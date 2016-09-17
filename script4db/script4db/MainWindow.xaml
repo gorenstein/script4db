@@ -5,8 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:script4db"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="script4db" Height="350" Width="525" WindowStartupLocation="CenterScreen">
     <Grid>
-        
+        <Button x:Name="buttonRun" Content="Run" HorizontalAlignment="Right" Margin="0,0,10,104" VerticalAlignment="Bottom" Width="56" Click="buttonRun_Click"/>
+        <Button x:Name="buttonPauseContinue" Content="Pause" HorizontalAlignment="Right" Margin="0,0,10,79" VerticalAlignment="Bottom" Width="56" IsEnabled="False" Click="buttonPauseContinue_Click"/>
+        <Button x:Name="buttonBreak" Content="Break" HorizontalAlignment="Right" Margin="0,0,10,44" VerticalAlignment="Bottom" Width="56" IsEnabled="False" Click="buttonBreak_Click"/>
+        <Button x:Name="buttonExit" Content="Exit" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" ToolTip="Close application" Width="56" Click="buttonExit_Click"/>
     </Grid>
 </Window>
