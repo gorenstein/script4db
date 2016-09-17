@@ -93,6 +93,7 @@ namespace script4db
                 case Status.Pause:
                 case Status.Continue:
                     buttonPauseContinue.Content = CurrentStatus.ToString();
+                    buttonPauseContinue.ToolTip = buttonPauseContinue.Content + " script";
                     buttonRun.IsEnabled = false;
                     buttonPauseContinue.IsEnabled = true;
                     buttonBreak.IsEnabled = true;
