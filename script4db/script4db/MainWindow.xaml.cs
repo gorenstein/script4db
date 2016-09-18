@@ -22,6 +22,7 @@ namespace script4db
     {
         enum Status {
             Init,
+            Parse,
             Run,
             Continue,
             Finish,
@@ -30,12 +31,49 @@ namespace script4db
             Error
         }
 
-        Status CurrentStatus = Status.Init;
+        Status CurrentStatus;
+        //String InitialDirectory = Environment.SpecialFolder.Desktop.ToString();
+        String InitialDirectory = System.AppDomain.CurrentDomain.BaseDirectory;
 
         public MainWindow()
         {
             InitializeComponent();
+            this.MinHeight = this.Height;
+            this.MinWidth = this.Width;
+            refreshView(Status.Init);
         }
+
+        private void buttonOpen_Click(object sender, RoutedEventArgs e)
+        {
+            // Create OpenFileDialog 
+            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+
+            dlg.InitialDirectory = InitialDirectory;
+
+            // Set filter for file extension and default file extension 
+            dlg.DefaultExt = ".script4db";
+            dlg.Filter = "Script Files (*.script4db)|*.script4db";
+
+            // Display OpenFileDialog by calling ShowDialog method 
+            Nullable<bool> result = dlg.ShowDialog();
+
+            // Get the selected file name and display in a TextBox 
+            if (result == true)
+            {
+                // Open script 
+                string filename = dlg.FileName;
+                textBoxScriptFile.Text = filename;
+
+                InitialDirectory = System.IO.Path.GetDirectoryName(filename);
+                refreshView(Status.Parse);
+            }
+            else
+            {
+                refreshView(Status.Init);
+            }
+
+        }
+
 
         private void buttonRun_Click(object sender, RoutedEventArgs e)
         {
@@ -67,38 +105,47 @@ namespace script4db
 
         private void refreshView(Status newStatus)
         {
+
             CurrentStatus = newStatus;
+
+            buttonOpen.IsEnabled = false;
+            buttonRun.IsEnabled = false;
+            buttonPauseContinue.IsEnabled = false;
+            buttonBreak.IsEnabled = false;
+            buttonExit.IsEnabled = false;
+
             switch (CurrentStatus)
             {
                 case Status.Init:
+                    buttonOpen.IsEnabled = true;
+                    buttonExit.IsEnabled = true;
+                    break;
+                case Status.Parse:
+                    //this.
+                    buttonExit.IsEnabled = true;
+                    break;
                 case Status.Break:
                 case Status.Error:
-                    buttonRun.IsEnabled = true;
-                    buttonPauseContinue.IsEnabled = false;
-                    buttonBreak.IsEnabled = false;
+                    buttonOpen.IsEnabled = true;
                     buttonExit.IsEnabled = true;
                     break;
                 case Status.Run:
-                    buttonRun.IsEnabled = false;
                     buttonPauseContinue.IsEnabled = true;
                     buttonBreak.IsEnabled = true;
-                    buttonExit.IsEnabled = false;
                     break;
                 case Status.Finish:
-                    buttonRun.IsEnabled = false;
-                    buttonPauseContinue.IsEnabled = false;
-                    buttonBreak.IsEnabled = false;
+                    buttonOpen.IsEnabled = true;
                     buttonExit.IsEnabled = true;
                     break;
                 case Status.Pause:
                 case Status.Continue:
                     buttonPauseContinue.Content = CurrentStatus.ToString();
                     buttonPauseContinue.ToolTip = buttonPauseContinue.Content + " script";
-                    buttonRun.IsEnabled = false;
                     buttonPauseContinue.IsEnabled = true;
                     buttonBreak.IsEnabled = true;
-                    buttonExit.IsEnabled = false;
                     break;
+                default:
+                    throw new System.ArgumentException("Default switch case must not be never reachable by refreshView.", "appStatusError");
             }
         }
     }

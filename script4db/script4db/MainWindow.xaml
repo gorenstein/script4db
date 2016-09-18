@@ -7,9 +7,11 @@
         mc:Ignorable="d"
         Title="script4db" Height="350" Width="525" WindowStartupLocation="CenterScreen">
     <Grid>
-        <Button x:Name="buttonRun" Content="Run" HorizontalAlignment="Right" Margin="0,0,10,104" VerticalAlignment="Bottom" Width="56" Click="buttonRun_Click" ToolTip="Run script"/>
-        <Button x:Name="buttonPauseContinue" Content="Pause" HorizontalAlignment="Right" Margin="0,0,10,79" VerticalAlignment="Bottom" Width="56" IsEnabled="False" Click="buttonPauseContinue_Click" ToolTip="Pause script"/>
-        <Button x:Name="buttonBreak" Content="Break" HorizontalAlignment="Right" Margin="0,0,10,44" VerticalAlignment="Bottom" Width="56" IsEnabled="False" Click="buttonBreak_Click" ToolTip="Break script"/>
+        <Button x:Name="buttonOpen" Content="Open" HorizontalAlignment="Right" Margin="0,10,10,0" VerticalAlignment="Top" Width="56" Click="buttonOpen_Click" ToolTip="Run script"/>
+        <Button x:Name="buttonRun" Content="Run" HorizontalAlignment="Right" Margin="0,45,10,0" VerticalAlignment="Top" Width="56" Click="buttonRun_Click" ToolTip="Run script" IsEnabled="False"/>
+        <Button x:Name="buttonPauseContinue" Content="Pause" HorizontalAlignment="Right" Margin="0,70,10,0" VerticalAlignment="Top" Width="56" IsEnabled="False" Click="buttonPauseContinue_Click" ToolTip="Pause script"/>
+        <Button x:Name="buttonBreak" Content="Break" HorizontalAlignment="Right" Margin="0,105,10,0" VerticalAlignment="Top" Width="56" IsEnabled="False" Click="buttonBreak_Click" ToolTip="Break script"/>
         <Button x:Name="buttonExit" Content="Exit" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" ToolTip="Close application" Width="56" Click="buttonExit_Click"/>
+        <TextBox x:Name="textBoxScriptFile" Height="20" Margin="10,10,87,0" TextWrapping="Wrap" VerticalAlignment="Top" VerticalContentAlignment="Center" HorizontalAlignment="Stretch"/>
     </Grid>
 </Window>
