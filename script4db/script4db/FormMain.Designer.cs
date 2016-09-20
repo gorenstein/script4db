@@ -52,10 +52,12 @@
             this.tabPageRaw = new System.Windows.Forms.TabPage();
             this.richTextBoxRaw = new System.Windows.Forms.RichTextBox();
             this.tabPageLogs = new System.Windows.Forms.TabPage();
+            this.richTextBoxLogs = new System.Windows.Forms.RichTextBox();
             this.statusStrip.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPageParsed.SuspendLayout();
             this.tabPageRaw.SuspendLayout();
+            this.tabPageLogs.SuspendLayout();
             this.SuspendLayout();
             // 
             // buttonOpen
@@ -219,15 +221,18 @@
             // richTextBoxRaw
             // 
             this.richTextBoxRaw.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.richTextBoxRaw.Font = new System.Drawing.Font("Lucida Console", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.richTextBoxRaw.Location = new System.Drawing.Point(3, 3);
             this.richTextBoxRaw.Name = "richTextBoxRaw";
             this.richTextBoxRaw.ReadOnly = true;
             this.richTextBoxRaw.Size = new System.Drawing.Size(470, 265);
             this.richTextBoxRaw.TabIndex = 0;
             this.richTextBoxRaw.Text = "";
+            this.richTextBoxRaw.WordWrap = false;
             // 
             // tabPageLogs
             // 
+            this.tabPageLogs.Controls.Add(this.richTextBoxLogs);
             this.tabPageLogs.Location = new System.Drawing.Point(4, 26);
             this.tabPageLogs.Name = "tabPageLogs";
             this.tabPageLogs.Padding = new System.Windows.Forms.Padding(3);
@@ -235,6 +240,18 @@
             this.tabPageLogs.TabIndex = 2;
             this.tabPageLogs.Text = "Logs";
             this.tabPageLogs.UseVisualStyleBackColor = true;
+            // 
+            // richTextBoxLogs
+            // 
+            this.richTextBoxLogs.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.richTextBoxLogs.Font = new System.Drawing.Font("Lucida Console", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.richTextBoxLogs.Location = new System.Drawing.Point(3, 3);
+            this.richTextBoxLogs.Name = "richTextBoxLogs";
+            this.richTextBoxLogs.ReadOnly = true;
+            this.richTextBoxLogs.Size = new System.Drawing.Size(470, 265);
+            this.richTextBoxLogs.TabIndex = 0;
+            this.richTextBoxLogs.Text = "";
+            this.richTextBoxLogs.WordWrap = false;
             // 
             // FormMain
             // 
@@ -262,6 +279,7 @@
             this.tabControl1.ResumeLayout(false);
             this.tabPageParsed.ResumeLayout(false);
             this.tabPageRaw.ResumeLayout(false);
+            this.tabPageLogs.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -285,6 +303,7 @@
         private System.Windows.Forms.TabPage tabPageRaw;
         private System.Windows.Forms.RichTextBox richTextBoxRaw;
         private System.Windows.Forms.TabPage tabPageLogs;
+        private System.Windows.Forms.RichTextBox richTextBoxLogs;
     }
 }
 

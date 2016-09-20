@@ -29,10 +29,13 @@ namespace script4db
         String InitialDirectory = Environment.SpecialFolder.Desktop.ToString();
         //String InitialDirectory = System.AppDomain.CurrentDomain.BaseDirectory;
 
+        Logs Logs;
+
         public FormMain()
         {
             InitializeComponent();
             this.MinimumSize = new Size(this.Width, this.Height);
+            this.Logs = new Logs(this.richTextBoxLogs);
             refreshControls(Status.Init);
         }
 
@@ -72,6 +75,7 @@ namespace script4db
 
                 if (File.Exists(openFileDialog.FileName))
                 {
+                    this.Logs.AppendMessage(Logs.Type.Info, "Open script " + openFileDialog.FileName);
                     richTextBoxRaw.LoadFile(openFileDialog.FileName, RichTextBoxStreamType.PlainText);
                 }
 
@@ -86,7 +90,7 @@ namespace script4db
 
         private void refreshControls(Status newStatus)
         {
-
+            this.Logs.AppendMessage(Logs.Type.Info, "Change status to " + newStatus.ToString());
             CurrentStatus = newStatus;
             toolStripStatusLabel1.Text = CurrentStatus.ToString();
 
