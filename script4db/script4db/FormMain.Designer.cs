@@ -51,6 +51,7 @@
             this.tabPageParsed = new System.Windows.Forms.TabPage();
             this.tabPageRaw = new System.Windows.Forms.TabPage();
             this.richTextBoxRaw = new System.Windows.Forms.RichTextBox();
+            this.tabPageLogs = new System.Windows.Forms.TabPage();
             this.statusStrip.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPageParsed.SuspendLayout();
@@ -185,6 +186,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl1.Controls.Add(this.tabPageParsed);
             this.tabControl1.Controls.Add(this.tabPageRaw);
+            this.tabControl1.Controls.Add(this.tabPageLogs);
             this.tabControl1.Font = new System.Drawing.Font("Arial", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tabControl1.Location = new System.Drawing.Point(12, 46);
             this.tabControl1.Name = "tabControl1";
@@ -206,10 +208,10 @@
             // tabPageRaw
             // 
             this.tabPageRaw.Controls.Add(this.richTextBoxRaw);
-            this.tabPageRaw.Location = new System.Drawing.Point(4, 27);
+            this.tabPageRaw.Location = new System.Drawing.Point(4, 26);
             this.tabPageRaw.Name = "tabPageRaw";
             this.tabPageRaw.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageRaw.Size = new System.Drawing.Size(476, 270);
+            this.tabPageRaw.Size = new System.Drawing.Size(476, 271);
             this.tabPageRaw.TabIndex = 1;
             this.tabPageRaw.Text = "Raw";
             this.tabPageRaw.UseVisualStyleBackColor = true;
@@ -220,9 +222,19 @@
             this.richTextBoxRaw.Location = new System.Drawing.Point(3, 3);
             this.richTextBoxRaw.Name = "richTextBoxRaw";
             this.richTextBoxRaw.ReadOnly = true;
-            this.richTextBoxRaw.Size = new System.Drawing.Size(470, 264);
+            this.richTextBoxRaw.Size = new System.Drawing.Size(470, 265);
             this.richTextBoxRaw.TabIndex = 0;
             this.richTextBoxRaw.Text = "";
+            // 
+            // tabPageLogs
+            // 
+            this.tabPageLogs.Location = new System.Drawing.Point(4, 26);
+            this.tabPageLogs.Name = "tabPageLogs";
+            this.tabPageLogs.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageLogs.Size = new System.Drawing.Size(476, 271);
+            this.tabPageLogs.TabIndex = 2;
+            this.tabPageLogs.Text = "Logs";
+            this.tabPageLogs.UseVisualStyleBackColor = true;
             // 
             // FormMain
             // 
@@ -272,6 +284,7 @@
         private System.Windows.Forms.TabPage tabPageParsed;
         private System.Windows.Forms.TabPage tabPageRaw;
         private System.Windows.Forms.RichTextBox richTextBoxRaw;
+        private System.Windows.Forms.TabPage tabPageLogs;
     }
 }
 
