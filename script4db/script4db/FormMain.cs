@@ -69,8 +69,13 @@ namespace script4db
             {
                 textBoxScriptFile.Text = openFileDialog.FileName;
                 InitialDirectory = Path.GetDirectoryName(openFileDialog.FileName);
+
+                if (File.Exists(openFileDialog.FileName))
+                {
+                    richTextBoxRaw.LoadFile(openFileDialog.FileName, RichTextBoxStreamType.PlainText);
+                }
+
                 refreshControls(Status.Parse);
-                refreshControls(Status.Run);
             }
             else
             {
@@ -83,6 +88,7 @@ namespace script4db
         {
 
             CurrentStatus = newStatus;
+            toolStripStatusLabel1.Text = CurrentStatus.ToString();
 
             buttonOpen.Enabled = false;
             buttonRun.Enabled = false;
@@ -114,8 +120,12 @@ namespace script4db
                     buttonExit.Enabled = true;
                     break;
                 case Status.Pause:
+                    buttonPauseContinue.Text = Status.Continue.ToString();
+                    buttonPauseContinue.Enabled = true;
+                    buttonBreak.Enabled = true;
+                    break;
                 case Status.Continue:
-                    buttonPauseContinue.Text = CurrentStatus.ToString();
+                    buttonPauseContinue.Text = Status.Run.ToString();
                     buttonPauseContinue.Enabled = true;
                     buttonBreak.Enabled = true;
                     break;
@@ -132,10 +142,11 @@ namespace script4db
         private void buttonPauseContinue_Click(object sender, EventArgs e)
         {
             Status NewStatus;
-            if (CurrentStatus == Status.Run || CurrentStatus == Status.Pause)
-                NewStatus = Status.Continue;
-            else if (CurrentStatus == Status.Continue)
+            //switch button
+            if (CurrentStatus == Status.Run || CurrentStatus == Status.Continue)
                 NewStatus = Status.Pause;
+            else if (CurrentStatus == Status.Pause)
+                NewStatus = Status.Continue;
             else
                 throw new System.ArgumentException("Error application status: " + CurrentStatus.ToString() + " - Must be Pause or Continue.", "appStatusError");
 
