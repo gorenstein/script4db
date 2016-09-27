@@ -10,30 +10,21 @@ namespace script4db
 {
     class Logs
     {
-        public enum Type
-        {
-            Info = 0,
-            Warning,
-            Error
-        }
-
-        Color[] TypeColor = new Color[] { Color.DarkGreen, Color.DarkOrange, Color.Red };
-
         private RichTextBox RichTextBox;
 
         public Logs(RichTextBox richTextBox)
         {
             this.RichTextBox = richTextBox;
-            this.AppendMessage(Type.Info, "Initialize Logs");
+            //this.AppendMessage(new LogMessage(LogMessageTypes.Info, "Logs", "Initialize Logs"));
         }
 
-        public void AppendMessage(Type type, String message)
+        public void AppendMessage(LogMessage logMsg)
         {
             this.RichTextBox.AppendText(String.Format("{0:s}", DateTime.Now));
             this.RichTextBox.AppendText(" | ");
-            this.RichTextBox.AppendText(type.ToString().PadRight(7), TypeColor[(int)type]);
+            this.RichTextBox.AppendText(logMsg.TypeNameNormalized, logMsg.Color);
             this.RichTextBox.AppendText(" | ");
-            this.RichTextBox.AppendText(message);
+            this.RichTextBox.AppendText(logMsg.Text);
             this.RichTextBox.AppendText(Environment.NewLine);
         }
     }

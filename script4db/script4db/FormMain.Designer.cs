@@ -273,7 +273,6 @@
             this.Name = "FormMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "script4db";
-            this.Load += new System.EventHandler(this.FormMain_Load);
             this.statusStrip.ResumeLayout(false);
             this.statusStrip.PerformLayout();
             this.tabControl1.ResumeLayout(false);

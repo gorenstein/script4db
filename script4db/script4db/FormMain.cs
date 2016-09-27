@@ -13,10 +13,11 @@ namespace script4db
 {
     public partial class FormMain : Form
     {
-        enum Status
+        enum appStatuses
         {
             Init,
             Parse,
+            ReadyToRun,
             Run,
             Continue,
             Finish,
@@ -25,23 +26,20 @@ namespace script4db
             Error
         }
 
-        Status CurrentStatus;
-        String InitialDirectory = Environment.SpecialFolder.Desktop.ToString();
-        //String InitialDirectory = System.AppDomain.CurrentDomain.BaseDirectory;
+        appStatuses currentStatus;
+        String initialDirectory = Environment.SpecialFolder.Desktop.ToString();
+        //String initialDirectory = System.AppDomain.CurrentDomain.BaseDirectory;
 
         Logs Logs;
 
         public FormMain()
         {
             InitializeComponent();
+
             this.MinimumSize = new Size(this.Width, this.Height);
             this.Logs = new Logs(this.richTextBoxLogs);
-            refreshControls(Status.Init);
-        }
 
-        private void FormMain_Load(object sender, EventArgs e)
-        {
-
+            refreshControls(appStatuses.Init);
         }
 
         private void buttonExit_Click(object sender, EventArgs e)
@@ -57,11 +55,13 @@ namespace script4db
 
         private void buttonOpen_Click(object sender, EventArgs e)
         {
+            this.richTextBoxRaw.Clear();
+
             // Displays an OpenFileDialog so the user can select a Cursor.
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "Script Files (*.script4db)|*.script4db";
             openFileDialog.Title = "Select a Script File";
-            openFileDialog.InitialDirectory = InitialDirectory;
+            openFileDialog.InitialDirectory = initialDirectory;
             openFileDialog.CheckFileExists = true;
             openFileDialog.CheckPathExists = true;
 
@@ -71,28 +71,38 @@ namespace script4db
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 textBoxScriptFile.Text = openFileDialog.FileName;
-                InitialDirectory = Path.GetDirectoryName(openFileDialog.FileName);
+                initialDirectory = Path.GetDirectoryName(openFileDialog.FileName);
+                refreshControls(appStatuses.Parse);
 
-                if (File.Exists(openFileDialog.FileName))
+                // Parcing Script
+                Parser parser = new Parser(openFileDialog.FileName);
+
+                // Show Raw script
+                this.richTextBoxRaw.AppendText(parser.TextRaw);
+
+                // Show Parsing messages
+                foreach (LogMessage logMsg in parser.LogMessages)
                 {
-                    this.Logs.AppendMessage(Logs.Type.Info, "Open script " + openFileDialog.FileName);
-                    richTextBoxRaw.LoadFile(openFileDialog.FileName, RichTextBoxStreamType.PlainText);
+                    this.Logs.AppendMessage(logMsg);
                 }
 
-                refreshControls(Status.Parse);
+                if (parser.CurrentStatus == ParserStatuses.ParseSuccesse)
+                {
+                    refreshControls(appStatuses.ReadyToRun);
+                }
             }
             else
             {
                 textBoxScriptFile.Text = "";
-                refreshControls(Status.Init);
+                refreshControls(appStatuses.Init);
             }
         }
 
-        private void refreshControls(Status newStatus)
+        private void refreshControls(appStatuses newStatus)
         {
-            this.Logs.AppendMessage(Logs.Type.Info, "Change status to " + newStatus.ToString());
-            CurrentStatus = newStatus;
-            toolStripStatusLabel1.Text = CurrentStatus.ToString();
+            this.Logs.AppendMessage(new LogMessage(LogMessageTypes.Info, "main", "Change app status to " + newStatus.ToString()));
+            this.currentStatus = newStatus;
+            toolStripStatusLabel1.Text = this.currentStatus.ToString();
 
             buttonOpen.Enabled = false;
             buttonRun.Enabled = false;
@@ -100,36 +110,40 @@ namespace script4db
             buttonBreak.Enabled = false;
             buttonExit.Enabled = false;
 
-            switch (CurrentStatus)
+            switch (this.currentStatus)
             {
-                case Status.Init:
+                case appStatuses.Init:
                     buttonOpen.Enabled = true;
                     buttonExit.Enabled = true;
                     break;
-                case Status.Parse:
+                case appStatuses.Parse:
                     //this.
                     buttonExit.Enabled = true;
                     break;
-                case Status.Break:
-                case Status.Error:
+                case appStatuses.Break:
+                case appStatuses.Error:
                     buttonOpen.Enabled = true;
                     buttonExit.Enabled = true;
                     break;
-                case Status.Run:
+                case appStatuses.ReadyToRun:
+                    buttonOpen.Enabled = true;
+                    buttonRun.Enabled = true;
+                    break;
+                case appStatuses.Run:
                     buttonPauseContinue.Enabled = true;
                     buttonBreak.Enabled = true;
                     break;
-                case Status.Finish:
+                case appStatuses.Finish:
                     buttonOpen.Enabled = true;
                     buttonExit.Enabled = true;
                     break;
-                case Status.Pause:
-                    buttonPauseContinue.Text = Status.Continue.ToString();
+                case appStatuses.Pause:
+                    buttonPauseContinue.Text = appStatuses.Continue.ToString();
                     buttonPauseContinue.Enabled = true;
                     buttonBreak.Enabled = true;
                     break;
-                case Status.Continue:
-                    buttonPauseContinue.Text = Status.Run.ToString();
+                case appStatuses.Continue:
+                    buttonPauseContinue.Text = appStatuses.Pause.ToString();
                     buttonPauseContinue.Enabled = true;
                     buttonBreak.Enabled = true;
                     break;
@@ -140,26 +154,26 @@ namespace script4db
 
         private void buttonRun_Click(object sender, EventArgs e)
         {
-            refreshControls(Status.Run);
+            refreshControls(appStatuses.Run);
         }
 
         private void buttonPauseContinue_Click(object sender, EventArgs e)
         {
-            Status NewStatus;
+            appStatuses NewStatus;
             //switch button
-            if (CurrentStatus == Status.Run || CurrentStatus == Status.Continue)
-                NewStatus = Status.Pause;
-            else if (CurrentStatus == Status.Pause)
-                NewStatus = Status.Continue;
+            if (currentStatus == appStatuses.Run || currentStatus == appStatuses.Continue)
+                NewStatus = appStatuses.Pause;
+            else if (currentStatus == appStatuses.Pause)
+                NewStatus = appStatuses.Continue;
             else
-                throw new System.ArgumentException("Error application status: " + CurrentStatus.ToString() + " - Must be Pause or Continue.", "appStatusError");
+                throw new System.ArgumentException("Error application status: " + currentStatus.ToString() + " - Must be Pause or Continue.", "appStatusError");
 
             refreshControls(NewStatus);
         }
 
         private void buttonBreak_Click(object sender, EventArgs e)
         {
-            refreshControls(Status.Break);
+            refreshControls(appStatuses.Break);
         }
     }
 }
