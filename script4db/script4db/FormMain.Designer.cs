@@ -63,7 +63,7 @@
             // buttonOpen
             // 
             this.buttonOpen.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonOpen.Location = new System.Drawing.Point(502, 12);
+            this.buttonOpen.Location = new System.Drawing.Point(778, 12);
             this.buttonOpen.Name = "buttonOpen";
             this.buttonOpen.Size = new System.Drawing.Size(96, 31);
             this.buttonOpen.TabIndex = 0;
@@ -75,7 +75,7 @@
             // 
             this.buttonRun.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonRun.Enabled = false;
-            this.buttonRun.Location = new System.Drawing.Point(502, 62);
+            this.buttonRun.Location = new System.Drawing.Point(778, 62);
             this.buttonRun.Name = "buttonRun";
             this.buttonRun.Size = new System.Drawing.Size(96, 31);
             this.buttonRun.TabIndex = 1;
@@ -87,7 +87,7 @@
             // 
             this.buttonPauseContinue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonPauseContinue.Enabled = false;
-            this.buttonPauseContinue.Location = new System.Drawing.Point(502, 99);
+            this.buttonPauseContinue.Location = new System.Drawing.Point(778, 99);
             this.buttonPauseContinue.Name = "buttonPauseContinue";
             this.buttonPauseContinue.Size = new System.Drawing.Size(96, 31);
             this.buttonPauseContinue.TabIndex = 2;
@@ -99,7 +99,7 @@
             // 
             this.buttonBreak.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonBreak.Enabled = false;
-            this.buttonBreak.Location = new System.Drawing.Point(502, 147);
+            this.buttonBreak.Location = new System.Drawing.Point(778, 147);
             this.buttonBreak.Name = "buttonBreak";
             this.buttonBreak.Size = new System.Drawing.Size(96, 31);
             this.buttonBreak.TabIndex = 3;
@@ -110,7 +110,7 @@
             // buttonExit
             // 
             this.buttonExit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonExit.Location = new System.Drawing.Point(502, 316);
+            this.buttonExit.Location = new System.Drawing.Point(778, 316);
             this.buttonExit.Name = "buttonExit";
             this.buttonExit.Size = new System.Drawing.Size(96, 31);
             this.buttonExit.TabIndex = 4;
@@ -126,13 +126,13 @@
             this.textBoxScriptFile.Location = new System.Drawing.Point(12, 14);
             this.textBoxScriptFile.Name = "textBoxScriptFile";
             this.textBoxScriptFile.ReadOnly = true;
-            this.textBoxScriptFile.Size = new System.Drawing.Size(484, 25);
+            this.textBoxScriptFile.Size = new System.Drawing.Size(760, 25);
             this.textBoxScriptFile.TabIndex = 5;
             // 
             // buttonAbout
             // 
             this.buttonAbout.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonAbout.Location = new System.Drawing.Point(502, 279);
+            this.buttonAbout.Location = new System.Drawing.Point(778, 279);
             this.buttonAbout.Name = "buttonAbout";
             this.buttonAbout.Size = new System.Drawing.Size(96, 31);
             this.buttonAbout.TabIndex = 6;
@@ -147,7 +147,7 @@
             this.toolStripProgressBar1});
             this.statusStrip.Location = new System.Drawing.Point(0, 350);
             this.statusStrip.Name = "statusStrip";
-            this.statusStrip.Size = new System.Drawing.Size(610, 22);
+            this.statusStrip.Size = new System.Drawing.Size(886, 22);
             this.statusStrip.TabIndex = 7;
             this.statusStrip.Text = "statusStrip";
             // 
@@ -178,7 +178,7 @@
             treeNode4.Text = "root";
             this.treeViewParsed.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
             treeNode4});
-            this.treeViewParsed.Size = new System.Drawing.Size(470, 265);
+            this.treeViewParsed.Size = new System.Drawing.Size(746, 265);
             this.treeViewParsed.TabIndex = 8;
             // 
             // tabControl1
@@ -193,7 +193,7 @@
             this.tabControl1.Location = new System.Drawing.Point(12, 46);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(484, 301);
+            this.tabControl1.Size = new System.Drawing.Size(760, 301);
             this.tabControl1.TabIndex = 9;
             // 
             // tabPageParsed
@@ -202,7 +202,7 @@
             this.tabPageParsed.Location = new System.Drawing.Point(4, 26);
             this.tabPageParsed.Name = "tabPageParsed";
             this.tabPageParsed.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageParsed.Size = new System.Drawing.Size(476, 271);
+            this.tabPageParsed.Size = new System.Drawing.Size(752, 271);
             this.tabPageParsed.TabIndex = 0;
             this.tabPageParsed.Text = "Parsed";
             this.tabPageParsed.UseVisualStyleBackColor = true;
@@ -213,7 +213,7 @@
             this.tabPageRaw.Location = new System.Drawing.Point(4, 26);
             this.tabPageRaw.Name = "tabPageRaw";
             this.tabPageRaw.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageRaw.Size = new System.Drawing.Size(476, 271);
+            this.tabPageRaw.Size = new System.Drawing.Size(752, 271);
             this.tabPageRaw.TabIndex = 1;
             this.tabPageRaw.Text = "Raw";
             this.tabPageRaw.UseVisualStyleBackColor = true;
@@ -225,7 +225,7 @@
             this.richTextBoxRaw.Location = new System.Drawing.Point(3, 3);
             this.richTextBoxRaw.Name = "richTextBoxRaw";
             this.richTextBoxRaw.ReadOnly = true;
-            this.richTextBoxRaw.Size = new System.Drawing.Size(470, 265);
+            this.richTextBoxRaw.Size = new System.Drawing.Size(746, 265);
             this.richTextBoxRaw.TabIndex = 0;
             this.richTextBoxRaw.Text = "";
             this.richTextBoxRaw.WordWrap = false;
@@ -236,7 +236,7 @@
             this.tabPageLogs.Location = new System.Drawing.Point(4, 26);
             this.tabPageLogs.Name = "tabPageLogs";
             this.tabPageLogs.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageLogs.Size = new System.Drawing.Size(476, 271);
+            this.tabPageLogs.Size = new System.Drawing.Size(752, 271);
             this.tabPageLogs.TabIndex = 2;
             this.tabPageLogs.Text = "Logs";
             this.tabPageLogs.UseVisualStyleBackColor = true;
@@ -248,7 +248,7 @@
             this.richTextBoxLogs.Location = new System.Drawing.Point(3, 3);
             this.richTextBoxLogs.Name = "richTextBoxLogs";
             this.richTextBoxLogs.ReadOnly = true;
-            this.richTextBoxLogs.Size = new System.Drawing.Size(470, 265);
+            this.richTextBoxLogs.Size = new System.Drawing.Size(746, 265);
             this.richTextBoxLogs.TabIndex = 0;
             this.richTextBoxLogs.Text = "";
             this.richTextBoxLogs.WordWrap = false;
@@ -257,7 +257,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(610, 372);
+            this.ClientSize = new System.Drawing.Size(886, 372);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.statusStrip);
             this.Controls.Add(this.buttonAbout);

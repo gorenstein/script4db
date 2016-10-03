@@ -64,7 +64,7 @@ namespace script4db
         {
             get
             {
-                if (typeNameNormalized == null)
+                if (String.IsNullOrEmpty(typeNameNormalized))
                 {
                     typeNameNormalized = this.type.ToString().PadRight(TypeNameMaxWidth);
                 }

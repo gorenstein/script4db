@@ -26,8 +26,6 @@ namespace script4db
         private String fileName;
         // Equal to script file conntent on disk
         private String textRaw;
-        // Script file with formated conntent - RichText
-        private String textRich;
         // Actuel Parser step - status   
         private ParserStatuses currentStatus;
         // LogMessages
@@ -38,7 +36,14 @@ namespace script4db
             this.currentStatus = ParserStatuses.Init;
             if (this.LoadFile(fileName))
             {
-                this.DoParse();
+                if (this.DoParse())
+                {
+                    this.currentStatus = ParserStatuses.ParseSuccesse;
+                }
+                else
+                {
+                    this.currentStatus = ParserStatuses.ParseError;
+                }
             }
         }
 
@@ -67,7 +72,6 @@ namespace script4db
         {
             this.fileName = "";
             this.textRaw = "";
-            this.textRich = "";
             this.LogMessages.Clear();
             this.currentStatus = ParserStatuses.Init;
         }
@@ -75,11 +79,22 @@ namespace script4db
         public bool DoParse()
         {
             this.currentStatus = ParserStatuses.Parsing;
-            LogMessages.Add(new LogMessage(LogMessageTypes.Info, "Parser", "Start parsing"));
-            // TODO ... parsing
-            LogMessages.Add(new LogMessage(LogMessageTypes.Info, "Parser", "Finish parsing"));
-            this.currentStatus = ParserStatuses.ParseSuccesse;
-            return true;
+            LogMessages.Add(new LogMessage(LogMessageTypes.Info, this.GetType().Name, "Start parsing"));
+
+            Interpreter interpreter = new Interpreter(Path.GetExtension(this.fileName), this.textRaw);
+            this.textRaw = interpreter.ScriptProcessor.TextRaw;
+            foreach (LogMessage logMsg in interpreter.LogMessages) this.LogMessages.Add(logMsg);
+
+            if (interpreter.hasError())
+            {
+                LogMessages.Add(new LogMessage(LogMessageTypes.Info, this.GetType().Name, "Break parsing - has error"));
+                return false;
+            }
+            else
+            {
+                LogMessages.Add(new LogMessage(LogMessageTypes.Info, this.GetType().Name, "Finish parsing"));
+                return true;
+            }
         }
 
         public string FileName
@@ -104,14 +119,6 @@ namespace script4db
             get
             {
                 return textRaw;
-            }
-        }
-
-        public string TextRich
-        {
-            get
-            {
-                return textRich;
             }
         }
     }

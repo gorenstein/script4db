@@ -81,14 +81,16 @@ namespace script4db
                 this.richTextBoxRaw.AppendText(parser.TextRaw);
 
                 // Show Parsing messages
-                foreach (LogMessage logMsg in parser.LogMessages)
-                {
-                    this.Logs.AppendMessage(logMsg);
-                }
+                foreach (LogMessage logMsg in parser.LogMessages) this.Logs.AppendMessage(logMsg);
 
                 if (parser.CurrentStatus == ParserStatuses.ParseSuccesse)
                 {
                     refreshControls(appStatuses.ReadyToRun);
+                }
+                else
+                {
+                    refreshControls(appStatuses.Error);
+                    this.tabControl1.SelectTab(this.tabPageLogs);
                 }
             }
             else
@@ -128,6 +130,7 @@ namespace script4db
                 case appStatuses.ReadyToRun:
                     buttonOpen.Enabled = true;
                     buttonRun.Enabled = true;
+                    buttonExit.Enabled = true;
                     break;
                 case appStatuses.Run:
                     buttonPauseContinue.Enabled = true;
