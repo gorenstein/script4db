@@ -49,5 +49,13 @@ namespace script4db
                 return scriptProcessor;
             }
         }
+
+        public string ProcessorName
+        {
+            get
+            {
+                return processorName;
+            }
+        }
     }
 }

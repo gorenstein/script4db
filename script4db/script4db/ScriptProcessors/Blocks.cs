@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace script4db.ScriptProcessors.Default
+namespace script4db.ScriptProcessors
 {
     enum BlockNames
     {

@@ -10,6 +10,7 @@ namespace script4db.ScriptProcessors
     interface IScriptProcessor
     {
         string TextRaw { get; set; }
+        Blocks Blocks { get; }
         ArrayList LogMessages { get; }
     }
 }

@@ -39,7 +39,7 @@ namespace script4db
             this.MinimumSize = new Size(this.Width, this.Height);
             this.Logs = new Logs(this.richTextBoxLogs);
 
-            refreshControls(appStatuses.Init);
+            RefreshControls(appStatuses.Init);
         }
 
         private void buttonExit_Click(object sender, EventArgs e)
@@ -72,35 +72,34 @@ namespace script4db
             {
                 textBoxScriptFile.Text = openFileDialog.FileName;
                 initialDirectory = Path.GetDirectoryName(openFileDialog.FileName);
-                refreshControls(appStatuses.Parse);
+                RefreshControls(appStatuses.Parse);
 
                 // Parcing Script
                 Parser parser = new Parser(openFileDialog.FileName);
 
-                // Show Raw script
+                // Show Result
+                parser.RefreshBlocksTree(this.treeViewScriptBlocks);
                 this.richTextBoxRaw.AppendText(parser.TextRaw);
-
-                // Show Parsing messages
                 foreach (LogMessage logMsg in parser.LogMessages) this.Logs.AppendMessage(logMsg);
 
                 if (parser.CurrentStatus == ParserStatuses.ParseSuccesse)
                 {
-                    refreshControls(appStatuses.ReadyToRun);
+                    RefreshControls(appStatuses.ReadyToRun);
                 }
                 else
                 {
-                    refreshControls(appStatuses.Error);
+                    RefreshControls(appStatuses.Error);
                     this.tabControl1.SelectTab(this.tabPageLogs);
                 }
             }
             else
             {
                 textBoxScriptFile.Text = "";
-                refreshControls(appStatuses.Init);
+                RefreshControls(appStatuses.Init);
             }
         }
 
-        private void refreshControls(appStatuses newStatus)
+        private void RefreshControls(appStatuses newStatus)
         {
             this.Logs.AppendMessage(new LogMessage(LogMessageTypes.Info, "main", "Change app status to " + newStatus.ToString()));
             this.currentStatus = newStatus;
@@ -157,7 +156,7 @@ namespace script4db
 
         private void buttonRun_Click(object sender, EventArgs e)
         {
-            refreshControls(appStatuses.Run);
+            RefreshControls(appStatuses.Run);
         }
 
         private void buttonPauseContinue_Click(object sender, EventArgs e)
@@ -171,12 +170,12 @@ namespace script4db
             else
                 throw new System.ArgumentException("Error application status: " + currentStatus.ToString() + " - Must be Pause or Continue.", "appStatusError");
 
-            refreshControls(NewStatus);
+            RefreshControls(NewStatus);
         }
 
         private void buttonBreak_Click(object sender, EventArgs e)
         {
-            refreshControls(appStatuses.Break);
+            RefreshControls(appStatuses.Break);
         }
     }
 }

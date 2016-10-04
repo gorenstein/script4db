@@ -71,8 +71,8 @@
       <DependentUpon>AboutBox.cs</DependentUpon>
     </Compile>
     <Compile Include="Interpreter.cs" />
-    <Compile Include="ScriptProcessors\Default\Block.cs" />
-    <Compile Include="ScriptProcessors\Default\Blocks.cs" />
+    <Compile Include="ScriptProcessors\Block.cs" />
+    <Compile Include="ScriptProcessors\Blocks.cs" />
     <Compile Include="LogMessage.cs" />
     <Compile Include="Logs.cs" />
     <Compile Include="FormMain.cs">

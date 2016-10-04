@@ -28,13 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Settings");
-            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("Values");
-            System.Windows.Forms.TreeNode treeNode3 = new System.Windows.Forms.TreeNode("Commands");
-            System.Windows.Forms.TreeNode treeNode4 = new System.Windows.Forms.TreeNode("root", new System.Windows.Forms.TreeNode[] {
-            treeNode1,
-            treeNode2,
-            treeNode3});
+            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("empty");
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
             this.buttonOpen = new System.Windows.Forms.Button();
             this.buttonRun = new System.Windows.Forms.Button();
@@ -46,16 +40,16 @@
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
-            this.treeViewParsed = new System.Windows.Forms.TreeView();
+            this.treeViewScriptBlocks = new System.Windows.Forms.TreeView();
             this.tabControl1 = new System.Windows.Forms.TabControl();
-            this.tabPageParsed = new System.Windows.Forms.TabPage();
+            this.tabPageTree = new System.Windows.Forms.TabPage();
             this.tabPageRaw = new System.Windows.Forms.TabPage();
             this.richTextBoxRaw = new System.Windows.Forms.RichTextBox();
             this.tabPageLogs = new System.Windows.Forms.TabPage();
             this.richTextBoxLogs = new System.Windows.Forms.RichTextBox();
             this.statusStrip.SuspendLayout();
             this.tabControl1.SuspendLayout();
-            this.tabPageParsed.SuspendLayout();
+            this.tabPageTree.SuspendLayout();
             this.tabPageRaw.SuspendLayout();
             this.tabPageLogs.SuspendLayout();
             this.SuspendLayout();
@@ -162,32 +156,28 @@
             this.toolStripProgressBar1.Name = "toolStripProgressBar1";
             this.toolStripProgressBar1.Size = new System.Drawing.Size(100, 16);
             // 
-            // treeViewParsed
+            // treeViewScriptBlocks
             // 
-            this.treeViewParsed.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.treeViewParsed.Font = new System.Drawing.Font("Arial", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.treeViewParsed.Location = new System.Drawing.Point(3, 3);
-            this.treeViewParsed.Name = "treeViewParsed";
-            treeNode1.Name = "Node1";
-            treeNode1.Text = "Settings";
-            treeNode2.Name = "Node2";
-            treeNode2.Text = "Values";
-            treeNode3.Name = "Node3";
-            treeNode3.Text = "Commands";
-            treeNode4.Name = "Node0";
-            treeNode4.Text = "root";
-            this.treeViewParsed.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode4});
-            this.treeViewParsed.Size = new System.Drawing.Size(746, 265);
-            this.treeViewParsed.TabIndex = 8;
+            this.treeViewScriptBlocks.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.treeViewScriptBlocks.Font = new System.Drawing.Font("Arial", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.treeViewScriptBlocks.Location = new System.Drawing.Point(3, 3);
+            this.treeViewScriptBlocks.Name = "treeViewScriptBlocks";
+            treeNode1.ForeColor = System.Drawing.Color.Gray;
+            treeNode1.Name = "Node0";
+            treeNode1.NodeFont = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            treeNode1.Text = "empty";
+            this.treeViewScriptBlocks.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
+            treeNode1});
+            this.treeViewScriptBlocks.Size = new System.Drawing.Size(746, 265);
+            this.treeViewScriptBlocks.TabIndex = 8;
             // 
             // tabControl1
             // 
             this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tabControl1.Controls.Add(this.tabPageParsed);
             this.tabControl1.Controls.Add(this.tabPageRaw);
+            this.tabControl1.Controls.Add(this.tabPageTree);
             this.tabControl1.Controls.Add(this.tabPageLogs);
             this.tabControl1.Font = new System.Drawing.Font("Arial", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tabControl1.Location = new System.Drawing.Point(12, 46);
@@ -196,16 +186,16 @@
             this.tabControl1.Size = new System.Drawing.Size(760, 301);
             this.tabControl1.TabIndex = 9;
             // 
-            // tabPageParsed
+            // tabPageTree
             // 
-            this.tabPageParsed.Controls.Add(this.treeViewParsed);
-            this.tabPageParsed.Location = new System.Drawing.Point(4, 26);
-            this.tabPageParsed.Name = "tabPageParsed";
-            this.tabPageParsed.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageParsed.Size = new System.Drawing.Size(752, 271);
-            this.tabPageParsed.TabIndex = 0;
-            this.tabPageParsed.Text = "Parsed";
-            this.tabPageParsed.UseVisualStyleBackColor = true;
+            this.tabPageTree.Controls.Add(this.treeViewScriptBlocks);
+            this.tabPageTree.Location = new System.Drawing.Point(4, 26);
+            this.tabPageTree.Name = "tabPageTree";
+            this.tabPageTree.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageTree.Size = new System.Drawing.Size(752, 271);
+            this.tabPageTree.TabIndex = 0;
+            this.tabPageTree.Text = "Tree";
+            this.tabPageTree.UseVisualStyleBackColor = true;
             // 
             // tabPageRaw
             // 
@@ -276,7 +266,7 @@
             this.statusStrip.ResumeLayout(false);
             this.statusStrip.PerformLayout();
             this.tabControl1.ResumeLayout(false);
-            this.tabPageParsed.ResumeLayout(false);
+            this.tabPageTree.ResumeLayout(false);
             this.tabPageRaw.ResumeLayout(false);
             this.tabPageLogs.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -296,9 +286,9 @@
         private System.Windows.Forms.StatusStrip statusStrip;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
         private System.Windows.Forms.ToolStripProgressBar toolStripProgressBar1;
-        private System.Windows.Forms.TreeView treeViewParsed;
+        private System.Windows.Forms.TreeView treeViewScriptBlocks;
         private System.Windows.Forms.TabControl tabControl1;
-        private System.Windows.Forms.TabPage tabPageParsed;
+        private System.Windows.Forms.TabPage tabPageTree;
         private System.Windows.Forms.TabPage tabPageRaw;
         private System.Windows.Forms.RichTextBox richTextBoxRaw;
         private System.Windows.Forms.TabPage tabPageLogs;

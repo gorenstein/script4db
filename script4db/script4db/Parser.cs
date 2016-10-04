@@ -1,10 +1,12 @@
 ﻿using System;
 using System.IO;
+using System.Drawing;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using script4db.ScriptProcessors;
 
 namespace script4db
 {
@@ -26,9 +28,9 @@ namespace script4db
         private String fileName;
         // Equal to script file conntent on disk
         private String textRaw;
-        // Actuel Parser step - status   
+
         private ParserStatuses currentStatus;
-        // LogMessages
+        private Interpreter interpreter;
         public ArrayList LogMessages = new ArrayList();
 
         public Parser(String fileName)
@@ -68,6 +70,54 @@ namespace script4db
             }
         }
 
+        public void RefreshBlocksTree(TreeView treeView)
+        {
+            treeView.BeginUpdate();
+            treeView.Nodes.Clear();
+            TreeNode rootNode = new TreeNode("script");
+            rootNode.NodeFont = new Font("Arial", 11, FontStyle.Regular); 
+
+            foreach (var item in this.interpreter.ScriptProcessor.Blocks.BlocksGroup)
+            {
+                // item => Dictionary<BlockNames, ArrayList>
+                int itemValueCount = item.Value.Count;
+                string countEm = " set";
+                if (itemValueCount > 1) countEm += "s";
+                    
+                TreeNode childNode = new TreeNode(item.Key.ToString() + " (" + itemValueCount.ToString() + countEm + ")");
+                childNode.NodeFont = new Font("Arial", 10, FontStyle.Bold);
+                this.AddSubNodes(childNode, item.Value);
+
+                rootNode.Nodes.Add(childNode);
+            }
+
+            treeView.Nodes.Add(rootNode);
+            rootNode.Expand();
+            treeView.EndUpdate();
+        }
+
+        private void AddSubNodes(TreeNode @node, ArrayList subList)
+        {
+            int i = 0;
+            foreach (Block item in subList)
+            {
+                i++;
+                TreeNode childNode = new TreeNode(i.ToString());
+                this.AddNodeParameters(childNode, item);
+
+                node.Nodes.Add(childNode);
+            }
+        }
+
+        private void AddNodeParameters(TreeNode @node, Block block)
+        {
+            foreach (var item in block.Parameters)
+            {
+                TreeNode childNode = new TreeNode(item.Key + " = " + item.Value);
+                node.Nodes.Add(childNode);
+            }
+        }
+
         public void Clear()
         {
             this.fileName = "";
@@ -81,8 +131,8 @@ namespace script4db
             this.currentStatus = ParserStatuses.Parsing;
             LogMessages.Add(new LogMessage(LogMessageTypes.Info, this.GetType().Name, "Start parsing"));
 
-            Interpreter interpreter = new Interpreter(Path.GetExtension(this.fileName), this.textRaw);
-            this.textRaw = interpreter.ScriptProcessor.TextRaw;
+            this.interpreter = new Interpreter(Path.GetExtension(this.fileName), this.textRaw);
+            this.textRaw = this.interpreter.ScriptProcessor.TextRaw;
             foreach (LogMessage logMsg in interpreter.LogMessages) this.LogMessages.Add(logMsg);
 
             if (interpreter.hasError())
