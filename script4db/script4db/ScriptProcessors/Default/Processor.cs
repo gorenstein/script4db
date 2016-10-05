@@ -9,7 +9,7 @@ namespace script4db.ScriptProcessors.Default
 {
     class Processor : IScriptProcessor
     {
-        
+
         // Data for Pass
         ///////////////
         // content of script file
@@ -34,20 +34,20 @@ namespace script4db.ScriptProcessors.Default
         {
             if (!this.Pass1())
             {
-                string msg = String.Format("Has error on Syntax Pass #1");
-                LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
+                string msg = String.Format("Syntax error on Pass #1");
+                LogMessages.Add(new LogMessage(LogMessageTypes.Warning, this.GetType().Name, msg));
                 return false;
             }
             if (!this.Pass2())
             {
-                string msg = String.Format("Has error on Syntax Pass #2");
-                LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
+                string msg = String.Format("Syntax error on Pass #2");
+                LogMessages.Add(new LogMessage(LogMessageTypes.Warning, this.GetType().Name, msg));
                 return false;
             }
             if (!this.Pass3())
             {
-                string msg = String.Format("Has error on Syntax Pass #3");
-                LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
+                string msg = String.Format("Syntax error on Pass #3");
+                LogMessages.Add(new LogMessage(LogMessageTypes.Warning, this.GetType().Name, msg));
                 return false;
             }
 
@@ -57,7 +57,7 @@ namespace script4db.ScriptProcessors.Default
         // Pass RAW text line by line
         private bool Pass1()
         {
-            int lineNumber = 0; 
+            int lineNumber = 0;
             foreach (String scriptLine in this.scriptLines)
             {
                 string line = scriptLine.Trim();
@@ -97,7 +97,13 @@ namespace script4db.ScriptProcessors.Default
                 string key = line.Substring(0, IndexOfSplitChar);
                 string value = line.Substring(IndexOfSplitChar + 1);
 
-                this.block.AddParameter(key, value);
+                if (false == this.block.AddParameter(key, value))
+                {
+                    foreach (LogMessage logMsg in this.blocks.LogMessages) this.LogMessages.Add(logMsg);
+                    string msg = String.Format("Line No: {0} - Can't add parameter: '{1}'. Maybe Duplicated?", lineNumber, key);
+                    LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
+                    return false;
+                }
             }
             return true;
         }
