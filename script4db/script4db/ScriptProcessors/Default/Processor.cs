@@ -35,19 +35,13 @@ namespace script4db.ScriptProcessors.Default
             if (!this.Pass1())
             {
                 string msg = String.Format("Syntax error on Pass #1");
-                LogMessages.Add(new LogMessage(LogMessageTypes.Warning, this.GetType().Name, msg));
+                LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
                 return false;
             }
             if (!this.Pass2())
             {
-                string msg = String.Format("Syntax error on Pass #2");
-                LogMessages.Add(new LogMessage(LogMessageTypes.Warning, this.GetType().Name, msg));
-                return false;
-            }
-            if (!this.Pass3())
-            {
-                string msg = String.Format("Syntax error on Pass #3");
-                LogMessages.Add(new LogMessage(LogMessageTypes.Warning, this.GetType().Name, msg));
+                string msg = String.Format("Connection checking error on Pass #2");
+                LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
                 return false;
             }
 
@@ -108,14 +102,8 @@ namespace script4db.ScriptProcessors.Default
             return true;
         }
 
-        // Pass to Check syntax 
-        private bool Pass2()
-        {
-            return false;
-        }
-
         // Pass to Check evalible of DB connection 
-        private bool Pass3()
+        private bool Pass2()
         {
             return false;
         }

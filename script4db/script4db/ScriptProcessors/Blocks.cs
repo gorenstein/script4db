@@ -73,8 +73,9 @@ namespace script4db.ScriptProcessors
                 }
                 else
                 {
+                    foreach (LogMessage logMsg in _block.LogMessages) this.LogMessages.Add(logMsg);
                     string msg = String.Format("Can't add parsed block '{0}'", _block.Name);
-                    this.logMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
+                    this.logMessages.Add(new LogMessage(LogMessageTypes.Warning, this.GetType().Name, msg));
                     return false;
                 }
             }

@@ -150,7 +150,7 @@ namespace script4db
                     buttonBreak.Enabled = true;
                     break;
                 default:
-                    throw new System.ArgumentException("Default switch case must not be never reachable by refreshControls.", "appStatusError");
+                    throw new System.ArgumentException("Default switch case must be never reachable by refreshControls.", "appStatusError");
             }
         }
 

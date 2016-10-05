@@ -137,7 +137,7 @@ namespace script4db
 
             if (interpreter.hasError())
             {
-                LogMessages.Add(new LogMessage(LogMessageTypes.Info, this.GetType().Name, "Break parsing - has error"));
+                LogMessages.Add(new LogMessage(LogMessageTypes.Warning, this.GetType().Name, "Break parsing - has error"));
                 return false;
             }
             else
