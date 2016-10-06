@@ -24,7 +24,8 @@ namespace script4db.ScriptProcessors.Default
 
         public Processor(String scriptText)
         {
-            this.TextRaw = scriptText;
+            // Support multyline - concatenated two line when Next Line started with '<<' and to previous line enden '<<'
+            this.TextRaw = scriptText.Replace("<<\r\n<<", "");
             // Split with empty/space line for keep number of lines
             this.scriptLines = this.TextRaw.Split(new String[] { "\r\n" }, StringSplitOptions.None);
 
