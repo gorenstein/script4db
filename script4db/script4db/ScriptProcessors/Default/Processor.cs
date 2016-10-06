@@ -25,7 +25,8 @@ namespace script4db.ScriptProcessors.Default
         public Processor(String scriptText)
         {
             this.TextRaw = scriptText;
-            this.scriptLines = this.TextRaw.Split(new String[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            // Split with empty/space line for keep number of lines
+            this.scriptLines = this.TextRaw.Split(new String[] { "\r\n" }, StringSplitOptions.None);
 
             this.Run();
         }
@@ -57,21 +58,15 @@ namespace script4db.ScriptProcessors.Default
                 string line = scriptLine.Trim();
                 lineNumber++;
 
+                if (String.IsNullOrWhiteSpace(line)) continue;
                 // It's comment line
                 if (line.First().ToString() == ";") continue;
 
                 // It's begin of block line
                 if (line.First().ToString() == "[" && line.Trim().Last().ToString() == "]")
                 {
-                    // If it's nexte block then save preview block
-                    if (block != null)
-                    {
-                        if (false == this.Blocks.addBlock(block))
-                        {
-                            foreach (LogMessage logMsg in this.blocks.LogMessages) this.LogMessages.Add(logMsg);
-                            return false;
-                        }
-                    }
+                    // If it's nexte block then try to save preview block
+                    if (false == AddBlockIfAny(block)) return false;
 
                     string blockName = line.Substring(1, line.Length - 2).Trim();
                     int blockID = Blocks.BlockNamesID(blockName);
@@ -88,8 +83,8 @@ namespace script4db.ScriptProcessors.Default
 
                 // It's line with paar key=value
                 int IndexOfSplitChar = line.IndexOf("=");
-                string key = line.Substring(0, IndexOfSplitChar);
-                string value = line.Substring(IndexOfSplitChar + 1);
+                string key = line.Substring(0, IndexOfSplitChar).Trim();
+                string value = line.Substring(IndexOfSplitChar + 1).Trim();
 
                 if (false == this.block.AddParameter(key, value))
                 {
@@ -99,13 +94,27 @@ namespace script4db.ScriptProcessors.Default
                     return false;
                 }
             }
-            return true;
+            // It's Last block, save if any
+            return AddBlockIfAny(block);
         }
 
         // Pass to Check evalible of DB connection 
         private bool Pass2()
         {
             return false;
+        }
+
+        private bool AddBlockIfAny(Block block)
+        {
+            if (block != null)
+            {
+                if (false == this.Blocks.addBlock(block))
+                {
+                    foreach (LogMessage logMsg in this.blocks.LogMessages) this.LogMessages.Add(logMsg);
+                    return false;
+                }
+            }
+            return true;
         }
 
         private void addParameterToBlock(string blockName, int blockNumber)

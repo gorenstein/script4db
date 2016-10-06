@@ -21,7 +21,7 @@ namespace script4db
             switch (this.processorName)
             {
                 case ".script4db":
-                    this.LogMessages.Add(new LogMessage(LogMessageTypes.Info, this.GetType().Name, "Using Interprete processor 'Default'."));
+                    this.LogMessages.Add(new LogMessage(LogMessageTypes.Info, this.GetType().Name, "Using Interprete processor 'Default'"));
                     this.scriptProcessor = new ScriptProcessors.Default.Processor(textRaw);
                     break;
                 default:
