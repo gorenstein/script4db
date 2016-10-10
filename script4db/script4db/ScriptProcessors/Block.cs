@@ -170,6 +170,18 @@ namespace script4db.ScriptProcessors
             return this.parameters.ContainsKey(key);
         }
 
+        public bool UpdateParameter(KeyValuePair<string, string> _parameter)
+        {
+            if (this.parameters.ContainsKey(_parameter.Key))
+            {
+                this.parameters[_parameter.Key] = _parameter.Value;
+                return true;
+            }
+
+            // Key not exist 
+            return false;
+        }
+
         public BlockNames Name
         {
             get

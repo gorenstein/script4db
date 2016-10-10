@@ -42,11 +42,16 @@ namespace script4db.ScriptProcessors.Default
             }
             if (!this.Pass2())
             {
-                string msg = String.Format("Connection checking error on Pass #2");
+                string msg = String.Format("Fill place holders checking error on Pass #2");
                 LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
                 return false;
             }
-
+            if (!this.Pass3())
+            {
+                string msg = String.Format("Connection checking error on Pass #3");
+                LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
+                return false;
+            }
             return true;
         }
 
@@ -99,8 +104,19 @@ namespace script4db.ScriptProcessors.Default
             return AddBlockIfAny(block);
         }
 
-        // Pass to Check evalible of DB connection 
+        // Pass for replace variable placeholders 
         private bool Pass2()
+        {
+            if (!this.blocks.FillPlaceHolders())
+            {
+                foreach (LogMessage logMsg in this.blocks.LogMessages) this.LogMessages.Add(logMsg);
+                return false;
+            }
+            return true;
+        }
+
+        // Pass to Check evalible of DB connection 
+        private bool Pass3()
         {
             return false;
         }

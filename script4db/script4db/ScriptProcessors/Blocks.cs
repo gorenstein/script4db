@@ -54,7 +54,8 @@ namespace script4db.ScriptProcessors
                 blocksGroup.Add(_block.Name, new ArrayList());
             }
 
-            ArrayList blockList = blocksGroup[_block.Name];
+            //ArrayList blockList = blocksGroup[_block.Name];
+            ArrayList blockList;
             if (blocksGroup.TryGetValue(_block.Name, out blockList))
             {
                 // Check multiple blocks
@@ -94,6 +95,63 @@ namespace script4db.ScriptProcessors
             }
             //block not supported
             return -1;
+        }
+
+        public bool FillPlaceHolders()
+        {
+            foreach (var blocksGroup in this.BlocksGroup)
+            {
+                foreach (Block block in blocksGroup.Value)
+                {
+                    foreach (KeyValuePair<string, string> parameter in block.Parameters.ToList())
+                    {
+                        if (parameter.Value.IndexOf("${") != -1)
+                        {
+                            if (!ReplacePlaceHolders(block, parameter))
+                            {
+                                string msg = String.Format("Can't set Constant value in parameter string: '{0}'", parameter.Value);
+                                LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        private bool ReplacePlaceHolders(Block _block, KeyValuePair<string, string> _parameter)
+        {
+            ArrayList constantsBlockList;
+            if (this.BlocksGroup.TryGetValue(BlockNames.constants, out constantsBlockList))
+            {
+                // Costants Block exist
+                switch (constantsBlockList.Count)
+                {
+                    case 0: return true;
+                    case 1: // Allowed only Only One set of parameters
+                        string newParameterValue = _parameter.Value;
+                        Block constantsBlock = (Block)constantsBlockList[0];
+                        foreach (var parameter in constantsBlock.Parameters)
+                        {
+                            string placeHolderKey = "${" + parameter.Key + "}";
+                            string placeHolderValue = parameter.Value;
+                            newParameterValue = newParameterValue.Replace(placeHolderKey, placeHolderValue);
+                        }
+
+                        if (newParameterValue.IndexOf("${") != -1)
+                        {
+                            string msg = String.Format("Not all Constants are defined: '{0}'", newParameterValue);
+                            LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
+                            return false;
+                        }
+                        return _block.UpdateParameter(new KeyValuePair<string, string>(_parameter.Key, newParameterValue));
+                    default: // Allowed only Only One set of parameters or none
+                        throw new System.ArgumentException("It's must be never reachable", this.GetType().Name);
+                }
+            }
+            return true;
         }
 
     }
