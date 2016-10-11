@@ -46,6 +46,26 @@ namespace script4db.ScriptProcessors
             }
         }
 
+        public bool TestDbConnections()
+        {
+            foreach (var blocksGroup in this.BlocksGroup)
+            {
+                foreach (Block block in blocksGroup.Value)
+                {
+                    if (block.Name == BlockNames.command)
+                    {
+                        if (!block.TestDbConnection())
+                        {
+                            foreach (LogMessage logMsg in block.LogMessages) this.LogMessages.Add(logMsg);
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            return true;
+        }
+
         public bool addBlock(Block _block)
         {
             if (!blocksGroup.ContainsKey(_block.Name))
@@ -153,6 +173,5 @@ namespace script4db.ScriptProcessors
             }
             return true;
         }
-
     }
 }

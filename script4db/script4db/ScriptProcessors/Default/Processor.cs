@@ -115,10 +115,15 @@ namespace script4db.ScriptProcessors.Default
             return true;
         }
 
-        // Pass to Check evalible of DB connection 
+        // Pass to Check evalieble of DB connection 
         private bool Pass3()
         {
-            return false;
+            if (!this.blocks.TestDbConnections())
+            {
+                foreach (LogMessage logMsg in this.blocks.LogMessages) this.LogMessages.Add(logMsg);
+                return false;
+            }
+            return true;
         }
 
         private bool AddBlockIfAny(Block block)

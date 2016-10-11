@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using script4db.Connection;
 
 namespace script4db.ScriptProcessors
 {
@@ -20,7 +21,7 @@ namespace script4db.ScriptProcessors
         private string[] cmdTableExportOptional = new string[] { "onErrorContinue", "maxPerLoop" };
 
         private string[] onErrorContinueValues = new string[] { "true", "false" };
-
+        private string[] connectionParameterNames = new string[] { "connection", "connectionSource", "connectionTarget" };
         public Block(BlockNames _name)
         {
             this.name = _name;
@@ -29,14 +30,38 @@ namespace script4db.ScriptProcessors
         public bool Check()
         {
             if (this.name == BlockNames.constants) return true;
-            if (this.name == BlockNames.command) return checkCommandParameters();
+            if (this.name == BlockNames.command) return CheckCommandParameters();
 
             this.LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, "Block name is not defined"));
 
             return false;
         }
 
-        private bool checkCommandParameters()
+        public bool TestDbConnection()
+        {
+            if (this.name != BlockNames.command) return true;
+
+            foreach (string conParam in connectionParameterNames)
+            {
+                if (this.parameters.ContainsKey(conParam))
+                {
+                    string rawConnString = this.parameters[conParam];
+                    Connector connector = new Connector(rawConnString);
+                    if (!connector.isCorrectRawConnString)
+                    {
+                        foreach (LogMessage logMsg in connector.LogMessages) this.LogMessages.Add(logMsg);
+                        return false;
+                    }
+                    // TODO check live conn
+
+                    return true;
+                }
+            }
+
+            return true;
+        }
+
+        private bool CheckCommandParameters()
         {
             // Get/Check command Type
             if (!this.parameters.ContainsKey("type"))

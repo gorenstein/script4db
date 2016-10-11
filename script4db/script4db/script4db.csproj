@@ -70,6 +70,7 @@
     <Compile Include="AboutBox.Designer.cs">
       <DependentUpon>AboutBox.cs</DependentUpon>
     </Compile>
+    <Compile Include="Connection\Connector.cs" />
     <Compile Include="Interpreter.cs" />
     <Compile Include="ScriptProcessors\Block.cs" />
     <Compile Include="ScriptProcessors\Blocks.cs" />
