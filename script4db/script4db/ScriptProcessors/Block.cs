@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using script4db.Connection;
+using script4db.Connections;
 
 namespace script4db.ScriptProcessors
 {
@@ -46,14 +46,18 @@ namespace script4db.ScriptProcessors
                 if (this.parameters.ContainsKey(conParam))
                 {
                     string rawConnString = this.parameters[conParam];
-                    Connector connector = new Connector(rawConnString);
-                    if (!connector.isCorrectRawConnString)
+                    Connection connection = new Connection(rawConnString);
+                    if (!connection.isCorrectRawConnString)
                     {
-                        foreach (LogMessage logMsg in connector.LogMessages) this.LogMessages.Add(logMsg);
+                        foreach (LogMessage logMsg in connection.LogMessages) this.LogMessages.Add(logMsg);
                         return false;
                     }
-                    // TODO check live conn
 
+                    if (!connection.IsLive())
+                    {
+                        foreach (LogMessage logMsg in connection.LogMessages) this.LogMessages.Add(logMsg);
+                        return false;
+                    }
                     return true;
                 }
             }
