@@ -9,7 +9,7 @@ namespace script4db.Connection
 {
     class Connector
     {
-        private string[] connTypes = new string[] { "ODBC", "MySQL", "OleAccess" };
+        enum ConnTypes { ODBC, MySQL, OleAccess };
         public string rawConnString;
         public bool isCorrectRawConnString;
         public string[] connParams;
@@ -31,7 +31,7 @@ namespace script4db.Connection
                 this.LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
                 return false;
             }
-            if (!this.connTypes.Contains(this.connParams[0]))
+            if (!Enum.GetNames(typeof(ConnTypes)).Contains(this.connParams[0]))
             {
                 string msg = String.Format("Connection Type '{0}' is not supported", this.connParams[0]);
                 this.LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
@@ -43,7 +43,6 @@ namespace script4db.Connection
                 this.LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
                 return false;
             }
-
 
             return true;
         }
