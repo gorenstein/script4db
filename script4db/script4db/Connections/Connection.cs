@@ -30,16 +30,20 @@ namespace script4db.Connections
             {
                 this.type = (ConnTypes)Enum.Parse(typeof(ConnTypes), connParams[0]);
                 this.source = connParams[1];
-                this.login = connParams[2];
-                this.password = connParams[3];
+                this.login = (connParams.Count() < 3) ? "" : connParams[2];
+                this.password = (connParams.Count() < 4) ? "" : connParams[3];
             }
         }
 
         public bool IsLive()
         {
             // TODO Add logs
-            //foreach (LogMessage logMsg in connector.LogMessages) this.LogMessages.Add(logMsg);
-            return this.Connector.IsLive;
+            if (!this.Connector.IsLive())
+            {
+                foreach (LogMessage logMsg in connector.LogMessages) this.LogMessages.Add(logMsg);
+                return false;
+            }
+            return true;
         }
 
         private bool CheckRawConnString(string[] connParams)
@@ -83,10 +87,10 @@ namespace script4db.Connections
                     switch (this.type)
                     {
                         case ConnTypes.ODBC:
-                        case ConnTypes.MySQL:
-                        case ConnTypes.OleAccess:
                             connector = new OdbcConnector(this.source, this.login, this.password);
                             break;
+                        case ConnTypes.MySQL:
+                        case ConnTypes.OleAccess:
                         default:
                             throw new System.ArgumentException("It's must be never reachable", this.GetType().Name);
                     }
