@@ -31,7 +31,7 @@ namespace script4db.Connections
         }
 
         //OdbcDataReader myReader = myCommand.ExecuteReader();
-        public int ExecuteSQL(string sql)
+        public int ExecuteSQL(string sqlText)
         {
             int result = -42;
 
@@ -41,16 +41,31 @@ namespace script4db.Connections
             try
             {
                 conn.Open();
-                if (String.IsNullOrWhiteSpace(sql)) result = 0;
+                if (String.IsNullOrWhiteSpace(sqlText)) result = 0;
                 else
                 {
-                    //TODO Run command
-                    result = 1;
+                    try
+                    {
+                        result = this.ExecuteQuery(sqlText, conn);
+                    }
+                    catch (OdbcException odbcEx)
+                    {
+                        for (int i = 0; i < odbcEx.Errors.Count; i++)
+                        {
+                            string msg = "By exicute SQL ERROR #" + i + " " +
+                                          "Message: " + odbcEx.Errors[i].Message + " :: " +
+                                          "Native: " + odbcEx.Errors[i].NativeError.ToString() + " :: " +
+                                          "Source: " + odbcEx.Errors[i].Source + " :: " +
+                                          "SQL: " + odbcEx.Errors[i].SQLState;
+                            this.LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
+                        }
+                        result = -2;
+                    }
                 }
             }
             catch (Exception ex)
             {
-                string msg = String.Format("Connection error '{0}'", ex.Message);
+                string msg = String.Format("By open connection error '{0}'", ex.Message);
                 this.LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
                 result = -1;
             }
@@ -62,9 +77,32 @@ namespace script4db.Connections
             return result;
         }
 
+        private int ExecuteQuery(string sqlText, OdbcConnection conn)
+        {
+            int result;
+            sqlText = sqlText.TrimStart();
+            string cmdName = sqlText.Substring(0, sqlText.IndexOf(" "));
+            OdbcCommand command = new OdbcCommand(sqlText, conn);
+
+            if (cmdName.ToUpper() == "SELECT")
+            {
+                OdbcDataReader dataReader = command.ExecuteReader();
+                result = dataReader.RecordsAffected;
+            }
+            else
+            {
+                // DROP, CREATE  => return -1
+                // INSERT, UPDATE, DELETE => return count
+                result = Math.Abs(command.ExecuteNonQuery());
+            }
+
+            return result;
+        }
+
         public bool IsLive()
         {
-            if (ExecuteSQL("") == 0) return true;
+            string sql = "";
+            if (ExecuteSQL(sql) >= 0) return true;
             else
             {
                 string msg = String.Format("Can't connected to '{0}'", connString);
