@@ -56,6 +56,7 @@ namespace script4db
         private void buttonOpen_Click(object sender, EventArgs e)
         {
             this.richTextBoxRaw.Clear();
+            toolStripStatusLabel2.Text = "Selecting a script file...";
 
             // Displays an OpenFileDialog so the user can select a Cursor.
             OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -96,6 +97,7 @@ namespace script4db
             {
                 textBoxScriptFile.Text = "";
                 RefreshControls(appStatuses.Init);
+                toolStripStatusLabel2.Text = "File was not selected.";
             }
         }
 
@@ -116,38 +118,50 @@ namespace script4db
                 case appStatuses.Init:
                     buttonOpen.Enabled = true;
                     buttonExit.Enabled = true;
+                    toolStripStatusLabel2.Text = "Please open a script file. Waiting...";
                     break;
                 case appStatuses.Parse:
                     //this.
                     buttonExit.Enabled = true;
+                    toolStripStatusLabel2.Text = "Parsing in process...";
                     break;
                 case appStatuses.Break:
+                    buttonOpen.Enabled = true;
+                    buttonExit.Enabled = true;
+                    toolStripStatusLabel2.Text = "Canseled";
+                    break;
                 case appStatuses.Error:
                     buttonOpen.Enabled = true;
                     buttonExit.Enabled = true;
+                    toolStripStatusLabel2.Text = "Look please a Logs for details";
                     break;
                 case appStatuses.ReadyToRun:
                     buttonOpen.Enabled = true;
                     buttonRun.Enabled = true;
                     buttonExit.Enabled = true;
+                    toolStripStatusLabel2.Text = "Click 'Run' to start srcript. Waiting...";
                     break;
                 case appStatuses.Run:
                     buttonPauseContinue.Enabled = true;
                     buttonBreak.Enabled = true;
+                    toolStripStatusLabel2.Text = "Running...";
                     break;
                 case appStatuses.Finish:
                     buttonOpen.Enabled = true;
                     buttonExit.Enabled = true;
+                    toolStripStatusLabel2.Text = "Ended. You can open a next script file. Waiting...";
                     break;
                 case appStatuses.Pause:
                     buttonPauseContinue.Text = appStatuses.Continue.ToString();
                     buttonPauseContinue.Enabled = true;
                     buttonBreak.Enabled = true;
+                    toolStripStatusLabel2.Text = "Waiting...";
                     break;
                 case appStatuses.Continue:
                     buttonPauseContinue.Text = appStatuses.Pause.ToString();
                     buttonPauseContinue.Enabled = true;
                     buttonBreak.Enabled = true;
+                    toolStripStatusLabel2.Text = "Continue running...";
                     break;
                 default:
                     throw new System.ArgumentException("Default switch case must be never reachable by refreshControls.", "appStatusError");

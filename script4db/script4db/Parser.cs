@@ -49,7 +49,7 @@ namespace script4db
             }
         }
 
-        public bool LoadFile(String fileForParce)
+        public bool LoadFile(string fileForParce)
         {
             this.Clear();
             this.currentStatus = ParserStatuses.FileLoading;
