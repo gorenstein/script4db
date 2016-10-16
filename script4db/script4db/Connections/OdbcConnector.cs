@@ -16,6 +16,9 @@ namespace script4db.Connections
         private string login;
         private string password;
         private string connString;
+        private OdbcDataReader dataReader;
+        private int affected;
+        private string[] nonQueryCmdNames = new string[] { "DROP", "CREATE", "INSERT", "UPDATE", "DELETE" };
         private ArrayList logMessages = new ArrayList();
 
         public OdbcConnector(string _source, string _login, string _password)
@@ -81,19 +84,27 @@ namespace script4db.Connections
         {
             int result;
             sqlText = sqlText.TrimStart();
-            string cmdName = sqlText.Substring(0, sqlText.IndexOf(" "));
+            string cmdName = sqlText.Substring(0, sqlText.IndexOf(" ")).ToUpper();
             OdbcCommand command = new OdbcCommand(sqlText, conn);
 
-            if (cmdName.ToUpper() == "SELECT")
+            if (cmdName == "SELECT")
             {
-                OdbcDataReader dataReader = command.ExecuteReader();
-                result = dataReader.RecordsAffected;
+                this.dataReader = command.ExecuteReader();
+                this.affected = dataReader.RecordsAffected;
+                result = 0;
             }
-            else
+            else if (this.nonQueryCmdNames.Contains(cmdName))
             {
                 // DROP, CREATE  => return -1
                 // INSERT, UPDATE, DELETE => return count
-                result = Math.Abs(command.ExecuteNonQuery());
+                this.affected = Math.Abs(command.ExecuteNonQuery());
+                result = 0;
+            }
+            else
+            {
+                string msg = String.Format("Not supported sql command '{0}'", cmdName);
+                this.LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
+                result = -1;
             }
 
             return result;
@@ -116,6 +127,22 @@ namespace script4db.Connections
             get
             {
                 return logMessages;
+            }
+        }
+
+        public OdbcDataReader DataReader
+        {
+            get
+            {
+                return dataReader;
+            }
+        }
+
+        public int Affected
+        {
+            get
+            {
+                return affected;
             }
         }
     }
