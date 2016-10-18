@@ -27,8 +27,9 @@ namespace script4db
         }
 
         appStatuses currentStatus;
-        String initialDirectory = Environment.SpecialFolder.Desktop.ToString();
-        //String initialDirectory = System.AppDomain.CurrentDomain.BaseDirectory;
+        string initialDirectory = Environment.SpecialFolder.Desktop.ToString();
+        //string initialDirectory = System.AppDomain.CurrentDomain.BaseDirectory;
+        string baseTextStatusLabel2;
 
         Logs Logs;
 
@@ -146,11 +147,13 @@ namespace script4db
                     buttonPauseContinue.Enabled = true;
                     buttonBreak.Enabled = true;
                     toolStripStatusLabel2.Text = "Running...";
+                    toolStripProgressBar1.Visible = true;
                     break;
                 case appStatuses.Finish:
                     buttonOpen.Enabled = true;
                     buttonExit.Enabled = true;
                     toolStripStatusLabel2.Text = "Ended. You can open a next script file.";
+                    toolStripProgressBar1.Visible = false;
                     break;
                 case appStatuses.Pause:
                     buttonPauseContinue.Text = appStatuses.Continue.ToString();
@@ -192,6 +195,33 @@ namespace script4db
         private void buttonRun_Click(object sender, EventArgs e)
         {
             RefreshControls(appStatuses.Run);
+            baseTextStatusLabel2 = "Checking DB connection";
+
+            BackgroundWorker bw = new BackgroundWorker();
+            bw.DoWork += ((object doWorkSender, DoWorkEventArgs doWorkArgs) =>
+            {
+                for (int i = 0; i < 100; i++)
+                {
+                    //Check Connection
+                    bw.ReportProgress(i);
+                    System.Threading.Thread.Sleep(50);
+                }
+            });
+            bw.ProgressChanged += Bw_ProgressChanged;
+            bw.RunWorkerCompleted += Bw_RunWorkerCompleted;
+            bw.WorkerReportsProgress = true;
+            bw.RunWorkerAsync();
+        }
+
+        private void Bw_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            toolStripStatusLabel2.Text = String.Format("{0}: {1,3} %", baseTextStatusLabel2, e.ProgressPercentage);
+            toolStripProgressBar1.Value = e.ProgressPercentage;
+        }
+
+        private void Bw_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            RefreshControls(appStatuses.Finish);
         }
     }
 }

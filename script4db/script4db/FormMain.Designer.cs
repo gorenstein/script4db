@@ -47,6 +47,7 @@
             this.tabPageTree = new System.Windows.Forms.TabPage();
             this.tabPageLogs = new System.Windows.Forms.TabPage();
             this.richTextBoxLogs = new System.Windows.Forms.RichTextBox();
+            this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
             this.statusStrip.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPageRaw.SuspendLayout();
@@ -139,7 +140,8 @@
             // 
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel1,
-            this.toolStripStatusLabel2});
+            this.toolStripStatusLabel2,
+            this.toolStripProgressBar1});
             this.statusStrip.Location = new System.Drawing.Point(0, 348);
             this.statusStrip.Name = "statusStrip";
             this.statusStrip.Size = new System.Drawing.Size(886, 24);
@@ -246,6 +248,13 @@
             this.richTextBoxLogs.Text = "";
             this.richTextBoxLogs.WordWrap = false;
             // 
+            // toolStripProgressBar1
+            // 
+            this.toolStripProgressBar1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripProgressBar1.Name = "toolStripProgressBar1";
+            this.toolStripProgressBar1.Size = new System.Drawing.Size(100, 18);
+            this.toolStripProgressBar1.Visible = false;
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
@@ -296,6 +305,7 @@
         private System.Windows.Forms.RichTextBox richTextBoxLogs;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel2;
         private System.Windows.Forms.StatusStrip statusStrip;
+        private System.Windows.Forms.ToolStripProgressBar toolStripProgressBar1;
     }
 }
 
