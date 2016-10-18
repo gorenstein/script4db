@@ -86,6 +86,7 @@ namespace script4db
                 if (parser.CurrentStatus == ParserStatuses.ParseSuccesse)
                 {
                     RefreshControls(appStatuses.ReadyToRun);
+                    this.tabControl1.SelectTab(this.tabPageTree);
                 }
                 else
                 {
@@ -118,7 +119,7 @@ namespace script4db
                 case appStatuses.Init:
                     buttonOpen.Enabled = true;
                     buttonExit.Enabled = true;
-                    toolStripStatusLabel2.Text = "Please open a script file. Waiting...";
+                    toolStripStatusLabel2.Text = "Please open a script file.";
                     break;
                 case appStatuses.Parse:
                     //this.
@@ -139,7 +140,7 @@ namespace script4db
                     buttonOpen.Enabled = true;
                     buttonRun.Enabled = true;
                     buttonExit.Enabled = true;
-                    toolStripStatusLabel2.Text = "Click 'Run' to start srcript. Waiting...";
+                    toolStripStatusLabel2.Text = "Click 'Run' to start srcript.";
                     break;
                 case appStatuses.Run:
                     buttonPauseContinue.Enabled = true;
@@ -149,13 +150,13 @@ namespace script4db
                 case appStatuses.Finish:
                     buttonOpen.Enabled = true;
                     buttonExit.Enabled = true;
-                    toolStripStatusLabel2.Text = "Ended. You can open a next script file. Waiting...";
+                    toolStripStatusLabel2.Text = "Ended. You can open a next script file.";
                     break;
                 case appStatuses.Pause:
                     buttonPauseContinue.Text = appStatuses.Continue.ToString();
                     buttonPauseContinue.Enabled = true;
                     buttonBreak.Enabled = true;
-                    toolStripStatusLabel2.Text = "Waiting...";
+                    toolStripStatusLabel2.Text = "Pause...";
                     break;
                 case appStatuses.Continue:
                     buttonPauseContinue.Text = appStatuses.Pause.ToString();
@@ -168,10 +169,6 @@ namespace script4db
             }
         }
 
-        private void buttonRun_Click(object sender, EventArgs e)
-        {
-            RefreshControls(appStatuses.Run);
-        }
 
         private void buttonPauseContinue_Click(object sender, EventArgs e)
         {
@@ -190,6 +187,11 @@ namespace script4db
         private void buttonBreak_Click(object sender, EventArgs e)
         {
             RefreshControls(appStatuses.Break);
+        }
+
+        private void buttonRun_Click(object sender, EventArgs e)
+        {
+            RefreshControls(appStatuses.Run);
         }
     }
 }

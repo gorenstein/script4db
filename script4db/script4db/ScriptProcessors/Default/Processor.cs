@@ -46,12 +46,12 @@ namespace script4db.ScriptProcessors.Default
                 LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
                 return false;
             }
-            if (!this.Pass3())
-            {
-                string msg = String.Format("Connection checking error on Pass #3");
-                LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
-                return false;
-            }
+            //if (!this.Pass3())
+            //{
+            //    string msg = String.Format("Connection checking error on Pass #3");
+            //    LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
+            //    return false;
+            //}
             return true;
         }
 
@@ -116,15 +116,15 @@ namespace script4db.ScriptProcessors.Default
         }
 
         // Pass to Check evalieble of DB connection 
-        private bool Pass3()
-        {
-            if (!this.blocks.TestDbConnections())
-            {
-                foreach (LogMessage logMsg in this.blocks.LogMessages) this.LogMessages.Add(logMsg);
-                return false;
-            }
-            return true;
-        }
+        //private bool Pass3()
+        //{
+        //    if (!this.blocks.TestDbConnections())
+        //    {
+        //        foreach (LogMessage logMsg in this.blocks.LogMessages) this.LogMessages.Add(logMsg);
+        //        return false;
+        //    }
+        //    return true;
+        //}
 
         private bool AddBlockIfAny(Block block)
         {

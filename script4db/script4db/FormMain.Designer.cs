@@ -87,6 +87,7 @@
             this.buttonPauseContinue.TabIndex = 2;
             this.buttonPauseContinue.Text = "Pause";
             this.buttonPauseContinue.UseVisualStyleBackColor = true;
+            this.buttonPauseContinue.Visible = false;
             this.buttonPauseContinue.Click += new System.EventHandler(this.buttonPauseContinue_Click);
             // 
             // buttonBreak
