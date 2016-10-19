@@ -90,12 +90,10 @@ namespace script4db
                 if (parser.CurrentStatus == ParserStatuses.ParseSuccesse)
                 {
                     RefreshControls(appStatuses.ReadyToRun);
-                    this.tabControl1.SelectTab(this.tabPageTree);
                 }
                 else
                 {
                     RefreshControls(appStatuses.Error);
-                    this.tabControl1.SelectTab(this.tabPageLogs);
                 }
             }
             else
@@ -134,19 +132,26 @@ namespace script4db
                     buttonOpen.Enabled = true;
                     buttonExit.Enabled = true;
                     statusLabel2.Text = "Canseled";
+                    statusLabel3.Visible = false;
+                    progressBar1.Visible = false;
                     break;
                 case appStatuses.Error:
                     buttonOpen.Enabled = true;
                     buttonExit.Enabled = true;
                     statusLabel2.Text = "Look please a Logs for details";
+                    this.tabControl1.SelectTab(this.tabPageLogs);
+                    statusLabel3.Visible = false;
+                    progressBar1.Visible = false;
                     break;
                 case appStatuses.ReadyToRun:
                     buttonOpen.Enabled = true;
                     buttonRun.Enabled = true;
                     buttonExit.Enabled = true;
                     statusLabel2.Text = "Click 'Run' to start srcript.";
+                    this.tabControl1.SelectTab(this.tabPageTree);
                     break;
                 case appStatuses.Run:
+                    // TODO Disable close WindowsForm
                     buttonPauseContinue.Enabled = true;
                     buttonCancel.Enabled = true;
                     statusLabel2.Text = "Running...";
@@ -194,6 +199,8 @@ namespace script4db
 
         private void buttonBreak_Click(object sender, EventArgs e)
         {
+            // TODO Confirm dialog
+
             // Cancel the asynchronous operation.
             this.worker.CancelAsync();
 
@@ -228,8 +235,7 @@ namespace script4db
                 if (worker.CancellationPending == true)
                 {
                     workerMsgs.Add(new LogMessage(LogMessageTypes.Warning, "Check Connection", "Aborted by user"));
-                    e.Result = workerMsgs;
-                    e.Cancel = true;
+                    e.Result = new WorkerResult(WorkerResultStatuses.Cancel, workerMsgs);
                     return;
                 }
 
@@ -239,16 +245,14 @@ namespace script4db
                 if (!connection.isCorrectRawConnString)
                 {
                     foreach (LogMessage logMsg in connection.LogMessages) workerMsgs.Add(logMsg);
-                    e.Result = workerMsgs;
-                    e.Cancel = true;
+                    e.Result = new WorkerResult(WorkerResultStatuses.Error, workerMsgs);
                     return;
                 }
 
                 if (!connection.IsLive())
                 {
                     foreach (LogMessage logMsg in connection.LogMessages) workerMsgs.Add(logMsg);
-                    e.Result = workerMsgs;
-                    e.Cancel = true;
+                    e.Result = new WorkerResult(WorkerResultStatuses.Error, workerMsgs);
                     return;
                 }
 
@@ -257,7 +261,9 @@ namespace script4db
 
             string msg = String.Format("Success checked {0} {1}", connCount, "connection" + (connCount > 1 ? "s" : ""));
             workerMsgs.Add(new LogMessage(LogMessageTypes.Info, "Check Connection", msg));
-            e.Result = workerMsgs;
+            e.Result = new WorkerResult(WorkerResultStatuses.Success, workerMsgs);
+
+            // TODO Run command here
         }
 
         private void Bw_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -270,21 +276,32 @@ namespace script4db
         {
             if (e.Error == null)
             {
-                ArrayList logMsgs = (ArrayList)e.Result;
-                foreach (LogMessage logMsg in logMsgs) this.Logs.AppendMessage(logMsg);
-
                 if (e.Cancelled)
                 {
                     RefreshControls(appStatuses.Cancel);
                 }
                 else
                 {
-                    RefreshControls(appStatuses.Finish);
+                    WorkerResult result = e.Result as WorkerResult;
+                    foreach (LogMessage logMsg in result.LogMsgs) this.Logs.AppendMessage(logMsg);
+                    switch (result.Status)
+                    {
+                        case WorkerResultStatuses.Cancel:
+                            RefreshControls(appStatuses.Cancel);
+                            break;
+                        case WorkerResultStatuses.Success:
+                            RefreshControls(appStatuses.Finish);
+                            break;
+                        case WorkerResultStatuses.Error:
+                        default:
+                            RefreshControls(appStatuses.Error);
+                            break;
+                    }
                 }
             }
             else
             {
-                LogMessage logMsg = new LogMessage(LogMessageTypes.Error, "Check Connection", e.Error.ToString());
+                LogMessage logMsg = new LogMessage(LogMessageTypes.Error, "Worker", e.Error.ToString());
                 this.Logs.AppendMessage(logMsg);
             }
         }
