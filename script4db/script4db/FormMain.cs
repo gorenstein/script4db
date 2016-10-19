@@ -255,7 +255,7 @@ namespace script4db
                 progress += progressStep;
             }
 
-            string msg = String.Format("Success checked {0} connection", connCount);
+            string msg = String.Format("Success checked {0} {1}", connCount, "connection" + (connCount > 1 ? "s" : ""));
             workerMsgs.Add(new LogMessage(LogMessageTypes.Info, "Check Connection", msg));
             e.Result = workerMsgs;
         }
