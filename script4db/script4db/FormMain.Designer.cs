@@ -33,7 +33,7 @@
             this.buttonOpen = new System.Windows.Forms.Button();
             this.buttonRun = new System.Windows.Forms.Button();
             this.buttonPauseContinue = new System.Windows.Forms.Button();
-            this.buttonBreak = new System.Windows.Forms.Button();
+            this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonExit = new System.Windows.Forms.Button();
             this.textBoxScriptFile = new System.Windows.Forms.TextBox();
             this.buttonAbout = new System.Windows.Forms.Button();
@@ -92,17 +92,17 @@
             this.buttonPauseContinue.Visible = false;
             this.buttonPauseContinue.Click += new System.EventHandler(this.buttonPauseContinue_Click);
             // 
-            // buttonBreak
+            // buttonCancel
             // 
-            this.buttonBreak.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonBreak.Enabled = false;
-            this.buttonBreak.Location = new System.Drawing.Point(778, 147);
-            this.buttonBreak.Name = "buttonBreak";
-            this.buttonBreak.Size = new System.Drawing.Size(96, 31);
-            this.buttonBreak.TabIndex = 3;
-            this.buttonBreak.Text = "Break";
-            this.buttonBreak.UseVisualStyleBackColor = true;
-            this.buttonBreak.Click += new System.EventHandler(this.buttonBreak_Click);
+            this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonCancel.Enabled = false;
+            this.buttonCancel.Location = new System.Drawing.Point(778, 147);
+            this.buttonCancel.Name = "buttonCancel";
+            this.buttonCancel.Size = new System.Drawing.Size(96, 31);
+            this.buttonCancel.TabIndex = 3;
+            this.buttonCancel.Text = "Cancel";
+            this.buttonCancel.UseVisualStyleBackColor = true;
+            this.buttonCancel.Click += new System.EventHandler(this.buttonBreak_Click);
             // 
             // buttonExit
             // 
@@ -274,7 +274,7 @@
             this.Controls.Add(this.buttonAbout);
             this.Controls.Add(this.textBoxScriptFile);
             this.Controls.Add(this.buttonExit);
-            this.Controls.Add(this.buttonBreak);
+            this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.buttonPauseContinue);
             this.Controls.Add(this.buttonRun);
             this.Controls.Add(this.buttonOpen);
@@ -300,7 +300,7 @@
         private System.Windows.Forms.Button buttonOpen;
         private System.Windows.Forms.Button buttonRun;
         private System.Windows.Forms.Button buttonPauseContinue;
-        private System.Windows.Forms.Button buttonBreak;
+        private System.Windows.Forms.Button buttonCancel;
         private System.Windows.Forms.Button buttonExit;
         private System.Windows.Forms.TextBox textBoxScriptFile;
         private System.Windows.Forms.Button buttonAbout;

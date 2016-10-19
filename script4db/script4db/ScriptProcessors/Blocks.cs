@@ -46,6 +46,28 @@ namespace script4db.ScriptProcessors
             }
         }
 
+        public ArrayList ConnectionsStrings()
+        {
+            ArrayList connections = new ArrayList();
+
+            foreach (var blocksGroup in this.BlocksGroup)
+            {
+                foreach (Block block in blocksGroup.Value)
+                {
+                    if (block.Name == BlockNames.command)
+                    {
+                        foreach (string connection in block.ConnectionsStrings())
+                        {
+                            if (!connections.Contains(connection)) connections.Add(connection);
+                        }
+                    }
+                }
+            }
+
+            return connections;
+        }
+
+
         public bool TestDbConnections()
         {
             foreach (var blocksGroup in this.BlocksGroup)

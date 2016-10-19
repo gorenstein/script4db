@@ -12,5 +12,6 @@ namespace script4db.ScriptProcessors
         string TextRaw { get; set; }
         Blocks Blocks { get; }
         ArrayList LogMessages { get; }
+        ArrayList ConnectionsStrings();
     }
 }

@@ -170,5 +170,10 @@ namespace script4db.ScriptProcessors.Default
                 return blocks;
             }
         }
+
+        public ArrayList ConnectionsStrings()
+        {
+            return this.blocks.ConnectionsStrings();
+        }
     }
 }

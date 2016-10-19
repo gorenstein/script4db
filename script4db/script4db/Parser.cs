@@ -171,5 +171,10 @@ namespace script4db
                 return textRaw;
             }
         }
+
+        public ArrayList ConnectionsStrings()
+        {
+            return this.interpreter.ScriptProcessor.ConnectionsStrings();
+        }
     }
 }

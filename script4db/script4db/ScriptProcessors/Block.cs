@@ -37,6 +37,27 @@ namespace script4db.ScriptProcessors
             return false;
         }
 
+        public ArrayList ConnectionsStrings()
+        {
+            ArrayList connections = new ArrayList();
+
+            if (this.name != BlockNames.command) return connections;
+
+            foreach (string conParam in connectionParameterNames)
+            {
+                if (this.parameters.ContainsKey(conParam))
+                {
+                    string rawConnString = this.parameters[conParam];
+                    if (!connections.Contains(rawConnString))
+                    {
+                        connections.Add(rawConnString);
+                    }
+                }
+            }
+
+            return connections;
+        }
+
         public bool TestDbConnection()
         {
             if (this.name != BlockNames.command) return true;
