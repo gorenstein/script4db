@@ -29,7 +29,7 @@ namespace script4db
         appStatuses currentStatus;
         string initialDirectory = Environment.SpecialFolder.Desktop.ToString();
         //string initialDirectory = System.AppDomain.CurrentDomain.BaseDirectory;
-        string baseTextStatusLabel2;
+        BackgroundWorker bw = new BackgroundWorker();
 
         Logs Logs;
 
@@ -57,7 +57,7 @@ namespace script4db
         private void buttonOpen_Click(object sender, EventArgs e)
         {
             this.richTextBoxRaw.Clear();
-            toolStripStatusLabel2.Text = "Selecting a script file...";
+            statusLabel2.Text = "Selecting a script file...";
 
             // Displays an OpenFileDialog so the user can select a Cursor.
             OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -99,7 +99,7 @@ namespace script4db
             {
                 textBoxScriptFile.Text = "";
                 RefreshControls(appStatuses.Init);
-                toolStripStatusLabel2.Text = "File was not selected.";
+                statusLabel2.Text = "File was not selected.";
             }
         }
 
@@ -107,7 +107,7 @@ namespace script4db
         {
             this.Logs.AppendMessage(new LogMessage(LogMessageTypes.Info, "main", "Change app status to " + newStatus.ToString()));
             this.currentStatus = newStatus;
-            toolStripStatusLabel1.Text = this.currentStatus.ToString();
+            statusLabel1.Text = this.currentStatus.ToString();
 
             buttonOpen.Enabled = false;
             buttonRun.Enabled = false;
@@ -120,52 +120,54 @@ namespace script4db
                 case appStatuses.Init:
                     buttonOpen.Enabled = true;
                     buttonExit.Enabled = true;
-                    toolStripStatusLabel2.Text = "Please open a script file.";
+                    statusLabel2.Text = "Please open a script file.";
                     break;
                 case appStatuses.Parse:
                     //this.
                     buttonExit.Enabled = true;
-                    toolStripStatusLabel2.Text = "Parsing in process...";
+                    statusLabel2.Text = "Parsing in process...";
                     break;
                 case appStatuses.Break:
                     buttonOpen.Enabled = true;
                     buttonExit.Enabled = true;
-                    toolStripStatusLabel2.Text = "Canseled";
+                    statusLabel2.Text = "Canseled";
                     break;
                 case appStatuses.Error:
                     buttonOpen.Enabled = true;
                     buttonExit.Enabled = true;
-                    toolStripStatusLabel2.Text = "Look please a Logs for details";
+                    statusLabel2.Text = "Look please a Logs for details";
                     break;
                 case appStatuses.ReadyToRun:
                     buttonOpen.Enabled = true;
                     buttonRun.Enabled = true;
                     buttonExit.Enabled = true;
-                    toolStripStatusLabel2.Text = "Click 'Run' to start srcript.";
+                    statusLabel2.Text = "Click 'Run' to start srcript.";
                     break;
                 case appStatuses.Run:
                     buttonPauseContinue.Enabled = true;
                     buttonBreak.Enabled = true;
-                    toolStripStatusLabel2.Text = "Running...";
-                    toolStripProgressBar1.Visible = true;
+                    statusLabel2.Text = "Running...";
+                    statusLabel3.Visible = true;
+                    progressBar1.Visible = true;
                     break;
                 case appStatuses.Finish:
                     buttonOpen.Enabled = true;
                     buttonExit.Enabled = true;
-                    toolStripStatusLabel2.Text = "Ended. You can open a next script file.";
-                    toolStripProgressBar1.Visible = false;
+                    statusLabel2.Text = "Ended. You can open a next script file.";
+                    statusLabel3.Visible = false;
+                    progressBar1.Visible = false;
                     break;
                 case appStatuses.Pause:
                     buttonPauseContinue.Text = appStatuses.Continue.ToString();
                     buttonPauseContinue.Enabled = true;
                     buttonBreak.Enabled = true;
-                    toolStripStatusLabel2.Text = "Pause...";
+                    statusLabel2.Text = "Pause...";
                     break;
                 case appStatuses.Continue:
                     buttonPauseContinue.Text = appStatuses.Pause.ToString();
                     buttonPauseContinue.Enabled = true;
                     buttonBreak.Enabled = true;
-                    toolStripStatusLabel2.Text = "Continue running...";
+                    statusLabel2.Text = "Continue running...";
                     break;
                 default:
                     throw new System.ArgumentException("Default switch case must be never reachable by refreshControls.", "appStatusError");
@@ -195,9 +197,8 @@ namespace script4db
         private void buttonRun_Click(object sender, EventArgs e)
         {
             RefreshControls(appStatuses.Run);
-            baseTextStatusLabel2 = "Checking DB connection";
+            statusLabel2.Text = "Checking DB connection";
 
-            BackgroundWorker bw = new BackgroundWorker();
             bw.DoWork += ((object doWorkSender, DoWorkEventArgs doWorkArgs) =>
             {
                 for (int i = 0; i < 100; i++)
@@ -215,8 +216,8 @@ namespace script4db
 
         private void Bw_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            toolStripStatusLabel2.Text = String.Format("{0}: {1,3} %", baseTextStatusLabel2, e.ProgressPercentage);
-            toolStripProgressBar1.Value = e.ProgressPercentage;
+            statusLabel3.Text = String.Format("{0,3} %", e.ProgressPercentage);
+            progressBar1.Value = e.ProgressPercentage;
         }
 
         private void Bw_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)

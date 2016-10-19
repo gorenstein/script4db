@@ -38,8 +38,10 @@
             this.textBoxScriptFile = new System.Windows.Forms.TextBox();
             this.buttonAbout = new System.Windows.Forms.Button();
             this.statusStrip = new System.Windows.Forms.StatusStrip();
-            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.statusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.statusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.progressBar1 = new System.Windows.Forms.ToolStripProgressBar();
+            this.statusLabel3 = new System.Windows.Forms.ToolStripStatusLabel();
             this.treeViewScriptBlocks = new System.Windows.Forms.TreeView();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPageRaw = new System.Windows.Forms.TabPage();
@@ -47,7 +49,6 @@
             this.tabPageTree = new System.Windows.Forms.TabPage();
             this.tabPageLogs = new System.Windows.Forms.TabPage();
             this.richTextBoxLogs = new System.Windows.Forms.RichTextBox();
-            this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
             this.statusStrip.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPageRaw.SuspendLayout();
@@ -139,27 +140,42 @@
             // statusStrip
             // 
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripStatusLabel1,
-            this.toolStripStatusLabel2,
-            this.toolStripProgressBar1});
+            this.statusLabel1,
+            this.statusLabel2,
+            this.progressBar1,
+            this.statusLabel3});
             this.statusStrip.Location = new System.Drawing.Point(0, 348);
             this.statusStrip.Name = "statusStrip";
             this.statusStrip.Size = new System.Drawing.Size(886, 24);
             this.statusStrip.TabIndex = 7;
             this.statusStrip.Text = "statusStrip";
             // 
-            // toolStripStatusLabel1
+            // statusLabel1
             // 
-            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(118, 19);
-            this.toolStripStatusLabel1.Text = "toolStripStatusLabel1";
+            this.statusLabel1.Name = "statusLabel1";
+            this.statusLabel1.Size = new System.Drawing.Size(72, 19);
+            this.statusLabel1.Text = "statusLabel1";
             // 
-            // toolStripStatusLabel2
+            // statusLabel2
             // 
-            this.toolStripStatusLabel2.BorderSides = System.Windows.Forms.ToolStripStatusLabelBorderSides.Left;
-            this.toolStripStatusLabel2.Name = "toolStripStatusLabel2";
-            this.toolStripStatusLabel2.Size = new System.Drawing.Size(122, 19);
-            this.toolStripStatusLabel2.Text = "toolStripStatusLabel2";
+            this.statusLabel2.BorderSides = System.Windows.Forms.ToolStripStatusLabelBorderSides.Left;
+            this.statusLabel2.Name = "statusLabel2";
+            this.statusLabel2.Size = new System.Drawing.Size(76, 19);
+            this.statusLabel2.Text = "statusLabel2";
+            // 
+            // progressBar1
+            // 
+            this.progressBar1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(100, 18);
+            this.progressBar1.Visible = false;
+            // 
+            // statusLabel3
+            // 
+            this.statusLabel3.Name = "statusLabel3";
+            this.statusLabel3.Size = new System.Drawing.Size(72, 19);
+            this.statusLabel3.Text = "statusLabel3";
+            this.statusLabel3.Visible = false;
             // 
             // treeViewScriptBlocks
             // 
@@ -248,13 +264,6 @@
             this.richTextBoxLogs.Text = "";
             this.richTextBoxLogs.WordWrap = false;
             // 
-            // toolStripProgressBar1
-            // 
-            this.toolStripProgressBar1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripProgressBar1.Name = "toolStripProgressBar1";
-            this.toolStripProgressBar1.Size = new System.Drawing.Size(100, 18);
-            this.toolStripProgressBar1.Visible = false;
-            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
@@ -295,7 +304,7 @@
         private System.Windows.Forms.Button buttonExit;
         private System.Windows.Forms.TextBox textBoxScriptFile;
         private System.Windows.Forms.Button buttonAbout;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
+        private System.Windows.Forms.ToolStripStatusLabel statusLabel1;
         private System.Windows.Forms.TreeView treeViewScriptBlocks;
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabPageTree;
@@ -303,9 +312,10 @@
         private System.Windows.Forms.RichTextBox richTextBoxRaw;
         private System.Windows.Forms.TabPage tabPageLogs;
         private System.Windows.Forms.RichTextBox richTextBoxLogs;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel2;
+        private System.Windows.Forms.ToolStripStatusLabel statusLabel2;
         private System.Windows.Forms.StatusStrip statusStrip;
-        private System.Windows.Forms.ToolStripProgressBar toolStripProgressBar1;
+        private System.Windows.Forms.ToolStripProgressBar progressBar1;
+        private System.Windows.Forms.ToolStripStatusLabel statusLabel3;
     }
 }
 
