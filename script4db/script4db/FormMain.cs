@@ -229,18 +229,17 @@ namespace script4db
                 statusLabel1.ForeColor = Color.DarkOrange;
                 buttonCancel.Enabled = false;
             }
-
         }
 
         private void buttonRun_Click(object sender, EventArgs e)
         {
             RefreshControls(appStatuses.Run);
-            statusLabel2.Text = "Checking DB connection";
+            statusLabel2.Text = String.Format("Checking DB connection ({0})", parser.ConnectionsStrings().Count);
 
             worker.DoWork += Bw_DoWorkCheckConnection;
 
             worker.ProgressChanged += Bw_ProgressChanged;
-            worker.RunWorkerCompleted += Bw_RunWorkerCompleted;
+            worker.RunWorkerCompleted += Bw_RunWorkerCheckCompleted;
             worker.WorkerSupportsCancellation = true;
             worker.WorkerReportsProgress = true;
             worker.RunWorkerAsync();
@@ -286,8 +285,6 @@ namespace script4db
             string msg = String.Format("Success checked {0} {1}", connCount, "connection" + (connCount > 1 ? "s" : ""));
             workerMsgs.Add(new LogMessage(LogMessageTypes.Info, "Check Connection", msg));
             e.Result = new WorkerResult(WorkerResultStatuses.Success, workerMsgs);
-
-            // TODO Run command here
         }
 
         private void Bw_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -296,7 +293,7 @@ namespace script4db
             progressBar1.Value = e.ProgressPercentage;
         }
 
-        private void Bw_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        private void Bw_RunWorkerCheckCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             if (e.Error == null)
             {
@@ -314,7 +311,8 @@ namespace script4db
                             RefreshControls(appStatuses.Cancel);
                             break;
                         case WorkerResultStatuses.Success:
-                            RefreshControls(appStatuses.Finish);
+                            RunScriptCommand();
+                            //RefreshControls(appStatuses.Finish);
                             break;
                         case WorkerResultStatuses.Error:
                         default:
@@ -328,6 +326,27 @@ namespace script4db
                 LogMessage logMsg = new LogMessage(LogMessageTypes.Error, "Worker", e.Error.ToString());
                 this.Logs.AppendMessage(logMsg);
             }
+        }
+
+        private void RunScriptCommand()
+        {
+            RefreshControls(appStatuses.Run);
+            statusLabel2.Text = String.Format("Run Script command ({0})", parser.ConnectionsStrings().Count);
+
+            worker.DoWork += Bw_DoWorkScriptcommand;
+
+            worker.ProgressChanged += Bw_ProgressChanged;
+            worker.RunWorkerCompleted += Bw_RunWorkerScriptCompleted;
+            worker.WorkerSupportsCancellation = true;
+            worker.WorkerReportsProgress = true;
+            worker.RunWorkerAsync();
+        }
+        private void Bw_DoWorkScriptcommand(object sender, DoWorkEventArgs e)
+        {
+        }
+
+        private void Bw_RunWorkerScriptCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
         }
     }
 }

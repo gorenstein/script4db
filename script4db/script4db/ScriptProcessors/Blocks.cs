@@ -32,18 +32,12 @@ namespace script4db.ScriptProcessors
 
         public Dictionary<BlockNames, ArrayList> BlocksGroup
         {
-            get
-            {
-                return blocksGroup;
-            }
+            get { return blocksGroup; }
         }
 
         public ArrayList LogMessages
         {
-            get
-            {
-                return logMessages;
-            }
+            get { return logMessages; }
         }
 
         public ArrayList ConnectionsStrings()
@@ -133,7 +127,6 @@ namespace script4db.ScriptProcessors
             foreach (BlockNames blockName in Enum.GetValues(typeof(BlockNames)))
             {
                 if (blockName.ToString() == _name) return (int)blockName;
-
             }
             //block not supported
             return -1;

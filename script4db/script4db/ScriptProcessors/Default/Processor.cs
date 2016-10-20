@@ -139,36 +139,20 @@ namespace script4db.ScriptProcessors.Default
             return true;
         }
 
-        private void addParameterToBlock(string blockName, int blockNumber)
-        {
-        }
-
         public string TextRaw
         {
-            get
-            {
-                return textRaw;
-            }
-            set
-            {
-                textRaw = value;
-            }
+            get { return textRaw; }
+            set { textRaw = value; }
         }
 
         public ArrayList LogMessages
         {
-            get
-            {
-                return logMessages;
-            }
+            get { return logMessages; }
         }
 
         public Blocks Blocks
         {
-            get
-            {
-                return blocks;
-            }
+            get { return blocks; }
         }
 
         public ArrayList ConnectionsStrings()

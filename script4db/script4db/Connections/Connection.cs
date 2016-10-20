@@ -37,12 +37,12 @@ namespace script4db.Connections
 
         public bool IsLive()
         {
-            // TODO Add logs
             if (!this.Connector.IsLive())
             {
                 foreach (LogMessage logMsg in connector.LogMessages) this.LogMessages.Add(logMsg);
                 return false;
             }
+
             return true;
         }
 
@@ -72,10 +72,7 @@ namespace script4db.Connections
 
         public ArrayList LogMessages
         {
-            get
-            {
-                return logMessages;
-            }
+            get { return logMessages; }
         }
 
         public IConnector Connector
@@ -95,6 +92,7 @@ namespace script4db.Connections
                             throw new System.ArgumentException("It's must be never reachable", this.GetType().Name);
                     }
                 }
+
                 return this.connector;
             }
         }

@@ -44,18 +44,12 @@ namespace script4db
 
         public IScriptProcessor ScriptProcessor
         {
-            get
-            {
-                return scriptProcessor;
-            }
+            get { return scriptProcessor; }
         }
 
         public string ProcessorName
         {
-            get
-            {
-                return processorName;
-            }
+            get { return processorName; }
         }
     }
 }

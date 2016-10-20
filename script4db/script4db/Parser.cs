@@ -75,7 +75,7 @@ namespace script4db
             treeView.BeginUpdate();
             treeView.Nodes.Clear();
             TreeNode rootNode = new TreeNode("script");
-            rootNode.NodeFont = new Font("Arial", 11, FontStyle.Regular); 
+            rootNode.NodeFont = new Font("Arial", 11, FontStyle.Regular);
 
             foreach (var item in this.interpreter.ScriptProcessor.Blocks.BlocksGroup)
             {
@@ -83,7 +83,7 @@ namespace script4db
                 int itemValueCount = item.Value.Count;
                 string countEm = " set";
                 if (itemValueCount > 1) countEm += "s";
-                    
+
                 TreeNode childNode = new TreeNode(item.Key.ToString() + " (" + itemValueCount.ToString() + countEm + ")");
                 childNode.NodeFont = new Font("Arial", 10, FontStyle.Bold);
                 this.AddSubNodes(childNode, item.Value);
@@ -149,32 +149,27 @@ namespace script4db
 
         public string FileName
         {
-            get
-            {
-                return fileName;
-            }
+            get { return fileName; }
         }
 
         public ParserStatuses CurrentStatus
         {
-            get
-            {
-                return currentStatus;
-            }
-
+            get { return currentStatus; }
         }
 
         public string TextRaw
         {
-            get
-            {
-                return textRaw;
-            }
+            get { return textRaw; }
         }
 
         public ArrayList ConnectionsStrings()
         {
             return this.interpreter.ScriptProcessor.ConnectionsStrings();
+        }
+
+        public void CommandBloks()
+        {
+            //this.interpreter.ScriptProcessor.Blocks.BlocksGroup.G;
         }
     }
 }

@@ -124,26 +124,17 @@ namespace script4db.Connections
 
         public ArrayList LogMessages
         {
-            get
-            {
-                return logMessages;
-            }
+            get { return logMessages; }
         }
 
         public OdbcDataReader DataReader
         {
-            get
-            {
-                return dataReader;
-            }
+            get { return dataReader; }
         }
 
         public int Affected
         {
-            get
-            {
-                return affected;
-            }
+            get { return affected; }
         }
     }
 }

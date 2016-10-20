@@ -79,6 +79,7 @@ namespace script4db.ScriptProcessors
                         foreach (LogMessage logMsg in connection.LogMessages) this.LogMessages.Add(logMsg);
                         return false;
                     }
+
                     return true;
                 }
             }
@@ -234,26 +235,17 @@ namespace script4db.ScriptProcessors
 
         public BlockNames Name
         {
-            get
-            {
-                return name;
-            }
+            get { return name; }
         }
 
         public Dictionary<string, string> Parameters
         {
-            get
-            {
-                return parameters;
-            }
+            get { return parameters; }
         }
 
         public ArrayList LogMessages
         {
-            get
-            {
-                return logMessages;
-            }
+            get { return logMessages; }
         }
     }
 }
