@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using script4db.Connections;
@@ -49,6 +50,23 @@ namespace script4db
         private void buttonExit_Click(object sender, EventArgs e)
         {
             Application.Exit();
+        }
+
+        internal const int SC_CLOSE = 0xF060;           //close button's code in Windows API
+        internal const int MF_ENABLED = 0x00000000;     //enabled button status
+        internal const int MF_GRAYED = 0x1;             //disabled button status (enabled = false)
+        internal const int MF_DISABLED = 0x00000002;    //disabled button status
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetSystemMenu(IntPtr HWNDValue, bool isRevert);
+
+        [DllImport("user32.dll")]
+        private static extern int EnableMenuItem(IntPtr tMenu, int targetItem, int targetStatus);
+
+        private void EnableCloseItem(bool value)
+        {
+            IntPtr tMenu = GetSystemMenu(this.Handle, false);
+            EnableMenuItem(tMenu, SC_CLOSE, value ? MF_ENABLED : MF_DISABLED);
         }
 
         private void buttonAbout_Click(object sender, EventArgs e)
@@ -109,12 +127,14 @@ namespace script4db
             this.Logs.AppendMessage(new LogMessage(LogMessageTypes.Info, "main", "Change app status to " + newStatus.ToString()));
             this.currentStatus = newStatus;
             statusLabel1.Text = this.currentStatus.ToString();
+            statusLabel1.ForeColor = Color.Black;
 
             buttonOpen.Enabled = false;
             buttonRun.Enabled = false;
             buttonPauseContinue.Enabled = false;
             buttonCancel.Enabled = false;
             buttonExit.Enabled = false;
+            EnableCloseItem(false);
 
             switch (this.currentStatus)
             {
@@ -131,15 +151,16 @@ namespace script4db
                 case appStatuses.Cancel:
                     buttonOpen.Enabled = true;
                     buttonExit.Enabled = true;
-                    statusLabel2.Text = "Canseled";
+                    statusLabel2.Text = "Canceled";
                     statusLabel3.Visible = false;
                     progressBar1.Visible = false;
                     break;
                 case appStatuses.Error:
                     buttonOpen.Enabled = true;
                     buttonExit.Enabled = true;
-                    statusLabel2.Text = "Look please a Logs for details";
                     this.tabControl1.SelectTab(this.tabPageLogs);
+                    statusLabel1.ForeColor = Color.Red;
+                    statusLabel2.Text = "Look please a Logs for details";
                     statusLabel3.Visible = false;
                     progressBar1.Visible = false;
                     break;
@@ -151,7 +172,6 @@ namespace script4db
                     this.tabControl1.SelectTab(this.tabPageTree);
                     break;
                 case appStatuses.Run:
-                    // TODO Disable close WindowsForm
                     buttonPauseContinue.Enabled = true;
                     buttonCancel.Enabled = true;
                     statusLabel2.Text = "Running...";
@@ -180,8 +200,9 @@ namespace script4db
                 default:
                     throw new System.ArgumentException("Default switch case must be never reachable by refreshControls.", "appStatusError");
             }
-        }
 
+            EnableCloseItem(buttonExit.Enabled);
+        }
 
         private void buttonPauseContinue_Click(object sender, EventArgs e)
         {
@@ -199,13 +220,16 @@ namespace script4db
 
         private void buttonBreak_Click(object sender, EventArgs e)
         {
-            // TODO Confirm dialog
+            var result = MessageBox.Show("Are you sure to cancel runnig script ?",
+                                     "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
+            if (result == DialogResult.Yes && this.worker.IsBusy)
+            {
+                this.worker.CancelAsync();
+                statusLabel1.Text = "Canceling...";
+                statusLabel1.ForeColor = Color.DarkOrange;
+                buttonCancel.Enabled = false;
+            }
 
-            // Cancel the asynchronous operation.
-            this.worker.CancelAsync();
-
-            // Disable the Cancel button.
-            buttonCancel.Enabled = false;
         }
 
         private void buttonRun_Click(object sender, EventArgs e)

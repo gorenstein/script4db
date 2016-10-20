@@ -68,7 +68,7 @@ namespace script4db.Connections
             }
             catch (Exception ex)
             {
-                string msg = String.Format("By open connection error '{0}'", ex.Message);
+                string msg = String.Format("By open connection '{0}'", ex.Message);
                 this.LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
                 result = -1;
             }
