@@ -8,9 +8,11 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using script4db.Connections;
+using script4db.ScriptProcessors;
 
 namespace script4db
 {
@@ -33,7 +35,7 @@ namespace script4db
         string initialDirectory = Environment.SpecialFolder.Desktop.ToString();
         //string initialDirectory = System.AppDomain.CurrentDomain.BaseDirectory;
         Parser parser;
-        BackgroundWorker worker = new BackgroundWorker();
+        BackgroundWorker worker;
 
         Logs Logs;
 
@@ -43,6 +45,11 @@ namespace script4db
 
             this.MinimumSize = new Size(this.Width, this.Height);
             this.Logs = new Logs(this.richTextBoxLogs);
+
+            this.worker = new BackgroundWorker();
+            this.worker.ProgressChanged += Bw_ProgressChanged;
+            this.worker.WorkerSupportsCancellation = true;
+            this.worker.WorkerReportsProgress = true;
 
             RefreshControls(appStatuses.Init);
         }
@@ -238,10 +245,7 @@ namespace script4db
 
             worker.DoWork += Bw_DoWorkCheckConnection;
 
-            worker.ProgressChanged += Bw_ProgressChanged;
             worker.RunWorkerCompleted += Bw_RunWorkerCheckCompleted;
-            worker.WorkerSupportsCancellation = true;
-            worker.WorkerReportsProgress = true;
             worker.RunWorkerAsync();
         }
 
@@ -254,14 +258,13 @@ namespace script4db
 
             foreach (string connString in parser.ConnectionsStrings())
             {
-                // User send Cancel ?
+                // User sended Cancel ?
                 if (worker.CancellationPending == true)
                 {
                     workerMsgs.Add(new LogMessage(LogMessageTypes.Warning, "Check Connection", "Aborted by user"));
                     e.Result = new WorkerResult(WorkerResultStatuses.Cancel, workerMsgs);
                     return;
                 }
-
                 // Do next step of Work
                 worker.ReportProgress(progress);
                 Connection connection = new Connection(connString);
@@ -289,8 +292,13 @@ namespace script4db
 
         private void Bw_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            statusLabel3.Text = String.Format("{0,3} %", e.ProgressPercentage);
-            progressBar1.Value = e.ProgressPercentage;
+            this.ProgressBar(e.ProgressPercentage);
+        }
+
+        private void ProgressBar(int value)
+        {
+            progressBar1.Value = value;
+            statusLabel3.Text = String.Format("{0,3} %", value);
         }
 
         private void Bw_RunWorkerCheckCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -311,8 +319,9 @@ namespace script4db
                             RefreshControls(appStatuses.Cancel);
                             break;
                         case WorkerResultStatuses.Success:
+                            worker.DoWork -= Bw_DoWorkCheckConnection;
+                            worker.RunWorkerCompleted -= Bw_RunWorkerCheckCompleted;
                             RunScriptCommand();
-                            //RefreshControls(appStatuses.Finish);
                             break;
                         case WorkerResultStatuses.Error:
                         default:
@@ -331,22 +340,75 @@ namespace script4db
         private void RunScriptCommand()
         {
             RefreshControls(appStatuses.Run);
-            statusLabel2.Text = String.Format("Run Script command ({0})", parser.ConnectionsStrings().Count);
+            statusLabel2.Text = String.Format("Run Script command ({0})", parser.Commands().Count);
+            this.ProgressBar(0);
 
-            worker.DoWork += Bw_DoWorkScriptcommand;
-
-            worker.ProgressChanged += Bw_ProgressChanged;
+            worker.DoWork += Bw_DoWorkScriptCommand;
             worker.RunWorkerCompleted += Bw_RunWorkerScriptCompleted;
-            worker.WorkerSupportsCancellation = true;
-            worker.WorkerReportsProgress = true;
             worker.RunWorkerAsync();
         }
-        private void Bw_DoWorkScriptcommand(object sender, DoWorkEventArgs e)
+
+        private void Bw_DoWorkScriptCommand(object sender, DoWorkEventArgs e)
         {
+            ArrayList workerMsgs = new ArrayList();
+            int count = parser.Commands().Count;
+            int progressStep = 100 / count;
+            int progress = progressStep / 2;
+
+            foreach (Block command in parser.Commands())
+            {
+                // User sended Cancel ?
+                if (worker.CancellationPending == true)
+                {
+                    workerMsgs.Add(new LogMessage(LogMessageTypes.Warning, "Run Script command", "Aborted by user"));
+                    e.Result = new WorkerResult(WorkerResultStatuses.Cancel, workerMsgs);
+                    return;
+                }
+                // Do next step of Work
+                worker.ReportProgress(progress);
+                // TODO Run command here
+                Thread.Sleep(500);
+                progress += progressStep;
+            }
+
+            string msg = String.Format("Success run {0} {1}", count, "script command" + (count > 1 ? "s" : ""));
+            workerMsgs.Add(new LogMessage(LogMessageTypes.Info, "Run Script command", msg));
+            e.Result = new WorkerResult(WorkerResultStatuses.Success, workerMsgs);
         }
 
         private void Bw_RunWorkerScriptCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            if (e.Error == null)
+            {
+                if (e.Cancelled)
+                {
+                    RefreshControls(appStatuses.Cancel);
+                }
+                else
+                {
+                    WorkerResult result = e.Result as WorkerResult;
+                    foreach (LogMessage logMsg in result.LogMsgs) this.Logs.AppendMessage(logMsg);
+                    switch (result.Status)
+                    {
+                        case WorkerResultStatuses.Cancel:
+                            RefreshControls(appStatuses.Cancel);
+                            break;
+                        case WorkerResultStatuses.Success:
+                            worker.DoWork -= Bw_DoWorkScriptCommand;
+                            RefreshControls(appStatuses.Finish);
+                            break;
+                        case WorkerResultStatuses.Error:
+                        default:
+                            RefreshControls(appStatuses.Error);
+                            break;
+                    }
+                }
+            }
+            else
+            {
+                LogMessage logMsg = new LogMessage(LogMessageTypes.Error, "Worker", e.Error.ToString());
+                this.Logs.AppendMessage(logMsg);
+            }
         }
     }
 }

@@ -167,9 +167,9 @@ namespace script4db
             return this.interpreter.ScriptProcessor.ConnectionsStrings();
         }
 
-        public void CommandBloks()
+        public ArrayList Commands()
         {
-            //this.interpreter.ScriptProcessor.Blocks.BlocksGroup.G;
+            return this.interpreter.ScriptProcessor.Blocks.BlocksGroup[BlockNames.command];
         }
     }
 }
