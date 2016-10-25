@@ -346,8 +346,7 @@ namespace script4db
 
         private void RunScriptCommand()
         {
-            RefreshControls(appStatuses.Run);
-            statusLabel2.Text = String.Format("Run Script command ({0})", parser.Commands().Count);
+            statusLabel2.Text = String.Format("Run Script commands ({0})", parser.Commands().Count);
             this.ProgressBar(0);
 
             worker.DoWork += Bw_DoWorkScriptCommand;
