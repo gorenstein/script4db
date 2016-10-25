@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace script4db.ScriptProcessors
 {
@@ -13,5 +14,6 @@ namespace script4db.ScriptProcessors
         Blocks Blocks { get; }
         ArrayList LogMessages { get; }
         ArrayList ConnectionsStrings();
+        void FillRichTextBox(RichTextBox richTextBox);
     }
 }

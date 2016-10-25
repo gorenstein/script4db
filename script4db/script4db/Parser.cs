@@ -49,6 +49,11 @@ namespace script4db
             }
         }
 
+        public void FillRichTextBox(RichTextBox richTextBox)
+        {
+            this.interpreter.FillRichTextBox(richTextBox);
+        }
+
         public bool LoadFile(string fileForParce)
         {
             this.Clear();
@@ -70,11 +75,11 @@ namespace script4db
             }
         }
 
-        public void RefreshBlocksTree(TreeView treeView)
+        public void FillBlocksTree(TreeView treeView)
         {
             treeView.BeginUpdate();
             treeView.Nodes.Clear();
-            TreeNode rootNode = new TreeNode("script");
+            TreeNode rootNode = new TreeNode("Script Blocks");
             rootNode.NodeFont = new Font("Arial", 11, FontStyle.Regular);
 
             foreach (var item in this.interpreter.ScriptProcessor.Blocks.BlocksGroup)
@@ -86,6 +91,9 @@ namespace script4db
 
                 TreeNode childNode = new TreeNode(item.Key.ToString() + " (" + itemValueCount.ToString() + countEm + ")");
                 childNode.NodeFont = new Font("Arial", 10, FontStyle.Bold);
+                if (item.Key.ToString() == "constants") childNode.ForeColor = Color.SteelBlue;
+                else childNode.ForeColor = Color.SlateBlue;
+
                 this.AddSubNodes(childNode, item.Value);
 
                 rootNode.Nodes.Add(childNode);

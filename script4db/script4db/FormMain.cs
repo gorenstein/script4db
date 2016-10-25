@@ -108,8 +108,9 @@ namespace script4db
                 this.parser = new Parser(openFileDialog.FileName);
 
                 // Show Result
-                parser.RefreshBlocksTree(this.treeViewScriptBlocks);
-                this.richTextBoxRaw.AppendText(parser.TextRaw);
+                parser.FillBlocksTree(this.treeViewScriptBlocks);
+                parser.FillRichTextBox(this.richTextBoxRaw);
+
                 foreach (LogMessage logMsg in parser.LogMessages) this.Logs.AppendMessage(logMsg);
 
                 if (parser.CurrentStatus == ParserStatuses.ParseSuccesse)
@@ -176,7 +177,7 @@ namespace script4db
                     buttonRun.Enabled = true;
                     buttonExit.Enabled = true;
                     statusLabel2.Text = "Click 'Run' to start srcript.";
-                    this.tabControl1.SelectTab(this.tabPageTree);
+                    //this.tabControl1.SelectTab(this.tabPageTree);
                     break;
                 case appStatuses.Run:
                     buttonPauseContinue.Enabled = true;

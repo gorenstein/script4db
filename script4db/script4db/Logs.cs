@@ -40,5 +40,15 @@ namespace script4db
             box.AppendText(text);
             box.SelectionColor = box.ForeColor;
         }
+        public static void AppendText(this RichTextBox box, string text, Color color, Font font)
+        {
+            box.SelectionStart = box.TextLength;
+            box.SelectionLength = 0;
+
+            box.SelectionColor = color;
+            box.SelectionFont = font;
+            box.AppendText(text);
+            box.SelectionColor = box.ForeColor;
+        }
     }
 }
