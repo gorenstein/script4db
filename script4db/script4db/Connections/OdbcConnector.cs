@@ -34,9 +34,9 @@ namespace script4db.Connections
         }
 
         //OdbcDataReader myReader = myCommand.ExecuteReader();
-        public int ExecuteSQL(string sqlText)
+        public bool ExecuteSQL(string sqlText, LogMessageTypes executeErrorLevel = LogMessageTypes.Error)
         {
-            int result = -42;
+            bool result;
 
             OdbcConnection conn = new OdbcConnection();
             conn.ConnectionString = connString;
@@ -44,7 +44,7 @@ namespace script4db.Connections
             try
             {
                 conn.Open();
-                if (String.IsNullOrWhiteSpace(sqlText)) result = 0;
+                if (String.IsNullOrWhiteSpace(sqlText)) result = true;
                 else
                 {
                     try
@@ -60,9 +60,9 @@ namespace script4db.Connections
                                           "Native: " + odbcEx.Errors[i].NativeError.ToString() + " :: " +
                                           "Source: " + odbcEx.Errors[i].Source + " :: " +
                                           "SQL: " + odbcEx.Errors[i].SQLState;
-                            this.LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
+                            this.LogMessages.Add(new LogMessage(executeErrorLevel, this.GetType().Name, msg));
                         }
-                        result = -2;
+                        result = false;
                     }
                 }
             }
@@ -70,7 +70,7 @@ namespace script4db.Connections
             {
                 string msg = String.Format("By open connection '{0}'", ex.Message);
                 this.LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
-                result = -1;
+                result = false;
             }
             finally
             {
@@ -80,9 +80,9 @@ namespace script4db.Connections
             return result;
         }
 
-        private int ExecuteQuery(string sqlText, OdbcConnection conn)
+        private bool ExecuteQuery(string sqlText, OdbcConnection conn)
         {
-            int result;
+            bool result;
             sqlText = sqlText.TrimStart();
             string cmdName = sqlText.Substring(0, sqlText.IndexOf(" ")).ToUpper();
             OdbcCommand command = new OdbcCommand(sqlText, conn);
@@ -91,20 +91,20 @@ namespace script4db.Connections
             {
                 this.dataReader = command.ExecuteReader();
                 this.affected = dataReader.RecordsAffected;
-                result = 0;
+                result = true;
             }
             else if (this.nonQueryCmdNames.Contains(cmdName))
             {
                 // DROP, CREATE  => return -1
                 // INSERT, UPDATE, DELETE => return count
                 this.affected = Math.Abs(command.ExecuteNonQuery());
-                result = 0;
+                result = true;
             }
             else
             {
                 string msg = String.Format("Not supported sql command '{0}'", cmdName);
                 this.LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
-                result = -1;
+                result = false;
             }
 
             return result;
@@ -112,8 +112,7 @@ namespace script4db.Connections
 
         public bool IsLive()
         {
-            string sql = "";
-            if (ExecuteSQL(sql) >= 0) return true;
+            if (ExecuteSQL("")) return true;
             else
             {
                 string msg = String.Format("Can't connected to '{0}'", connString);

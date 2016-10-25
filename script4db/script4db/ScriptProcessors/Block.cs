@@ -27,6 +27,63 @@ namespace script4db.ScriptProcessors
             this.name = _name;
         }
 
+        public bool Run()
+        {
+            if (this.name != BlockNames.command)
+            {
+                string msg = String.Format("Command '{0}' can't be run", this.name);
+                this.LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
+                return false;
+            }
+
+            bool result;
+            LogMessageTypes executeErrorLevel;
+
+            if ("true" == this.parameters["onErrorContinue"]) executeErrorLevel = LogMessageTypes.Warning;
+            else executeErrorLevel = LogMessageTypes.Error;
+
+            switch (this.parameters["type"])
+            {
+                case "simple":
+                    result = RunSimlpe(executeErrorLevel);
+                    break;
+                case "exportTable":
+                    result = RunExportTable(executeErrorLevel);
+                    break;
+                default:
+                    string msg = String.Format("Value for Command parameter type='{0}' is not supported", this.parameters["type"]);
+                    this.LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
+                    return false;
+            }
+
+            if ("true" == this.parameters["onErrorContinue"]) return true;
+            else return result;
+        }
+
+        private bool RunSimlpe(LogMessageTypes executeErrorLevel)
+        {
+            string sql = this.parameters["sql"];
+            string rawConnString = this.parameters["connection"];
+            Connection connection = new Connection(rawConnString);
+
+            if (connection.ExecuteSQL(sql, executeErrorLevel))
+            {
+                string msg = String.Format("Affected '{0}' for '{1}'", connection.Connector.Affected, sql);
+                this.LogMessages.Add(new LogMessage(LogMessageTypes.Info, this.GetType().Name, msg));
+                return true;
+            }
+            else
+            {
+                foreach (LogMessage logMsg in connection.LogMessages) this.LogMessages.Add(logMsg);
+                return false;
+            }
+        }
+
+        private bool RunExportTable(LogMessageTypes executeErrorLevel)
+        {
+            return false;
+        }
+
         public bool Check()
         {
             if (this.name == BlockNames.constants) return true;

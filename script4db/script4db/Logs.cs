@@ -25,6 +25,7 @@ namespace script4db
             this.RichTextBox.AppendText(logMsg.TypeNameNormalized, logMsg.Color);
             this.RichTextBox.AppendText(" | ");
             this.RichTextBox.AppendText(logMsg.Text);
+            this.RichTextBox.AppendText(" (" + logMsg.Source + ")", Color.DarkGray);
             this.RichTextBox.AppendText(Environment.NewLine);
         }
     }

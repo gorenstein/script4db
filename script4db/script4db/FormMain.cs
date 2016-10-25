@@ -364,16 +364,25 @@ namespace script4db
                     e.Result = new WorkerResult(WorkerResultStatuses.Cancel, workerMsgs);
                     return;
                 }
+
                 // Do next step of Work
                 worker.ReportProgress(progress);
-                // TODO Run command here
-                Thread.Sleep(500);
+                bool success = command.Run();
+                foreach (LogMessage logMsg in command.LogMessages) workerMsgs.Add(logMsg);
+
+                if (!success)
+                {
+                    workerMsgs.Add(new LogMessage(LogMessageTypes.Warning, "Worker", "Error by Run command"));
+                    e.Result = new WorkerResult(WorkerResultStatuses.Error, workerMsgs);
+                    return;
+                }
                 progress += progressStep;
             }
 
-            string msg = String.Format("Success run {0} {1}", count, "script command" + (count > 1 ? "s" : ""));
-            workerMsgs.Add(new LogMessage(LogMessageTypes.Info, "Run Script command", msg));
+            string msg = String.Format("Success run {0} {1}", count, "Worker" + (count > 1 ? "s" : ""));
+            workerMsgs.Add(new LogMessage(LogMessageTypes.Info, "Worker", msg));
             e.Result = new WorkerResult(WorkerResultStatuses.Success, workerMsgs);
+            return;
         }
 
         private void Bw_RunWorkerScriptCompleted(object sender, RunWorkerCompletedEventArgs e)
