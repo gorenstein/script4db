@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -257,6 +258,9 @@ namespace script4db
             int progressStep = 100 / connCount;
             int progress = progressStep / 2;
 
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+
             foreach (string connString in parser.ConnectionsStrings())
             {
                 // User sended Cancel ?
@@ -286,7 +290,9 @@ namespace script4db
                 progress += progressStep;
             }
 
-            string msg = String.Format("Success checked {0} {1}", connCount, "connection" + (connCount > 1 ? "s" : ""));
+            sw.Stop();
+
+            string msg = String.Format("Elapsed {0:0.000}s : Success checked {1} {2}", sw.Elapsed.TotalSeconds, connCount, "connection" + (connCount > 1 ? "s" : ""));
             workerMsgs.Add(new LogMessage(LogMessageTypes.Info, "Check Connection", msg));
             e.Result = new WorkerResult(WorkerResultStatuses.Success, workerMsgs);
         }
@@ -380,7 +386,7 @@ namespace script4db
                 progress += progressStep;
             }
 
-            string msg = String.Format("Success run {0} {1}", count, "Worker" + (count > 1 ? "s" : ""));
+            string msg = String.Format("Success run {0} script command{1}", count, (count > 1 ? "s" : ""));
             workerMsgs.Add(new LogMessage(LogMessageTypes.Info, "Worker", msg));
             e.Result = new WorkerResult(WorkerResultStatuses.Success, workerMsgs);
             return;

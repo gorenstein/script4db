@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 using script4db.Connections;
 
 namespace script4db.ScriptProcessors
@@ -66,9 +67,13 @@ namespace script4db.ScriptProcessors
             string rawConnString = this.parameters["connection"];
             Connection connection = new Connection(rawConnString);
 
-            if (connection.ExecuteSQL(sql, executeErrorLevel))
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            bool success = connection.ExecuteSQL(sql, executeErrorLevel);
+            sw.Stop();
+            if (success)
             {
-                string msg = String.Format("Affected '{0}' for '{1}'", connection.Connector.Affected, sql);
+                string msg = String.Format("Elapsed {0:0.000}s : Affected {1} : '{2}'", sw.Elapsed.TotalSeconds, connection.Connector.Affected, sql);
                 this.LogMessages.Add(new LogMessage(LogMessageTypes.Info, this.GetType().Name, msg));
                 return true;
             }
