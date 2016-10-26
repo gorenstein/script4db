@@ -16,6 +16,7 @@ namespace script4db.Connections
         private string login;
         private string password;
         private string connString;
+        private OdbcConnection conn;
         private OdbcDataReader dataReader;
         private int affected;
         private string[] nonQueryCmdNames = new string[] { "DROP", "CREATE", "INSERT", "UPDATE", "DELETE" };
@@ -34,22 +35,19 @@ namespace script4db.Connections
         }
 
         //OdbcDataReader myReader = myCommand.ExecuteReader();
-        public bool ExecuteSQL(string sqlText, LogMessageTypes executeErrorLevel = LogMessageTypes.Error)
+        public bool ExecuteSQL(string sqlText, LogMessageTypes executeErrorLevel = LogMessageTypes.Error, bool keepAlive = false)
         {
             bool result;
 
-            OdbcConnection conn = new OdbcConnection();
-            conn.ConnectionString = connString;
-
             try
             {
-                conn.Open();
-                if (String.IsNullOrWhiteSpace(sqlText)) result = true;
+                DbOpenIfClosed();
+                if (String.IsNullOrWhiteSpace(sqlText)) result = true; // Only testing Live connection 
                 else
                 {
                     try
                     {
-                        result = this.ExecuteQuery(sqlText, conn);
+                        result = this.ExecuteQuery(sqlText, Conn);
                     }
                     catch (OdbcException odbcEx)
                     {
@@ -74,18 +72,18 @@ namespace script4db.Connections
             }
             finally
             {
-                conn.Close();
+                if (!keepAlive) DbCloseIfOpen();
             }
 
             return result;
         }
 
-        private bool ExecuteQuery(string sqlText, OdbcConnection conn)
+        private bool ExecuteQuery(string sqlText, OdbcConnection Conn)
         {
             bool result;
             sqlText = sqlText.TrimStart();
             string cmdName = sqlText.Substring(0, sqlText.IndexOf(" ")).ToUpper();
-            OdbcCommand command = new OdbcCommand(sqlText, conn);
+            OdbcCommand command = new OdbcCommand(sqlText, Conn);
 
             if (cmdName == "SELECT")
             {
@@ -121,6 +119,16 @@ namespace script4db.Connections
             }
         }
 
+        private void DbOpenIfClosed()
+        {
+            if (Conn.State == ConnectionState.Closed) Conn.Open();
+        }
+
+        public void DbCloseIfOpen()
+        {
+            if (Conn.State != ConnectionState.Closed) Conn.Close();
+        }
+
         public ArrayList LogMessages
         {
             get { return logMessages; }
@@ -134,6 +142,20 @@ namespace script4db.Connections
         public int Affected
         {
             get { return affected; }
+        }
+
+        private OdbcConnection Conn
+        {
+            get
+            {
+                if (null == this.conn)
+                {
+                    this.conn = new OdbcConnection();
+                    this.conn.ConnectionString = this.connString;
+
+                }
+                return this.conn;
+            }
         }
     }
 }

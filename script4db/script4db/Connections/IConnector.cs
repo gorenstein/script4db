@@ -13,6 +13,7 @@ namespace script4db.Connections
         int Affected { get; }
         ArrayList LogMessages { get; }
         bool IsLive();
-        bool ExecuteSQL(string sql, LogMessageTypes executeErrorLevel);
+        void DbCloseIfOpen();
+        bool ExecuteSQL(string sql, LogMessageTypes executeErrorLevel, bool keepAlive);
     }
 }

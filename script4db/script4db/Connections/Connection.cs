@@ -35,9 +35,9 @@ namespace script4db.Connections
             }
         }
 
-        public bool ExecuteSQL(string sqlText, LogMessageTypes executeErrorLevel)
+        public bool ExecuteSQL(string sqlText, LogMessageTypes executeErrorLevel, bool keepAlive = false)
         {
-            if (Connector.ExecuteSQL(sqlText, executeErrorLevel)) return true;
+            if (Connector.ExecuteSQL(sqlText, executeErrorLevel, keepAlive)) return true;
             else
             {
                 foreach (LogMessage logMsg in Connector.LogMessages) this.LogMessages.Add(logMsg);
