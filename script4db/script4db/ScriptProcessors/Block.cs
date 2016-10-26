@@ -86,6 +86,15 @@ namespace script4db.ScriptProcessors
 
         private bool RunExportTable(LogMessageTypes executeErrorLevel)
         {
+            // Open Connection -> Source
+            // Open Connection -> Target
+
+            // Copy source Table structure
+            // Create target Table with copied source Table structure
+
+            // Select form source
+
+            // Insert to target
             return false;
         }
 
