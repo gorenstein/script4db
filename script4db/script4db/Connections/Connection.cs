@@ -40,7 +40,7 @@ namespace script4db.Connections
             if (Connector.ExecuteSQL(sqlText, executeErrorLevel)) return true;
             else
             {
-                foreach (LogMessage logMsg in connector.LogMessages) this.LogMessages.Add(logMsg);
+                foreach (LogMessage logMsg in Connector.LogMessages) this.LogMessages.Add(logMsg);
                 return false;
             }
         }
@@ -49,7 +49,7 @@ namespace script4db.Connections
         {
             if (!this.Connector.IsLive())
             {
-                foreach (LogMessage logMsg in connector.LogMessages) this.LogMessages.Add(logMsg);
+                foreach (LogMessage logMsg in Connector.LogMessages) this.LogMessages.Add(logMsg);
                 return false;
             }
 
@@ -94,7 +94,7 @@ namespace script4db.Connections
                     switch (this.type)
                     {
                         case ConnTypes.ODBC:
-                            connector = new OdbcConnector(this.source, this.login, this.password);
+                            this.connector = new OdbcConnector(this.source, this.login, this.password);
                             break;
                         case ConnTypes.MySQL:
                         case ConnTypes.OleAccess:
