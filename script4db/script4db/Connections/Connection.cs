@@ -43,8 +43,10 @@ namespace script4db.Connections
 
             if (string.IsNullOrWhiteSpace(tableFields))
             {
-                foreach (LogMessage logMsg in Connector.LogMessages) this.LogMessages.Add(logMsg);
                 sql = "";
+                foreach (LogMessage logMsg in Connector.LogMessages) this.LogMessages.Add(logMsg);
+                string msg = string.Format("Can't determine structure of table '{0}' ", tableSource);
+                this.LogMessages.Add(new LogMessage(connector.ErrorLevel, this.GetType().Name, msg));
             }
             else
             {

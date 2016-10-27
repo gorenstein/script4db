@@ -54,7 +54,7 @@ namespace script4db.Connections
             try
             {
                 DbOpenIfClosed();
-                if (String.IsNullOrWhiteSpace(sqlText)) result = true; // Only testing Live connection 
+                if (string.IsNullOrWhiteSpace(sqlText)) result = true; // Only testing Live connection 
                 else
                 {
                     try
@@ -63,24 +63,16 @@ namespace script4db.Connections
                     }
                     catch (OdbcException odbcEx)
                     {
-                        for (int i = 0; i < odbcEx.Errors.Count; i++)
-                        {
-                            string msg = "By exicute SQL ERROR #" + i + " " +
-                                          "Message: " + odbcEx.Errors[i].Message + " :: " +
-                                          "Native: " + odbcEx.Errors[i].NativeError.ToString() + " :: " +
-                                          "Source: " + odbcEx.Errors[i].Source + " :: " +
-                                          "SQL: " + odbcEx.Errors[i].SQLState;
-                            this.LogMessages.Add(new LogMessage(ErrorLevel, this.GetType().Name, msg));
-                        }
                         result = false;
+                        AddToLogOdbcError(odbcEx);
                     }
                 }
             }
             catch (Exception ex)
             {
-                string msg = String.Format("By open connection '{0}'", ex.Message);
-                this.LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
                 result = false;
+                string msg = String.Format("By open connection '{0}'", ex.Message);
+                this.LogMessages.Add(new LogMessage(errorLevel, this.GetType().Name, msg));
             }
             finally
             {
@@ -112,8 +104,8 @@ namespace script4db.Connections
             }
             else
             {
-                string msg = String.Format("Not supported sql command '{0}'", cmdName);
-                this.LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
+                string msg = string.Format("Not supported sql command '{0}'", cmdName);
+                this.LogMessages.Add(new LogMessage(errorLevel, this.GetType().Name, msg));
                 result = false;
             }
 
@@ -125,8 +117,8 @@ namespace script4db.Connections
             if (ExecuteSQL("")) return true;
             else
             {
-                string msg = String.Format("Can't connected to '{0}'", connString);
-                this.LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
+                string msg = string.Format("Can't connected to '{0}'", connString);
+                this.LogMessages.Add(new LogMessage(errorLevel, this.GetType().Name, msg));
                 return false;
             }
         }
@@ -183,9 +175,46 @@ namespace script4db.Connections
 
         public string GetTableFields(string tableName)
         {
-            string msg = String.Format("Can't determine structure of table '{0}' ", tableName);
-            this.LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
-            return "";
+            string tableFields = "";
+
+            try
+            {
+                DbOpenIfClosed();
+                try
+                {
+                    // TODO tableFields
+                }
+                catch (OdbcException odbcEx)
+                {
+                    tableFields = "";
+                    AddToLogOdbcError(odbcEx);
+                }
+            }
+            catch (Exception ex)
+            {
+                tableFields = "";
+                string msg = string.Format("By open connection '{0}'", ex.Message);
+                this.LogMessages.Add(new LogMessage(errorLevel, this.GetType().Name, msg));
+            }
+            finally
+            {
+                if (!KeepAlive) DbCloseIfOpen();
+            }
+
+            return tableFields;
+        }
+
+        private void AddToLogOdbcError(OdbcException odbcEx)
+        {
+            for (int i = 0; i < odbcEx.Errors.Count; i++)
+            {
+                string msg = "By exicute SQL ERROR #" + i + " " +
+                              "Message: " + odbcEx.Errors[i].Message + " :: " +
+                              "Native: " + odbcEx.Errors[i].NativeError.ToString() + " :: " +
+                              "Source: " + odbcEx.Errors[i].Source + " :: " +
+                              "SQL: " + odbcEx.Errors[i].SQLState;
+                this.LogMessages.Add(new LogMessage(ErrorLevel, this.GetType().Name, msg));
+            }
         }
     }
 }
