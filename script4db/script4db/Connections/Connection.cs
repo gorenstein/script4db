@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 
 namespace script4db.Connections
 {
-    enum ConnTypes { ODBC, MySQL, OleAccess };
+    //enum ConnTypes { ODBC, ODBC_String, MySQL, OleAccess };
+    enum ConnTypes { ODBC, ODBC_String };
 
     class Connection
     {
@@ -35,9 +36,27 @@ namespace script4db.Connections
             }
         }
 
-        public bool ExecuteSQL(string sqlText, LogMessageTypes executeErrorLevel, bool keepAlive = false)
+        public string GetCreateTableSql(string tableSource, string tableTarget)
         {
-            if (Connector.ExecuteSQL(sqlText, executeErrorLevel, keepAlive)) return true;
+            string sql;
+            string tableFields = connector.GetTableFields(tableSource);
+
+            if (string.IsNullOrWhiteSpace(tableFields))
+            {
+                foreach (LogMessage logMsg in Connector.LogMessages) this.LogMessages.Add(logMsg);
+                sql = "";
+            }
+            else
+            {
+                sql = string.Format("CREATE TABLE {0} ({1});", tableTarget, tableFields);
+            }
+
+            return sql;
+        }
+
+        public bool ExecuteSQL(string sqlText)
+        {
+            if (Connector.ExecuteSQL(sqlText)) return true;
             else
             {
                 foreach (LogMessage logMsg in Connector.LogMessages) this.LogMessages.Add(logMsg);
@@ -96,8 +115,11 @@ namespace script4db.Connections
                         case ConnTypes.ODBC:
                             this.connector = new OdbcConnector(this.source, this.login, this.password);
                             break;
-                        case ConnTypes.MySQL:
-                        case ConnTypes.OleAccess:
+                        case ConnTypes.ODBC_String:
+                            this.connector = new OdbcConnector(this.source);
+                            break;
+                        //case ConnTypes.MySQL:
+                        //case ConnTypes.OleAccess:
                         default:
                             throw new System.ArgumentException("It's must be never reachable", this.GetType().Name);
                     }

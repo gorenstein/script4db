@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Data;
+using System.Data.SqlClient;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using script4db.Connections;
@@ -69,7 +71,7 @@ namespace script4db.ScriptProcessors
 
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            bool success = connection.ExecuteSQL(sql, executeErrorLevel);
+            bool success = connection.ExecuteSQL(sql);
             sw.Stop();
             if (success)
             {
@@ -84,19 +86,115 @@ namespace script4db.ScriptProcessors
             }
         }
 
-        private bool RunExportTable(LogMessageTypes executeErrorLevel)
+        private bool RunExportTable(LogMessageTypes errorLevel)
         {
-            // Open Connection -> Source
-            // Open Connection -> Target
+            // Define Connections for Source & Target
+            Connection connSource = new Connection(this.parameters["connectionSource"]);
+            Connection connTarget = new Connection(this.parameters["connectionTarget"]);
+            connSource.Connector.KeepAlive = true;
+            connSource.Connector.ErrorLevel = errorLevel;
+            connTarget.Connector.KeepAlive = true;
+            connTarget.Connector.ErrorLevel = errorLevel;
 
-            // Copy source Table structure
-            // Create target Table with copied source Table structure
+            bool success;
+            string sql;
+
+            // Get Create Table sql string for table
+            sql = connSource.GetCreateTableSql(parameters["tableSource"], parameters["tableTarget"]);
+            if (string.IsNullOrWhiteSpace(sql))
+            {
+                foreach (LogMessage logMsg in connSource.LogMessages) this.LogMessages.Add(logMsg);
+                connSource.Connector.DbCloseIfOpen();
+                connTarget.Connector.DbCloseIfOpen();
+                return false;
+            }
+
+            // Create Target table as copy of Source table structure
+            success = connTarget.ExecuteSQL(sql);
+            if (!success)
+            {
+                foreach (LogMessage logMsg in connTarget.LogMessages) this.LogMessages.Add(logMsg);
+                connSource.Connector.DbCloseIfOpen();
+                connTarget.Connector.DbCloseIfOpen();
+                return false;
+            }
 
             // Select form source
 
             // Insert to target
-            return false;
+            return true;
         }
+
+        //private void Test2()
+        //{
+        //    SqlDataAdapter adapter1 = new SqlDataAdapter("select * from Table1", sqlConnectionString);
+        //}
+
+        //private void Test()
+        //{
+        //    //The connection strings needed: One for SQL and one for Access
+        //    String accessConnectionString = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\\...\\test.accdb;";
+        //    String sqlConnectionString = "Data Source=localhost\\SQLEXPRESS;Initial Catalog=Your_Catalog;Integrated Security=True";
+
+        //    //Make adapters for each table we want to export
+        //    SqlDataAdapter adapter1 = new SqlDataAdapter("select * from Table1", sqlConnectionString);
+        //    SqlDataAdapter adapter2 = new SqlDataAdapter("select * from Table2", sqlConnectionString);
+
+        //    //Fills the data set with data from the SQL database
+        //    DataSet dataSet = new DataSet();
+        //    adapter1.Fill(dataSet, "Table1");
+        //    adapter2.Fill(dataSet, "Table2");
+
+        //    //Create an empty Access file that we will fill with data from the data set
+        //    ADOX.Catalog catalog = new ADOX.Catalog();
+        //    catalog.Create(accessConnectionString);
+
+        //    //Create an Access connection and a command that we'll use
+        //    OleDbConnection accessConnection = new OleDbConnection(accessConnectionString);
+        //    OleDbCommand command = new OleDbCommand();
+        //    command.Connection = accessConnection;
+        //    command.CommandType = CommandType.Text;
+        //    accessConnection.Open();
+
+        //    //This loop creates the structure of the database
+        //    foreach (DataTable table in dataSet.Tables)
+        //    {
+        //        String columnsCommandText = "(";
+        //        foreach (DataColumn column in table.Columns)
+        //        {
+        //            String columnName = column.ColumnName;
+        //            String dataTypeName = column.DataType.Name;
+        //            String sqlDataTypeName = getSqlDataTypeName(dataTypeName);
+        //            columnsCommandText += "[" + columnName + "] " + sqlDataTypeName + ",";
+        //        }
+        //        columnsCommandText = columnsCommandText.Remove(columnsCommandText.Length - 1);
+        //        columnsCommandText += ")";
+
+        //        command.CommandText = "CREATE TABLE " + table.TableName + columnsCommandText;
+
+        //        command.ExecuteNonQuery();
+        //    }
+
+        //    //This loop fills the database with all information
+        //    foreach (DataTable table in dataSet.Tables)
+        //    {
+        //        foreach (DataRow row in table.Rows)
+        //        {
+        //            String commandText = "INSERT INTO " + table.TableName + " VALUES (";
+        //            foreach (var item in row.ItemArray)
+        //            {
+        //                commandText += "'" + item.ToString() + "',";
+        //            }
+        //            commandText = commandText.Remove(commandText.Length - 1);
+        //            commandText += ")";
+
+        //            command.CommandText = commandText;
+        //            command.ExecuteNonQuery();
+        //        }
+        //    }
+
+        //    accessConnection.Close();
+        //}
 
         public bool Check()
         {

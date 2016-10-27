@@ -21,21 +21,33 @@ namespace script4db.Connections
         private int affected;
         private string[] nonQueryCmdNames = new string[] { "DROP", "CREATE", "INSERT", "UPDATE", "DELETE" };
         private ArrayList logMessages = new ArrayList();
+        private bool keepAlive;
+        private LogMessageTypes errorLevel;
 
-        public OdbcConnector(string _source, string _login, string _password)
+        public OdbcConnector(string _source)
         {
             source = _source;
-            login = _login;
+            keepAlive = false;
+            ErrorLevel = LogMessageTypes.Error;
+
+            connString = _source;
+        }
+
+        public OdbcConnector(string _source, string _login, string _password)
+            : this(_source)
+        {
             password = _password;
-            connString = String.Format("DSN={0};", source);
-            if (!String.IsNullOrEmpty(login))
+            login = _login;
+
+            connString = string.Format("DSN={0};", source);
+            if (!string.IsNullOrEmpty(login))
             {
-                connString += String.Format(" UID={0}; PWD={1};", login, password);
+                connString += string.Format(" UID={0}; PWD={1};", login, password);
             }
         }
 
         //OdbcDataReader myReader = myCommand.ExecuteReader();
-        public bool ExecuteSQL(string sqlText, LogMessageTypes executeErrorLevel = LogMessageTypes.Error, bool keepAlive = false)
+        public bool ExecuteSQL(string sqlText)
         {
             bool result;
 
@@ -58,7 +70,7 @@ namespace script4db.Connections
                                           "Native: " + odbcEx.Errors[i].NativeError.ToString() + " :: " +
                                           "Source: " + odbcEx.Errors[i].Source + " :: " +
                                           "SQL: " + odbcEx.Errors[i].SQLState;
-                            this.LogMessages.Add(new LogMessage(executeErrorLevel, this.GetType().Name, msg));
+                            this.LogMessages.Add(new LogMessage(ErrorLevel, this.GetType().Name, msg));
                         }
                         result = false;
                     }
@@ -72,7 +84,7 @@ namespace script4db.Connections
             }
             finally
             {
-                if (!keepAlive) DbCloseIfOpen();
+                if (!KeepAlive) DbCloseIfOpen();
             }
 
             return result;
@@ -152,10 +164,28 @@ namespace script4db.Connections
                 {
                     this.conn = new OdbcConnection();
                     this.conn.ConnectionString = this.connString;
-
                 }
                 return this.conn;
             }
+        }
+
+        public bool KeepAlive
+        {
+            get { return keepAlive; }
+            set { keepAlive = value; }
+        }
+
+        public LogMessageTypes ErrorLevel
+        {
+            get { return errorLevel; }
+            set { errorLevel = value; }
+        }
+
+        public string GetTableFields(string tableName)
+        {
+            string msg = String.Format("Can't determine structure of table '{0}' ", tableName);
+            this.LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
+            return "";
         }
     }
 }

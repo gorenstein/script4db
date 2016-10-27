@@ -9,11 +9,13 @@ namespace script4db.Connections
 {
     interface IConnector
     {
-        OdbcDataReader DataReader { get; }
-        int Affected { get; }
-        ArrayList LogMessages { get; }
-        bool IsLive();
         void DbCloseIfOpen();
-        bool ExecuteSQL(string sql, LogMessageTypes executeErrorLevel, bool keepAlive);
+        bool KeepAlive { get; set; }
+        bool IsLive();
+        bool ExecuteSQL(string sql);
+        int Affected { get; }
+        string GetTableFields(string tableName);
+        LogMessageTypes ErrorLevel { get; set; }
+        ArrayList LogMessages { get; }
     }
 }
