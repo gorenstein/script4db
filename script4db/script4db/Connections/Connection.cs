@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace script4db.Connections
 {
     //enum ConnTypes { ODBC, ODBC_String, MySQL, OleAccess };
-    enum ConnTypes { ODBC, ODBC_String };
+    enum ConnTypes { ODBC, OdbcString };
 
     class Connection
     {
@@ -117,7 +117,7 @@ namespace script4db.Connections
                         case ConnTypes.ODBC:
                             this.connector = new OdbcConnector(this.source, this.login, this.password);
                             break;
-                        case ConnTypes.ODBC_String:
+                        case ConnTypes.OdbcString:
                             this.connector = new OdbcConnector(this.source);
                             break;
                         //case ConnTypes.MySQL:
