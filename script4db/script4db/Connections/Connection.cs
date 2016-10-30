@@ -36,6 +36,23 @@ namespace script4db.Connections
             }
         }
 
+        public int CountOfRecords(string tableName)
+        {
+            string sql = string.Format("SELECT COUNT(*) FROM {0}", tableName);
+            bool scalar = true;
+
+            connector.ExecuteSQL(sql, scalar);
+
+            if (connector.ScalarResult == null)
+            {
+                return 0;
+            }
+            else
+            {
+                return int.Parse(connector.ScalarResult);
+            }
+        }
+
         public string GetCreateTableSql(string tableSource, string tableTarget)
         {
             string sql;
@@ -56,9 +73,9 @@ namespace script4db.Connections
             return sql;
         }
 
-        public bool ExecuteSQL(string sqlText)
+        public bool ExecuteSQL(string sqlText, bool scalar = false)
         {
-            if (Connector.ExecuteSQL(sqlText)) return true;
+            if (Connector.ExecuteSQL(sqlText, scalar)) return true;
             else
             {
                 foreach (LogMessage logMsg in Connector.LogMessages) this.LogMessages.Add(logMsg);

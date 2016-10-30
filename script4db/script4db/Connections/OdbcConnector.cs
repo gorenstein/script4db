@@ -19,6 +19,7 @@ namespace script4db.Connections
         private OdbcConnection conn;
         private OdbcDataReader dataReader;
         private int affected;
+        private string scalarResult;
         private string[] nonQueryCmdNames = new string[] { "DROP", "CREATE", "INSERT", "UPDATE", "DELETE" };
         private ArrayList logMessages = new ArrayList();
         private bool keepAlive;
@@ -47,7 +48,7 @@ namespace script4db.Connections
         }
 
         //OdbcDataReader myReader = myCommand.ExecuteReader();
-        public bool ExecuteSQL(string sqlText)
+        public bool ExecuteSQL(string sqlText, bool scalar = false)
         {
             bool result;
 
@@ -59,7 +60,7 @@ namespace script4db.Connections
                 {
                     try
                     {
-                        result = this.ExecuteQuery(sqlText, Conn);
+                        result = this.ExecuteQuery(sqlText, Conn, scalar);
                     }
                     catch (OdbcException odbcEx)
                     {
@@ -82,7 +83,7 @@ namespace script4db.Connections
             return result;
         }
 
-        private bool ExecuteQuery(string sqlText, OdbcConnection Conn)
+        private bool ExecuteQuery(string sqlText, OdbcConnection Conn, bool scalar = false)
         {
             bool result;
             sqlText = sqlText.TrimStart();
@@ -91,8 +92,25 @@ namespace script4db.Connections
 
             if (cmdName == "SELECT")
             {
-                this.dataReader = command.ExecuteReader();
-                this.affected = dataReader.RecordsAffected;
+                if (scalar)
+                {
+                    var firstColumn = command.ExecuteScalar();
+                    if (firstColumn != null)
+                    {
+                        this.scalarResult = firstColumn.ToString();
+                        this.affected = 1;
+                    }
+                    else
+                    {
+                        this.scalarResult = null;
+                        this.affected = 0;
+                    }
+                }
+                else
+                {
+                    this.dataReader = command.ExecuteReader();
+                    this.affected = dataReader.RecordsAffected;
+                }
                 result = true;
             }
             else if (this.nonQueryCmdNames.Contains(cmdName))
@@ -171,6 +189,11 @@ namespace script4db.Connections
         {
             get { return errorLevel; }
             set { errorLevel = value; }
+        }
+
+        public string ScalarResult
+        {
+            get { return this.scalarResult; }
         }
 
         public string GetTableFields(string tableName)

@@ -98,9 +98,11 @@ namespace script4db.ScriptProcessors
 
             bool success;
             string sql;
+            string tableSource = parameters["tableSource"];
+            string tableTarget = parameters["tableTarget"];
 
             // Get Create Table sql string for table
-            sql = connSource.GetCreateTableSql(parameters["tableSource"], parameters["tableTarget"]);
+            sql = connSource.GetCreateTableSql(tableSource, tableTarget);
             Console.WriteLine(sql);
             if (string.IsNullOrWhiteSpace(sql))
             {
@@ -114,6 +116,8 @@ namespace script4db.ScriptProcessors
             success = connTarget.ExecuteSQL(sql);
             if (!success)
             {
+                string msg = String.Format("SQL: '{0}'", sql);
+                this.LogMessages.Add(new LogMessage(LogMessageTypes.Info, this.GetType().Name, msg));
                 foreach (LogMessage logMsg in connTarget.LogMessages) this.LogMessages.Add(logMsg);
                 connSource.Connector.DbCloseIfOpen();
                 connTarget.Connector.DbCloseIfOpen();
@@ -121,6 +125,12 @@ namespace script4db.ScriptProcessors
             }
 
             // Select form source
+            int recordCountSource;
+            connSource.CountOfRecords(tableSource);
+            recordCountSource = int.Parse(connSource.Connector.ScalarResult);
+            Console.WriteLine(
+                string.Format("Total {0} records for copy from table '{1}' to '{2}'",
+                                recordCountSource, tableSource, tableTarget));
 
             // Insert to target
             return true;

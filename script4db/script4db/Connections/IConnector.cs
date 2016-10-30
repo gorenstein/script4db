@@ -12,7 +12,8 @@ namespace script4db.Connections
         void DbCloseIfOpen();
         bool KeepAlive { get; set; }
         bool IsLive();
-        bool ExecuteSQL(string sql);
+        bool ExecuteSQL(string sql, bool scalar);
+        string ScalarResult { get; }
         int Affected { get; }
         string GetTableFields(string tableName);
         LogMessageTypes ErrorLevel { get; set; }
