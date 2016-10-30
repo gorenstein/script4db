@@ -182,7 +182,8 @@ namespace script4db.Connections
                 DbOpenIfClosed();
                 try
                 {
-                    // TODO tableFields
+                    OdbcReadTableStructure readTableStructure = new OdbcReadTableStructure(Conn, tableName);
+                    tableFields = readTableStructure.SkeletonCreate;
                 }
                 catch (OdbcException odbcEx)
                 {

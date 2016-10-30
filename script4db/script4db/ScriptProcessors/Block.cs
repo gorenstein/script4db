@@ -101,6 +101,7 @@ namespace script4db.ScriptProcessors
 
             // Get Create Table sql string for table
             sql = connSource.GetCreateTableSql(parameters["tableSource"], parameters["tableTarget"]);
+            Console.WriteLine(sql);
             if (string.IsNullOrWhiteSpace(sql))
             {
                 foreach (LogMessage logMsg in connSource.LogMessages) this.LogMessages.Add(logMsg);
