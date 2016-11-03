@@ -8,6 +8,16 @@ namespace script4db.Connections
 {
     class TableColumn
     {
+        private string[] stringFieldTypes =
+            new string[]
+            {
+                "CHAR", "VARCHAR",
+                "BINARY", "VARBINARY",
+                "BLOB", "TINYBLOB", "MEDIUMBLOB", "LONGBLOB",
+                "TEXT", "TINYTEXT", "MEDIUMTEXT", "LONGTEXT",
+                "ENUM", "SET", "JSON"
+            };
+
         private string _type;
         public string Name { get; set; }
         public int OrdinalPosition { get; set; }
@@ -21,19 +31,35 @@ namespace script4db.Connections
                 {
                     if (_type.Equals("integer")) { _type = "int"; }
                     if (_type.Equals("date")) { _type = "datetime"; }
-                    if (_type.Equals("varchar")) { _type = "nvarchar"; }
+                    //if (_type.Equals("varchar")) { _type = "nvarchar"; }
                 }
             }
         }
         public string ColumnSize { get; set; }
         public string Nullable { get; set; }
 
-        //override 
-        public string GetSqlDefinition()
+        public string GetFieldSetValuePlaceholder()
+        {
+            // INSERT INTO TableName SET col_string=":col_string", col_num=:col_num 
+            string sqlSyntax = string.Format("");
+
+            if (stringFieldTypes.Contains(Type))
+            {
+                sqlSyntax = string.Format("':{0}'",Name);
+            }
+            else
+            {
+                sqlSyntax = string.Format(":{0}", Name);
+            }
+
+            return sqlSyntax;
+        }
+         
+        public string GetCreateFieldDefinition()
         {
             string sqlSyntax = string.Format("");
 
-            if (Type.IndexOf("CHAR") > -1)
+            if (stringFieldTypes.Contains(Type))
             {
                 sqlSyntax = string.Format("{0} {1}({2}) {3}", Name, Type, ColumnSize, Nullable);
             }

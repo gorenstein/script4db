@@ -44,6 +44,8 @@ namespace script4db
         {
             InitializeComponent();
 
+            System.Windows.Forms.Control.CheckForIllegalCrossThreadCalls = false;
+
             this.MinimumSize = new Size(this.Width, this.Height);
             this.Logs = new Logs(this.richTextBoxLogs);
 
@@ -178,7 +180,6 @@ namespace script4db
                     buttonRun.Enabled = true;
                     buttonExit.Enabled = true;
                     statusLabel2.Text = "Click 'Run' to start srcript.";
-                    //this.tabControl1.SelectTab(this.tabPageTree);
                     break;
                 case appStatuses.Run:
                     buttonPauseContinue.Enabled = true;
@@ -186,6 +187,7 @@ namespace script4db
                     statusLabel2.Text = "Running...";
                     statusLabel3.Visible = true;
                     progressBar1.Visible = true;
+                    this.tabControl1.SelectTab(this.tabPageTree);
                     break;
                 case appStatuses.Finish:
                     buttonOpen.Enabled = true;
@@ -294,6 +296,8 @@ namespace script4db
 
             string msg = String.Format("Elapsed {0:0.000}s : Success checked {1} {2}", sw.Elapsed.TotalSeconds, connCount, "connection" + (connCount > 1 ? "s" : ""));
             workerMsgs.Add(new LogMessage(LogMessageTypes.Info, "Check Connection", msg));
+
+
             e.Result = new WorkerResult(WorkerResultStatuses.Success, workerMsgs);
         }
 
@@ -361,7 +365,7 @@ namespace script4db
             int progressStep = 100 / count;
             int progress = progressStep / 2;
 
-            foreach (Block command in parser.Commands())
+            foreach (Block block in parser.Commands())
             {
                 // User sended Cancel ?
                 if (worker.CancellationPending == true)
@@ -373,8 +377,8 @@ namespace script4db
 
                 // Do next step of Work
                 worker.ReportProgress(progress);
-                bool success = command.Run();
-                foreach (LogMessage logMsg in command.LogMessages) workerMsgs.Add(logMsg);
+                bool success = block.Run();
+                foreach (LogMessage logMsg in block.LogMessages) workerMsgs.Add(logMsg);
 
                 if (!success)
                 {

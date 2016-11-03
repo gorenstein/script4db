@@ -73,7 +73,7 @@
     <Compile Include="Connections\Connection.cs" />
     <Compile Include="Connections\IConnector.cs" />
     <Compile Include="Connections\OdbcConnector.cs" />
-    <Compile Include="Connections\OdbcReadTableStructure.cs" />
+    <Compile Include="Connections\OdbcTableStructure.cs" />
     <Compile Include="Connections\TableColumn.cs" />
     <Compile Include="Interpreter.cs" />
     <Compile Include="ScriptProcessors\Block.cs" />

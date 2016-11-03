@@ -16,6 +16,8 @@ namespace script4db.Connections
         string ScalarResult { get; }
         int Affected { get; }
         string GetTableFields(string tableName);
+        string GetInsertSql(OdbcDataReader dataReader, string tableTarget);
+        OdbcDataReader GetDataReader(string tableName);
         LogMessageTypes ErrorLevel { get; set; }
         ArrayList LogMessages { get; }
     }

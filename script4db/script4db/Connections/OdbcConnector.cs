@@ -18,6 +18,7 @@ namespace script4db.Connections
         private string connString;
         private OdbcConnection conn;
         private OdbcDataReader dataReader;
+        private OdbcTableStructure tableStructure;
         private int affected;
         private string scalarResult;
         private string[] nonQueryCmdNames = new string[] { "DROP", "CREATE", "INSERT", "UPDATE", "DELETE" };
@@ -48,6 +49,16 @@ namespace script4db.Connections
         }
 
         //OdbcDataReader myReader = myCommand.ExecuteReader();
+        public OdbcDataReader GetDataReader(string tableName)
+        {
+            string sql = string.Format("SELECT * FROM {0}", tableName);
+            bool scalarNonQuery = false;
+            keepAlive = true;
+            ExecuteSQL(sql, scalarNonQuery);
+
+            return dataReader;
+        }
+
         public bool ExecuteSQL(string sqlText, bool scalar = false)
         {
             bool result;
@@ -65,6 +76,8 @@ namespace script4db.Connections
                     catch (OdbcException odbcEx)
                     {
                         result = false;
+                        string msg = String.Format("SQL '{0}'", sqlText);
+                        this.LogMessages.Add(new LogMessage(errorLevel, this.GetType().Name, msg));
                         AddToLogOdbcError(odbcEx);
                     }
                 }
@@ -85,7 +98,12 @@ namespace script4db.Connections
 
         private bool ExecuteQuery(string sqlText, OdbcConnection Conn, bool scalar = false)
         {
-            bool result;
+            // Reset previous result values
+            this.affected = 0;
+            this.scalarResult = null;
+            this.dataReader = null;
+
+            bool result = false;
             sqlText = sqlText.TrimStart();
             string cmdName = sqlText.Substring(0, sqlText.IndexOf(" ")).ToUpper();
             OdbcCommand command = new OdbcCommand(sqlText, Conn);
@@ -205,8 +223,8 @@ namespace script4db.Connections
                 DbOpenIfClosed();
                 try
                 {
-                    OdbcReadTableStructure readTableStructure = new OdbcReadTableStructure(Conn, tableName);
-                    tableFields = readTableStructure.SkeletonCreate;
+                    this.tableStructure = new OdbcTableStructure(Conn, tableName);
+                    tableFields = tableStructure.SkeletonCreate;
                 }
                 catch (OdbcException odbcEx)
                 {
@@ -226,6 +244,51 @@ namespace script4db.Connections
             }
 
             return tableFields;
+        }
+
+        public string GetInsertSql(OdbcDataReader dataReader, string tableTarget)
+        {
+            string fieldNames = tableStructure.FieldNames;
+            string fieldValues = tableStructure.FieldValues;
+
+            if (string.IsNullOrWhiteSpace(fieldNames) || string.IsNullOrWhiteSpace(fieldValues)) // error
+            {
+                string msg = string.Format("Insert skeleton is not defined for table '{0}' ", tableTarget);
+                this.LogMessages.Add(new LogMessage(ErrorLevel, this.GetType().Name, msg));
+                return "";
+            }
+
+            string oldValue, newValue;
+            for (int i = 0; i < dataReader.FieldCount; i++)
+            {
+                oldValue = ":" + dataReader.GetName(i);
+                newValue = ValueToString(dataReader, i);
+                Console.WriteLine("-----------");
+                Console.WriteLine(dataReader.GetName(i) + " = " + dataReader.GetValue(i).ToString());
+                Console.WriteLine(dataReader.GetFieldType(i).ToString());
+                Console.WriteLine("===========");
+                fieldValues = fieldValues.Replace(oldValue, newValue);
+            }
+
+            return string.Format("INSERT INTO {0} ({1}) VALUES ({2});", tableTarget, fieldNames, fieldValues);
+        }
+
+        private string ValueToString(OdbcDataReader dataReader, int fieldNum)
+        {
+            string result = dataReader.GetValue(fieldNum).ToString();
+
+            switch (dataReader.GetFieldType(fieldNum).FullName)
+            {
+                case "System.Single":
+                case "System.Double":
+                case "System.Decimal":
+                    result = result.Replace(",", ".");
+                    break;
+                default:
+                    break;
+            }
+
+            return result;
         }
 
         private void AddToLogOdbcError(OdbcException odbcEx)

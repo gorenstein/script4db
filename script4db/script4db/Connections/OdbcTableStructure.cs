@@ -9,14 +9,15 @@ using System.Data.Odbc;
 
 namespace script4db.Connections
 {
-    class OdbcReadTableStructure
+    class OdbcTableStructure
     {
         private OdbcConnection _connection;
         private string _tableName;
         private string _skeletonCreate;
-        private string _skeletonInsert;
+        private string _fieldNames;
+        private string _fieldValues;
 
-        public OdbcReadTableStructure(OdbcConnection connection, string tableName)
+        public OdbcTableStructure(OdbcConnection connection, string tableName)
         {
             _connection = connection;
             _tableName = tableName;
@@ -28,16 +29,20 @@ namespace script4db.Connections
         {
             get { return _skeletonCreate; }
         }
-
-        public string SkeletonInsert
+        public string FieldNames
         {
-            get { return _skeletonInsert; }
+            get { return _fieldNames; }
         }
-
+        public string FieldValues
+        {
+            get { return _fieldValues; }
+        }
         private void ParceStructure()
         {
             List<TableColumn> tableColumns = new List<TableColumn>();
             StringBuilder buildCreateSeleton = new StringBuilder(string.Empty);
+            StringBuilder buildFieldNames = new StringBuilder(string.Empty);
+            StringBuilder buildFieldValues = new StringBuilder(string.Empty);
             DataTable table = _connection.GetSchema("Columns");
 
             foreach (DataRow row in table.Rows)
@@ -56,32 +61,39 @@ namespace script4db.Connections
             }
 
             var sortedScriptColumns =
-            from sc in tableColumns
-            orderby sc.OrdinalPosition
-            select sc;
+                from sc in tableColumns
+                orderby sc.OrdinalPosition
+                select sc;
             tableColumns = sortedScriptColumns.ToList<TableColumn>();
+
+            string delimiter = "";
 
             // CREATE TABLE Persons (PersonID int, LastName varchar(255));
             // Generate Skeletons "PersonID int, LastName varchar(255)"
             foreach (TableColumn column in tableColumns)
             {
                 //Console.WriteLine(column.ToString());
-                //Console.WriteLine(column.GetSqlDefinition());
-                if (buildCreateSeleton.Length > 0) buildCreateSeleton.Append(", ");
-                buildCreateSeleton.Append(column.GetSqlDefinition());
+                //Console.WriteLine(column.GetCreateFieldDefinition());
+                //Console.WriteLine(column.GetFieldSetValueDefinition());
+                buildCreateSeleton.Append(delimiter + column.GetCreateFieldDefinition());
+                buildFieldNames.Append(delimiter + column.Name);
+                buildFieldValues.Append(delimiter + column.GetFieldSetValuePlaceholder());
+                delimiter = ",";
             }
             _skeletonCreate = buildCreateSeleton.ToString();
+            _fieldNames = buildFieldNames.ToString();
+            _fieldValues = buildFieldValues.ToString();
         }
 
         private void Test()
         {
-                // Connect to the database then retrieve the schema information.
-                DataTable table = _connection.GetSchema("Tables");
+            // Connect to the database then retrieve the schema information.
+            DataTable table = _connection.GetSchema("Tables");
 
-                // Display the contents of the table.
-                DisplayData(table);
-                Console.WriteLine("Press any key to continue.");
-                Console.ReadKey();
+            // Display the contents of the table.
+            DisplayData(table);
+            Console.WriteLine("Press any key to continue.");
+            Console.ReadKey();
         }
 
         private static void DisplayData(System.Data.DataTable table)
@@ -95,8 +107,6 @@ namespace script4db.Connections
                 Console.WriteLine("============================");
             }
         }
-
-
 
     }
 }

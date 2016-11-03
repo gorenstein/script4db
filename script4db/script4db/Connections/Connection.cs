@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Data.Odbc;
 using System.Threading.Tasks;
 
 namespace script4db.Connections
@@ -34,6 +35,20 @@ namespace script4db.Connections
                 this.login = (connParams.Count() < 3) ? "" : connParams[2];
                 this.password = (connParams.Count() < 4) ? "" : connParams[3];
             }
+        }
+
+        public string GetInsertSql(OdbcDataReader dataReader, string tableTarget)
+        {
+            string sql = connector.GetInsertSql(dataReader, tableTarget);
+
+            if (string.IsNullOrWhiteSpace(sql))
+            {
+                foreach (LogMessage logMsg in Connector.LogMessages) this.LogMessages.Add(logMsg);
+                string msg = string.Format("Insert skeleton is not defined for table '{0}' ", tableTarget);
+                this.LogMessages.Add(new LogMessage(connector.ErrorLevel, this.GetType().Name, msg));
+            }
+
+            return sql;
         }
 
         public int CountOfRecords(string tableName)

@@ -3,17 +3,34 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Drawing;
 using System.Data;
+using System.Data.Odbc;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using System.Windows.Forms;
 using script4db.Connections;
 
 namespace script4db.ScriptProcessors
 {
+    enum BlockStatuses
+    {
+        Init,
+        ReadyToRun,
+        Working,
+        Done,
+        Warning,
+        Error
+    }
+
     class Block
     {
-        private BlockNames name;
+        private BlockNames _name;
+        private BlockStatuses _status;
+        public int order;
+        public TreeNode node;
+        private Color[] ColorByStatus = new Color[] { Color.DarkGray, Color.Black, Color.DarkOrange, Color.DarkGreen, Color.DarkOrange, Color.Red };
         Dictionary<string, string> parameters = new Dictionary<string, string>();
         private ArrayList logMessages = new ArrayList();
 
@@ -25,33 +42,37 @@ namespace script4db.ScriptProcessors
 
         private string[] onErrorContinueValues = new string[] { "true", "false" };
         private string[] connectionParameterNames = new string[] { "connection", "connectionSource", "connectionTarget" };
-        public Block(BlockNames _name)
+        public Block(BlockNames blockName)
         {
-            this.name = _name;
+            _name = blockName;
+            _status = BlockStatuses.Init;
         }
 
         public bool Run()
         {
-            if (this.name != BlockNames.command)
+            if (_name != BlockNames.command)
             {
-                string msg = String.Format("Command '{0}' can't be run", this.name);
+                string msg = String.Format("Command '{0}' can't be run", _name);
                 this.LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
                 return false;
             }
 
-            bool result;
+            bool success;
             LogMessageTypes executeErrorLevel;
 
             if ("true" == this.parameters["onErrorContinue"]) executeErrorLevel = LogMessageTypes.Warning;
             else executeErrorLevel = LogMessageTypes.Error;
 
+            Status = BlockStatuses.Working;
+
             switch (this.parameters["type"])
             {
                 case "simple":
-                    result = RunSimlpe(executeErrorLevel);
+                    node.Text += " : 1 of 1";
+                    success = RunSimlpe(executeErrorLevel);
                     break;
                 case "exportTable":
-                    result = RunExportTable(executeErrorLevel);
+                    success = RunExportTable(executeErrorLevel);
                     break;
                 default:
                     string msg = String.Format("Value for Command parameter type='{0}' is not supported", this.parameters["type"]);
@@ -59,8 +80,23 @@ namespace script4db.ScriptProcessors
                     return false;
             }
 
-            if ("true" == this.parameters["onErrorContinue"]) return true;
-            else return result;
+            if (success)
+            {
+                //Status = BlockStatuses.Done;
+            }
+            else if (!success && "true" == this.parameters["onErrorContinue"])
+            {
+                //Status = BlockStatuses.Warning;
+                Status = BlockStatuses.Done;
+                node.Text += " (skipped error)";
+                success = true;
+            }
+            else
+            {
+                Status = BlockStatuses.Error;
+            }
+
+            return success;
         }
 
         private bool RunSimlpe(LogMessageTypes executeErrorLevel)
@@ -71,12 +107,17 @@ namespace script4db.ScriptProcessors
 
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            bool success = connection.ExecuteSQL(sql);
+            bool scalarOrNonQuery = true;
+            bool success = connection.ExecuteSQL(sql, scalarOrNonQuery);
             sw.Stop();
             if (success)
             {
                 string msg = String.Format("Elapsed {0:0.000}s : Affected {1} : '{2}'", sw.Elapsed.TotalSeconds, connection.Connector.Affected, sql);
                 this.LogMessages.Add(new LogMessage(LogMessageTypes.Info, this.GetType().Name, msg));
+
+                Status = BlockStatuses.Done;
+                node.Text += String.Format(" - Ok : Affected {0} : Elapsed {1:0.000}s", connection.Connector.Affected, sw.Elapsed.TotalSeconds);
+
                 return true;
             }
             else
@@ -97,26 +138,34 @@ namespace script4db.ScriptProcessors
             connTarget.Connector.ErrorLevel = errorLevel;
 
             bool success;
+            bool scalarOrNonQuery;
+            string msg;
             string sql;
+            string nodeBaseText = BlockStatuses.Working.ToString();
             string tableSource = parameters["tableSource"];
             string tableTarget = parameters["tableTarget"];
+            Stopwatch sw = new Stopwatch();
 
-            // Get Create Table sql string for table
             sql = connSource.GetCreateTableSql(tableSource, tableTarget);
-            Console.WriteLine(sql);
-            if (string.IsNullOrWhiteSpace(sql))
+            if (string.IsNullOrWhiteSpace(sql)) success = false;
+            else // Create Target table as copy of Source table structure
             {
-                foreach (LogMessage logMsg in connSource.LogMessages) this.LogMessages.Add(logMsg);
-                connSource.Connector.DbCloseIfOpen();
-                connTarget.Connector.DbCloseIfOpen();
-                return false;
+                Console.WriteLine(sql);
+                scalarOrNonQuery = true;
+                sw.Restart();
+                success = connTarget.ExecuteSQL(sql, scalarOrNonQuery);
+                sw.Stop();
             }
 
-            // Create Target table as copy of Source table structure
-            success = connTarget.ExecuteSQL(sql);
-            if (!success)
+            if (success)
             {
-                string msg = String.Format("SQL: '{0}'", sql);
+                node.Text = String.Format("{0} : Copy table '{1}' structure : Elapsed {2:0.000}s", nodeBaseText, tableSource, sw.Elapsed.TotalSeconds);
+                msg = String.Format("Elapsed {0:0.000}s : '{1}'", sw.Elapsed.TotalSeconds, sql);
+                this.LogMessages.Add(new LogMessage(LogMessageTypes.Info, this.GetType().Name, msg));
+            }
+            else
+            {
+                msg = String.Format("SQL: '{0}'", sql);
                 this.LogMessages.Add(new LogMessage(LogMessageTypes.Info, this.GetType().Name, msg));
                 foreach (LogMessage logMsg in connTarget.LogMessages) this.LogMessages.Add(logMsg);
                 connSource.Connector.DbCloseIfOpen();
@@ -124,93 +173,106 @@ namespace script4db.ScriptProcessors
                 return false;
             }
 
-            // Select form source
-            int recordCountSource;
-            connSource.CountOfRecords(tableSource);
-            recordCountSource = int.Parse(connSource.Connector.ScalarResult);
+            // Copy Data
+            int recordCountSource = connSource.CountOfRecords(tableSource);
+            int restToCopy;
+            double readSec = 0;
+            double writeSec = 0;
+            double avReadSec = 0;
+            double avWriteSec = 0;
+            double restSec = 0;
             Console.WriteLine(
                 string.Format("Total {0} records for copy from table '{1}' to '{2}'",
                                 recordCountSource, tableSource, tableTarget));
+            int limit = 1; // Limit for max Read/Insert records per interation
+            int maxIteration = (int)Math.Ceiling((decimal)recordCountSource / limit);
 
-            // Insert to target
+            OdbcDataReader dataReader = connSource.Connector.GetDataReader(tableSource);
+            if (!dataReader.HasRows) // No data for copy
+            {
+                msg = String.Format("No data for copy from table '{0}'", tableSource);
+                this.LogMessages.Add(new LogMessage(LogMessageTypes.Info, this.GetType().Name, msg));
+                foreach (LogMessage logMsg in connTarget.LogMessages) this.LogMessages.Add(logMsg);
+                connSource.Connector.DbCloseIfOpen();
+                connTarget.Connector.DbCloseIfOpen();
+                return false;
+            }
+
+            for (int loop = 0; loop < maxIteration; loop += limit)
+            {
+                avReadSec = readSec / (loop + 1);
+                avWriteSec = writeSec / (loop + 1);
+                restSec = (avReadSec + avWriteSec) * (maxIteration - loop);
+                restToCopy = recordCountSource - (loop * limit + 1);
+
+                if (loop == 0 || (loop % 42) == 0)
+                {
+                    node.Text = String.Format(
+                        "{0} : Rest {1} rec / {3:0.0} s : Average R/W {4:0.0000} / {5:0.0000} rec/s",
+                        nodeBaseText, restToCopy, recordCountSource, restSec, avReadSec, avWriteSec);
+                }
+
+                // Read
+                sql = "";
+                sw.Restart();
+                for (int i = 0; i < limit; i++)
+                {
+                    if (dataReader.Read())
+                    {
+                        sql += connSource.GetInsertSql(dataReader, tableTarget);
+                    }
+                    else break;
+                }
+                sw.Stop();
+                readSec += sw.Elapsed.TotalSeconds;
+
+                // Write
+                if (string.IsNullOrWhiteSpace(sql)) success = false;
+                else // Insert to target - copy next scope of records
+                {
+                    Console.WriteLine(sql);
+                    scalarOrNonQuery = true;
+                    sw.Restart();
+                    success = connTarget.ExecuteSQL(sql, scalarOrNonQuery);
+                    sw.Stop();
+                    writeSec += sw.Elapsed.TotalSeconds;
+                }
+
+                if (!success)
+                {
+                    msg = String.Format("Copy scope from record '{0}' next '{1}'", loop, limit);
+                    this.LogMessages.Add(new LogMessage(LogMessageTypes.Info, this.GetType().Name, msg));
+                    foreach (LogMessage logMsg in connSource.LogMessages) this.LogMessages.Add(logMsg);
+                    foreach (LogMessage logMsg in connTarget.LogMessages) this.LogMessages.Add(logMsg);
+                    connSource.Connector.DbCloseIfOpen();
+                    connTarget.Connector.DbCloseIfOpen();
+                    return false;
+                }
+            }
+
+            connSource.Connector.DbCloseIfOpen();
+            connTarget.Connector.DbCloseIfOpen();
+
+            Status = BlockStatuses.Done;
+
+            avReadSec = readSec / maxIteration;
+            avWriteSec = writeSec / maxIteration;
+
+            node.Text += String.Format(
+                    " - Ok : Copied {0} records : Average R/W {1:0.0000} / {2:0.0000} rec/s : Elapsed {3:0.0}s",
+                      recordCountSource, avReadSec, avWriteSec, readSec + writeSec);
+
+            msg = String.Format("Elapsed {0:0.000}s : Copied in to table '{1}' {2} records",
+                                    readSec + writeSec, tableTarget, recordCountSource);
+            Console.WriteLine(msg);
+            this.LogMessages.Add(new LogMessage(LogMessageTypes.Info, this.GetType().Name, msg));
             return true;
         }
 
-        //private void Test2()
-        //{
-        //    SqlDataAdapter adapter1 = new SqlDataAdapter("select * from Table1", sqlConnectionString);
-        //}
-
-        //private void Test()
-        //{
-        //    //The connection strings needed: One for SQL and one for Access
-        //    String accessConnectionString = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\\...\\test.accdb;";
-        //    String sqlConnectionString = "Data Source=localhost\\SQLEXPRESS;Initial Catalog=Your_Catalog;Integrated Security=True";
-
-        //    //Make adapters for each table we want to export
-        //    SqlDataAdapter adapter1 = new SqlDataAdapter("select * from Table1", sqlConnectionString);
-        //    SqlDataAdapter adapter2 = new SqlDataAdapter("select * from Table2", sqlConnectionString);
-
-        //    //Fills the data set with data from the SQL database
-        //    DataSet dataSet = new DataSet();
-        //    adapter1.Fill(dataSet, "Table1");
-        //    adapter2.Fill(dataSet, "Table2");
-
-        //    //Create an empty Access file that we will fill with data from the data set
-        //    ADOX.Catalog catalog = new ADOX.Catalog();
-        //    catalog.Create(accessConnectionString);
-
-        //    //Create an Access connection and a command that we'll use
-        //    OleDbConnection accessConnection = new OleDbConnection(accessConnectionString);
-        //    OleDbCommand command = new OleDbCommand();
-        //    command.Connection = accessConnection;
-        //    command.CommandType = CommandType.Text;
-        //    accessConnection.Open();
-
-        //    //This loop creates the structure of the database
-        //    foreach (DataTable table in dataSet.Tables)
-        //    {
-        //        String columnsCommandText = "(";
-        //        foreach (DataColumn column in table.Columns)
-        //        {
-        //            String columnName = column.ColumnName;
-        //            String dataTypeName = column.DataType.Name;
-        //            String sqlDataTypeName = getSqlDataTypeName(dataTypeName);
-        //            columnsCommandText += "[" + columnName + "] " + sqlDataTypeName + ",";
-        //        }
-        //        columnsCommandText = columnsCommandText.Remove(columnsCommandText.Length - 1);
-        //        columnsCommandText += ")";
-
-        //        command.CommandText = "CREATE TABLE " + table.TableName + columnsCommandText;
-
-        //        command.ExecuteNonQuery();
-        //    }
-
-        //    //This loop fills the database with all information
-        //    foreach (DataTable table in dataSet.Tables)
-        //    {
-        //        foreach (DataRow row in table.Rows)
-        //        {
-        //            String commandText = "INSERT INTO " + table.TableName + " VALUES (";
-        //            foreach (var item in row.ItemArray)
-        //            {
-        //                commandText += "'" + item.ToString() + "',";
-        //            }
-        //            commandText = commandText.Remove(commandText.Length - 1);
-        //            commandText += ")";
-
-        //            command.CommandText = commandText;
-        //            command.ExecuteNonQuery();
-        //        }
-        //    }
-
-        //    accessConnection.Close();
-        //}
-
         public bool Check()
         {
-            if (this.name == BlockNames.constants) return true;
-            if (this.name == BlockNames.command) return CheckCommandParameters();
+            if (_name == BlockNames.constants) return true;
+            if (_name == BlockNames.command) return CheckCommandParameters();
 
             this.LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, "Block name is not defined"));
 
@@ -221,7 +283,7 @@ namespace script4db.ScriptProcessors
         {
             ArrayList connections = new ArrayList();
 
-            if (this.name != BlockNames.command) return connections;
+            if (_name != BlockNames.command) return connections;
 
             foreach (string conParam in connectionParameterNames)
             {
@@ -240,7 +302,7 @@ namespace script4db.ScriptProcessors
 
         public bool TestDbConnection()
         {
-            if (this.name != BlockNames.command) return true;
+            if (_name != BlockNames.command) return true;
 
             foreach (string conParam in connectionParameterNames)
             {
@@ -415,7 +477,7 @@ namespace script4db.ScriptProcessors
 
         public BlockNames Name
         {
-            get { return name; }
+            get { return _name; }
         }
 
         public Dictionary<string, string> Parameters
@@ -426,6 +488,20 @@ namespace script4db.ScriptProcessors
         public ArrayList LogMessages
         {
             get { return logMessages; }
+        }
+
+        public BlockStatuses Status
+        {
+            get { return _status; }
+            set
+            {
+                _status = value;
+                if (_name == BlockNames.command)
+                {
+                    node.Text = order.ToString() + " " + value.ToString();
+                    node.ForeColor = ColorByStatus[(int)value];
+                }
+            }
         }
     }
 }

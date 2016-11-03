@@ -81,6 +81,8 @@ namespace script4db
             treeView.Nodes.Clear();
             TreeNode rootNode = new TreeNode("Script Blocks");
             rootNode.NodeFont = new Font("Arial", 11, FontStyle.Regular);
+            Font font;
+            Color color;
 
             foreach (var item in this.interpreter.ScriptProcessor.Blocks.BlocksGroup)
             {
@@ -90,10 +92,19 @@ namespace script4db
                 if (itemValueCount > 1) countEm += "s";
 
                 TreeNode childNode = new TreeNode(item.Key.ToString() + " (" + itemValueCount.ToString() + countEm + ")");
-                childNode.NodeFont = new Font("Arial", 10, FontStyle.Bold);
-                if (item.Key.ToString() == "constants") childNode.ForeColor = Color.SteelBlue;
-                else childNode.ForeColor = Color.SlateBlue;
-
+                if (item.Key.ToString() == "command")
+                {
+                    childNode.Expand();
+                    font = new Font("Arial", 11, FontStyle.Bold);
+                    color = Color.Black; //Color.SlateBlue;
+                }
+                else
+                {
+                    font = new Font("Arial", 11, FontStyle.Regular);
+                    color = Color.Black; //Color.SteelBlue;
+                }
+                childNode.NodeFont = font;
+                childNode.ForeColor = color;
                 this.AddSubNodes(childNode, item.Value);
 
                 rootNode.Nodes.Add(childNode);
@@ -107,22 +118,30 @@ namespace script4db
         private void AddSubNodes(TreeNode @node, ArrayList subList)
         {
             int i = 0;
-            foreach (Block item in subList)
+            foreach (Block block in subList)
             {
                 i++;
-                TreeNode childNode = new TreeNode(i.ToString());
-                this.AddNodeParameters(childNode, item);
+                block.order = i;
+                block.node = new TreeNode(i.ToString());
+                block.node.NodeFont = new Font("Arial", 11);
+                this.AddNodeParameters(block);
+                node.Nodes.Add(block.node);
 
-                node.Nodes.Add(childNode);
+                //TreeNode childNode = new TreeNode(i.ToString());
+                //this.AddNodeParameters(childNode, block);
+                //node.Nodes.Add(childNode);
+
+                block.Status = BlockStatuses.ReadyToRun;
             }
         }
 
-        private void AddNodeParameters(TreeNode @node, Block block)
+        private void AddNodeParameters(Block block)
         {
             foreach (var item in block.Parameters)
             {
                 TreeNode childNode = new TreeNode(item.Key + " = " + item.Value);
-                node.Nodes.Add(childNode);
+                childNode.NodeFont = new Font("Arial", 10);
+                block.node.Nodes.Add(childNode);
             }
         }
 
