@@ -152,7 +152,7 @@ namespace script4db.ScriptProcessors
             {
                 Console.WriteLine(sql);
                 scalarOrNonQuery = true;
-                sw.Restart();
+                sw.Start();
                 success = connTarget.ExecuteSQL(sql, scalarOrNonQuery);
                 sw.Stop();
             }
@@ -176,16 +176,16 @@ namespace script4db.ScriptProcessors
             // Copy Data
             int recordCountSource = connSource.CountOfRecords(tableSource);
             int restToCopy;
-            double readSec = 0;
-            double writeSec = 0;
+            Stopwatch swRead = new Stopwatch();
+            Stopwatch swWrite = new Stopwatch();
             double avReadSec = 0;
             double avWriteSec = 0;
             double restSec = 0;
             Console.WriteLine(
                 string.Format("Total {0} records for copy from table '{1}' to '{2}'",
                                 recordCountSource, tableSource, tableTarget));
-            int limit = 1; // Limit for max Read/Insert records per interation
-            int maxIteration = (int)Math.Ceiling((decimal)recordCountSource / limit);
+            int step = int.Parse(parameters["maxPerLoop"]); // Limit for max Read/Insert records per interation
+            int maxLoops = (int)Math.Ceiling((decimal)recordCountSource / step);
 
             OdbcDataReader dataReader = connSource.Connector.GetDataReader(tableSource);
             if (!dataReader.HasRows) // No data for copy
@@ -198,24 +198,24 @@ namespace script4db.ScriptProcessors
                 return false;
             }
 
-            for (int loop = 0; loop < maxIteration; loop += limit)
+            for (int loop = 0; loop < maxLoops; loop += step)
             {
-                avReadSec = readSec / (loop + 1);
-                avWriteSec = writeSec / (loop + 1);
-                restSec = (avReadSec + avWriteSec) * (maxIteration - loop);
-                restToCopy = recordCountSource - (loop * limit + 1);
+                avReadSec = swRead.Elapsed.TotalSeconds / (loop + 1);
+                avWriteSec = swWrite.Elapsed.TotalSeconds / (loop + 1);
+                restSec = (avReadSec + avWriteSec) * (maxLoops - loop);
+                restToCopy = recordCountSource - (loop * step + 1);
 
                 if (loop == 0 || (loop % 42) == 0)
                 {
                     node.Text = String.Format(
-                        "{0} : Rest {1} rec / {3:0.0} s : Average R/W {4:0.0000} / {5:0.0000} rec/s",
+                        "{0} : Rest {1} rec / {3:0.0} s : Average r/w {4:0.0000} / {5:0.0000} rec/s",
                         nodeBaseText, restToCopy, recordCountSource, restSec, avReadSec, avWriteSec);
                 }
 
                 // Read
                 sql = "";
-                sw.Restart();
-                for (int i = 0; i < limit; i++)
+                swRead.Start();
+                for (int i = 0; i < step; i++)
                 {
                     if (dataReader.Read())
                     {
@@ -223,8 +223,7 @@ namespace script4db.ScriptProcessors
                     }
                     else break;
                 }
-                sw.Stop();
-                readSec += sw.Elapsed.TotalSeconds;
+                swRead.Stop();
 
                 // Write
                 if (string.IsNullOrWhiteSpace(sql)) success = false;
@@ -232,15 +231,14 @@ namespace script4db.ScriptProcessors
                 {
                     Console.WriteLine(sql);
                     scalarOrNonQuery = true;
-                    sw.Restart();
+                    swWrite.Start();
                     success = connTarget.ExecuteSQL(sql, scalarOrNonQuery);
-                    sw.Stop();
-                    writeSec += sw.Elapsed.TotalSeconds;
+                    swWrite.Stop();
                 }
 
                 if (!success)
                 {
-                    msg = String.Format("Copy scope from record '{0}' next '{1}'", loop, limit);
+                    msg = String.Format("Copy scope from record '{0}' next '{1}'", loop, step);
                     this.LogMessages.Add(new LogMessage(LogMessageTypes.Info, this.GetType().Name, msg));
                     foreach (LogMessage logMsg in connSource.LogMessages) this.LogMessages.Add(logMsg);
                     foreach (LogMessage logMsg in connTarget.LogMessages) this.LogMessages.Add(logMsg);
@@ -255,15 +253,15 @@ namespace script4db.ScriptProcessors
 
             Status = BlockStatuses.Done;
 
-            avReadSec = readSec / maxIteration;
-            avWriteSec = writeSec / maxIteration;
+            avReadSec = swRead.Elapsed.TotalSeconds / maxLoops;
+            avWriteSec = swWrite.Elapsed.TotalSeconds / maxLoops;
 
             node.Text += String.Format(
-                    " - Ok : Copied {0} records : Average R/W {1:0.0000} / {2:0.0000} rec/s : Elapsed {3:0.0}s",
-                      recordCountSource, avReadSec, avWriteSec, readSec + writeSec);
+                    " - Ok : Copied {0} records : Average r/w {1:0.0000} / {2:0.0000} rec/s : Elapsed {3:0.0}s",
+                      recordCountSource, avReadSec, avWriteSec, swRead.Elapsed.TotalSeconds + swWrite.Elapsed.TotalSeconds);
 
             msg = String.Format("Elapsed {0:0.000}s : Copied in to table '{1}' {2} records",
-                                    readSec + writeSec, tableTarget, recordCountSource);
+                                    swRead.Elapsed.TotalSeconds + swWrite.Elapsed.TotalSeconds, tableTarget, recordCountSource);
             Console.WriteLine(msg);
             this.LogMessages.Add(new LogMessage(LogMessageTypes.Info, this.GetType().Name, msg));
             return true;
@@ -427,7 +425,7 @@ namespace script4db.ScriptProcessors
             if (cmdType == "exportTable")
             {
                 paramName = "maxPerLoop";
-                defValue = "1000";
+                defValue = "1";
 
                 if (this.parameters.Keys.Contains(paramName))
                 {
