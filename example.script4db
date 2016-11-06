@@ -1,6 +1,7 @@
 ; this is a comment - line started with ";"
 [constants]
 var1=Table1
+var2=table2
 connByName=ODBC>>Name_of_ODBC_Data_Source
 connByString=OdbcString>>Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=X:\Access.accdb;Uid=Admin;Pwd=;
 connAnotherOne=OdbcString>>Driver={MySQL ODBC 5.3 Unicode Driver};Server=host;Database=dbName;User=userName;Password=userPass;Option=3;
@@ -8,7 +9,7 @@ connAnotherOne=OdbcString>>Driver={MySQL ODBC 5.3 Unicode Driver};Server=host;Da
 
 ;[command] - syntax
 ;type= "simple" | "exportTable"   
-;onErrorContinue= "true" | "false" | if not set uses default value 'false'
+;onErrorContinue= "true" | "false" | if not set uses default value "false"
 ;connection= ODBC>>source>>user>>password
 ;  or
 ;connection= OdbcString>>ODBC_String_here
@@ -20,14 +21,14 @@ connAnotherOne=OdbcString>>Driver={MySQL ODBC 5.3 Unicode Driver};Server=host;Da
 ; Odbc supports only one sql-request per command
 ; Supporting place holder for constants: "${constant_name}"
  
-; Command type "simple" > scalar or NonQuery SQL command
+; Command type "simple" -> scalar or NonQuery SQL command
 [command]
  type = simple
  onErrorContinue = true
  connection = ODBC>>Name_of_ODBC_Data_Source
  sql=DROP TABLE ${var1};
 
-; Command type "exportTable" > uses two connections 
+; Command type "exportTable" -> uses two connections 
 [command]
  type=exportTable
  connectionSource=${connByName}
