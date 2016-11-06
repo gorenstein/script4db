@@ -1,2 +1,29 @@
-# script4db
-Script interpreter for database manipulation
+script4db
+=========
+
+About
+-----
+Script interpreter for database manipulation from PC.
+Can be used for running batch commands on PC to make routine jobs with different databases.
+
+Features include:
+- Run non query SQL command (INSERT, UPDATE, DELETE, CREATE, DROP)
+- Copy tables between two different databases
+- Support ODBC as preconfigured by name or as connection string (tested on Access & MySQL connection)
+- For each command you can define behavior on error: stop script or skip/continue
+- script constants
+
+Documentation
+-------------
+For details see “example.script4db” file.
+
+Installation
+------------
+No need for any installation.
+Use script4db.exe to run (compiled for any processor).
+
+Drivers for used ODBC connections must be installed on the PC.
+
+License
+-------
+Apache License Version 2.0, January 2004
