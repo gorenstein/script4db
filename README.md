@@ -23,6 +23,7 @@ No need for any installation.
 Use script4db.exe to run (compiled for any processor).
 
 Drivers for used ODBC connections must be installed on the PC.
+Required .NET Framework 4.5.2 or above.
 
 License
 -------
