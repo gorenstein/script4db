@@ -1,4 +1,5 @@
 ; this is a comment - line started with ";"
+; Integrated constatnts: ${TIMESTAMP}, ${YEAR}, ${MONTH}, ${DAY}, ${WEEK}, ${WEEK_PREV}$, ${WEEK_NEXT}
 [constants]
 var1=Table1
 var2=table2

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Drawing;
+using System.Globalization;
 using System.Data;
 using System.Data.Odbc;
 using System.Data.SqlClient;
@@ -42,10 +43,26 @@ namespace script4db.ScriptProcessors
 
         private string[] onErrorContinueValues = new string[] { "true", "false" };
         private string[] connectionParameterNames = new string[] { "connection", "connectionSource", "connectionTarget" };
+
+        Dictionary<string, string> integratedConstants = new Dictionary<string, string>();
         public Block(BlockNames blockName)
         {
             _name = blockName;
             _status = BlockStatuses.Init;
+
+
+            DateTime dtNow = DateTime.Now;
+
+            integratedConstants.Add("${TIMESTAMP}", dtNow.ToString("yyyyMMddHHmmssffff"));
+            integratedConstants.Add("${YEAR}", dtNow.ToString("yyyy"));
+            integratedConstants.Add("${MONTH}", dtNow.ToString("MM"));
+            integratedConstants.Add("${DAY}", dtNow.ToString("dd"));
+
+            DateTimeFormatInfo dfi = DateTimeFormatInfo.CurrentInfo;
+            Calendar cal = dfi.Calendar;
+            integratedConstants.Add("${WEEK}", cal.GetWeekOfYear(dtNow, dfi.CalendarWeekRule, dfi.FirstDayOfWeek).ToString());
+            integratedConstants.Add("${WEEK_PREV}", cal.GetWeekOfYear(dtNow.AddDays(-7), dfi.CalendarWeekRule, dfi.FirstDayOfWeek).ToString());
+            integratedConstants.Add("${WEEK_NEXT}", cal.GetWeekOfYear(dtNow.AddDays(7), dfi.CalendarWeekRule, dfi.FirstDayOfWeek).ToString());
         }
 
         public bool Run()
@@ -456,10 +473,23 @@ namespace script4db.ScriptProcessors
             }
             else
             {
-                this.parameters.Add(key, value);
+                this.parameters.Add(key, FillIntegratedConstants(value));
             }
 
             return this.parameters.ContainsKey(key);
+        }
+
+        private string FillIntegratedConstants(string value)
+        {
+            if (value.IndexOf("${") != -1)
+            {
+                foreach (KeyValuePair<string, string> constant in integratedConstants)
+                {
+                    value = value.Replace(constant.Key, constant.Value);
+                }
+            }
+
+            return value;
         }
 
         public bool UpdateParameter(KeyValuePair<string, string> _parameter)
