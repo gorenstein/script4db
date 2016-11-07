@@ -29,8 +29,9 @@ namespace script4db.Connections
                 _type = value;
                 if (!string.IsNullOrEmpty(_type))
                 {
-                    if (_type.Equals("integer")) { _type = "int"; }
-                    if (_type.Equals("date")) { _type = "datetime"; }
+                    if (_type.Equals("INTEGER")) { _type = "int"; }
+                    if (_type.Equals("COUNTER")) { _type = "int"; }
+                    if (_type.Equals("DATE")) { _type = "datetime"; }
                     //if (_type.Equals("varchar")) { _type = "nvarchar"; }
                 }
             }

@@ -45,10 +45,13 @@ namespace script4db.Connections
             StringBuilder buildFieldValues = new StringBuilder(string.Empty);
             DataTable table = _connection.GetSchema("Columns");
 
+            Console.WriteLine("Table: {0}", _tableName);
+
             foreach (DataRow row in table.Rows)
             {
                 if (row["TABLE_NAME"].ToString().Equals(_tableName))
                 {
+                    Console.WriteLine("ColName:{0} | Type:{1} | Size:{2}", row["COLUMN_NAME"].ToString(), row["TYPE_NAME"].ToString(), row["COLUMN_SIZE"].ToString());
                     tableColumns.Add(new TableColumn
                     {
                         Name = row["COLUMN_NAME"].ToString(),
