@@ -113,11 +113,11 @@ namespace script4db.ScriptProcessors
             sw.Stop();
             if (success)
             {
-                string msg = String.Format("Elapsed {0:0.000}s : Affected {1} : '{2}'", sw.Elapsed.TotalSeconds, connection.Connector.Affected, sql);
+                string msg = String.Format("Elapsed {0:0.000}s : Affected {1} rec : '{2}'", sw.Elapsed.TotalSeconds, connection.Connector.Affected, sql);
                 this.LogMessages.Add(new LogMessage(LogMessageTypes.Info, this.GetType().Name, msg));
 
                 Status = BlockStatuses.Done;
-                node.Text += String.Format(" - Ok : Affected {0} : Elapsed {1:0.000}s", connection.Connector.Affected, sw.Elapsed.TotalSeconds);
+                node.Text += String.Format(" - Ok : Affected {0} rec : Elapsed {1:0.000}s", connection.Connector.Affected, sw.Elapsed.TotalSeconds);
 
                 return true;
             }
