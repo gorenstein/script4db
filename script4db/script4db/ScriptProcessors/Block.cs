@@ -223,7 +223,7 @@ namespace script4db.ScriptProcessors
                 restSec = (avReadSec + avWriteSec) * (maxLoops - loop);
                 restToCopy = recordCountSource - (loop * step + 1);
 
-                if (loop == 0 || (loop % 42) == 0)
+                if ((loop % 142) == 0)
                 {
                     node.Text = String.Format(
                         "{0} : Rest {1} rec / {3:0.0} s : Average r/w {4:0.0000} / {5:0.0000} rec/s",
