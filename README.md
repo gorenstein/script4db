@@ -7,7 +7,7 @@ Script interpreter for database manipulation from PC.
 Can be used for running batch commands on PC to make routine jobs with different databases.
 
 Features include:
-- Run non query SQL command (INSERT, UPDATE, DELETE, CREATE, DROP)
+- Run non query SQL command (INSERT, UPDATE, DELETE, CREATE, DROP, RENAME, ALTER)
 - Copy tables between two different databases
 - Support ODBC as preconfigured by name or as connection string (tested on Access & MySQL connection)
 - For each command you can define behavior on error: stop script or skip/continue

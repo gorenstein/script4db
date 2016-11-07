@@ -21,7 +21,7 @@ namespace script4db.Connections
         private OdbcTableStructure tableStructure;
         private int affected;
         private string scalarResult;
-        private string[] nonQueryCmdNames = new string[] { "DROP", "CREATE", "INSERT", "UPDATE", "DELETE" };
+        private string[] nonQueryCmdNames = new string[] { "DROP", "CREATE", "INSERT", "UPDATE", "DELETE", "RENAME", "ALTER" };
         private ArrayList logMessages = new ArrayList();
         private bool keepAlive;
         private LogMessageTypes errorLevel;

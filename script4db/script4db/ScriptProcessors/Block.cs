@@ -104,6 +104,7 @@ namespace script4db.ScriptProcessors
             string sql = this.parameters["sql"];
             string rawConnString = this.parameters["connection"];
             Connection connection = new Connection(rawConnString);
+            connection.Connector.ErrorLevel = executeErrorLevel;
 
             Stopwatch sw = new Stopwatch();
             sw.Start();
@@ -127,15 +128,15 @@ namespace script4db.ScriptProcessors
             }
         }
 
-        private bool RunExportTable(LogMessageTypes errorLevel)
+        private bool RunExportTable(LogMessageTypes executeErrorLevel)
         {
             // Define Connections for Source & Target
             Connection connSource = new Connection(this.parameters["connectionSource"]);
             Connection connTarget = new Connection(this.parameters["connectionTarget"]);
             connSource.Connector.KeepAlive = true;
-            connSource.Connector.ErrorLevel = errorLevel;
+            connSource.Connector.ErrorLevel = executeErrorLevel;
             connTarget.Connector.KeepAlive = true;
-            connTarget.Connector.ErrorLevel = errorLevel;
+            connTarget.Connector.ErrorLevel = executeErrorLevel;
 
             bool success;
             bool scalarOrNonQuery;
