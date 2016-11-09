@@ -18,7 +18,7 @@ namespace script4db.Connections
         private string connString;
         private OdbcConnection conn;
         private OdbcDataReader dataReader;
-        private OdbcTableStructure tableStructure;
+        private OdbcTableStructure2 tableStructure;
         private int affected;
         private string scalarResult;
         private string[] nonQueryCmdNames = new string[] { "DROP", "CREATE", "INSERT", "UPDATE", "DELETE", "RENAME", "ALTER" };
@@ -223,7 +223,7 @@ namespace script4db.Connections
                 DbOpenIfClosed();
                 try
                 {
-                    this.tableStructure = new OdbcTableStructure(Conn, tableName);
+                    this.tableStructure = new OdbcTableStructure2(Conn, tableName);
                     tableFields = tableStructure.SkeletonCreate;
                 }
                 catch (OdbcException odbcEx)

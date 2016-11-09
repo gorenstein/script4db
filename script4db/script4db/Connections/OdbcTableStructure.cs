@@ -13,6 +13,7 @@ namespace script4db.Connections
     {
         private OdbcConnection _connection;
         private string _tableName;
+        private string _tableType;
         private string _skeletonCreate;
         private string _fieldNames;
         private string _fieldValues;
@@ -22,6 +23,7 @@ namespace script4db.Connections
             _connection = connection;
             _tableName = tableName;
             //Test();
+            _tableType = GetTableType();
             ParceStructure();
         }
 
@@ -43,15 +45,27 @@ namespace script4db.Connections
             StringBuilder buildCreateSeleton = new StringBuilder(string.Empty);
             StringBuilder buildFieldNames = new StringBuilder(string.Empty);
             StringBuilder buildFieldValues = new StringBuilder(string.Empty);
-            DataTable table = _connection.GetSchema("Columns");
+            DataTable table;
+            switch (_tableType)
+            {
+                case "TABLE":
+                    table = _connection.GetSchema("Columns");
+                    break;
+                case "VIEW":
+                    table = _connection.GetSchema("Columns", new[] { null, null, null, "VIEW" });
+                    //table = _connection.GetSchema("ViewColumns");
+                    break;
+                default:
+                    throw new System.ArgumentException("Table or View not exist.", "TableStructure");
+            }
 
-            Console.WriteLine("Table: {0}", _tableName);
+            Console.WriteLine("{0}: {1}", _tableType, _tableName);
 
             foreach (DataRow row in table.Rows)
             {
+                Console.WriteLine("Table:{0} | ColName:{1} | Type:{2} | Size:{3}", row["TABLE_NAME"].ToString(), row["COLUMN_NAME"].ToString(), row["TYPE_NAME"].ToString(), row["COLUMN_SIZE"].ToString());
                 if (row["TABLE_NAME"].ToString().Equals(_tableName))
                 {
-                    Console.WriteLine("ColName:{0} | Type:{1} | Size:{2}", row["COLUMN_NAME"].ToString(), row["TYPE_NAME"].ToString(), row["COLUMN_SIZE"].ToString());
                     tableColumns.Add(new TableColumn
                     {
                         Name = row["COLUMN_NAME"].ToString(),
@@ -88,6 +102,34 @@ namespace script4db.Connections
             _fieldValues = buildFieldValues.ToString();
         }
 
+        private string GetTableType()
+        {
+            DataTable table;
+            table = _connection.GetSchema("Tables");
+            if (IsExistName(table)) return "TABLE";
+
+            table = _connection.GetSchema("Views");
+            if (IsExistName(table)) return "VIEW";
+
+            return "";
+        }
+
+        private bool IsExistName(DataTable table)
+        {
+            foreach (DataRow row in table.Rows)
+            {
+                foreach (DataColumn col in table.Columns)
+                {
+                    if (col.ColumnName == "TABLE_NAME" && (string)row[col] == _tableName)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
         private void Test()
         {
             // Connect to the database then retrieve the schema information.
@@ -95,11 +137,15 @@ namespace script4db.Connections
 
             // Display the contents of the table.
             DisplayData(table);
+
+            table = _connection.GetSchema("Views");
+            DisplayData(table);
+
             Console.WriteLine("Press any key to continue.");
             Console.ReadKey();
         }
 
-        private static void DisplayData(System.Data.DataTable table)
+        private static void DisplayData(DataTable table)
         {
             foreach (System.Data.DataRow row in table.Rows)
             {

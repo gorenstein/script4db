@@ -165,7 +165,11 @@ namespace script4db.ScriptProcessors
             Stopwatch sw = new Stopwatch();
 
             sql = connSource.GetCreateTableSql(tableSource, tableTarget);
-            if (string.IsNullOrWhiteSpace(sql)) success = false;
+            if (string.IsNullOrWhiteSpace(sql))
+            {
+                foreach (LogMessage logMsg in connSource.LogMessages) this.LogMessages.Add(logMsg);
+                success = false;
+            }
             else // Create Target table as copy of Source table structure
             {
                 Console.WriteLine(sql);

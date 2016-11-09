@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Data;
+using System.Data.Odbc;
 
 namespace script4db.Connections
 {
@@ -26,17 +28,26 @@ namespace script4db.Connections
             get { return _type; }
             set
             {
-                _type = value;
+                //8/13
+                //SqlDbType type = (SqlDbType)(int)ProviderType;
+                //System.Data.Odbc.OdbcType.Double
+                
+                // "System.String"
+                //  01234567
+                _type = value.Substring(7).ToUpper();
                 if (!string.IsNullOrEmpty(_type))
                 {
-                    if (_type.Equals("INTEGER")) { _type = "int"; }
-                    if (_type.Equals("COUNTER")) { _type = "int"; }
-                    if (_type.Equals("DATE")) { _type = "datetime"; }
+                    if (_type.Equals("STRING")) { _type = "VARCHAR"; }
+                    if (_type.Equals("INT32")) { _type = "INT"; }
+                    //if (_type.Equals("DATE")) { _type = "datetime"; }
                     //if (_type.Equals("varchar")) { _type = "nvarchar"; }
                 }
             }
         }
         public string ColumnSize { get; set; }
+        public int NumericPrecision { get; set; }
+        public int NumericScale { get; set; }
+        public int ProviderType { get; set; }
         public string Nullable { get; set; }
 
         public string GetFieldSetValuePlaceholder()
@@ -46,7 +57,7 @@ namespace script4db.Connections
 
             if (stringFieldTypes.Contains(Type))
             {
-                sqlSyntax = string.Format("':{0}'",Name);
+                sqlSyntax = string.Format("':{0}'", Name);
             }
             else
             {
@@ -55,7 +66,7 @@ namespace script4db.Connections
 
             return sqlSyntax;
         }
-         
+
         public string GetCreateFieldDefinition()
         {
             string sqlSyntax = string.Format("");
@@ -73,7 +84,10 @@ namespace script4db.Connections
         }
         public override string ToString()
         {
-            string tblColumn = string.Format("{0} {1} {2} {3} {4}", OrdinalPosition, Name, _type, ColumnSize, Nullable);
+            string tblColumn =
+                string.Format("Pos: {0} | ColName:{1} | Type:{2} | Size:{3} | {4}",
+                                OrdinalPosition, Name, _type, ColumnSize, Nullable
+                             );
 
             return tblColumn;
         }

@@ -134,6 +134,14 @@ namespace script4db.ScriptProcessors.Default
 
                 // It's line with paar key=value
                 int IndexOfSplitChar = line.IndexOf("=");
+                if (IndexOfSplitChar < 1)
+                {
+                    foreach (LogMessage logMsg in this.blocks.LogMessages) this.LogMessages.Add(logMsg);
+                    string msg = String.Format("Line No: {0} - Can't add parameter. Maybe Syntax error in script?", lineNumber);
+                    LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
+                    return false;
+                }
+
                 string key = line.Substring(0, IndexOfSplitChar).Trim();
                 string value = line.Substring(IndexOfSplitChar + 1).Trim();
 
