@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,7 +12,6 @@ namespace script4db.Connections
     {
         private OdbcConnection _connection;
         private string _tableName;
-        private string _tableType;
         private string _skeletonCreate;
         private string _fieldNames;
         private string _fieldValues;
@@ -23,7 +21,6 @@ namespace script4db.Connections
             _connection = connection;
             _tableName = tableName;
             //Test();
-            _tableType = GetTableType();
             ParceStructure();
         }
 
@@ -45,36 +42,58 @@ namespace script4db.Connections
             StringBuilder buildCreateSeleton = new StringBuilder(string.Empty);
             StringBuilder buildFieldNames = new StringBuilder(string.Empty);
             StringBuilder buildFieldValues = new StringBuilder(string.Empty);
-            DataTable table;
-            switch (_tableType)
-            {
-                case "TABLE":
-                    table = _connection.GetSchema("Columns");
-                    break;
-                case "VIEW":
-                    table = _connection.GetSchema("Columns", new[] { null, null, null, "VIEW" });
-                    //table = _connection.GetSchema("ViewColumns");
-                    break;
-                default:
-                    throw new System.ArgumentException("Table or View not exist.", "TableStructure");
-            }
 
-            Console.WriteLine("{0}: {1}", _tableType, _tableName);
+            //Retrieve column schema into a DataTable.
+            DataTable schemaTable = GetSchemaTable();
 
-            foreach (DataRow row in table.Rows)
+            Console.WriteLine("{0}:", _tableName);
+
+            TableColumn tableColumn;
+            int result;
+
+            //For each field in the table...
+            foreach (DataRow field in schemaTable.Rows)
             {
-                Console.WriteLine("Table:{0} | ColName:{1} | Type:{2} | Size:{3}", row["TABLE_NAME"].ToString(), row["COLUMN_NAME"].ToString(), row["TYPE_NAME"].ToString(), row["COLUMN_SIZE"].ToString());
-                if (row["TABLE_NAME"].ToString().Equals(_tableName))
+                tableColumn = new TableColumn();
+
+                //For each property of the field...
+                foreach (DataColumn column in schemaTable.Columns)
                 {
-                    tableColumns.Add(new TableColumn
+                    switch (column.ColumnName)
                     {
-                        Name = row["COLUMN_NAME"].ToString(),
-                        OrdinalPosition = (int)row["ORDINAL_POSITION"],
-                        ColumnSize = row["COLUMN_SIZE"].ToString(),
-                        Type = row["TYPE_NAME"].ToString(),
-                        Nullable = (row["NULLABLE"].ToString().Equals("1")) ? "NULL" : "NOT NULL"
-                    });
+                        case "ColumnName":
+                            tableColumn.Name = field[column].ToString();
+                            break;
+                        case "ColumnOrdinal":
+                            tableColumn.OrdinalPosition = (int)field[column];
+                            break;
+                        case "ColumnSize":
+                            tableColumn.ColumnSize = field[column].ToString();
+                            break;
+                        case "NumericPrecision":
+                            if (int.TryParse(field[column].ToString(), out result))
+                                tableColumn.NumericPrecision = result;
+                            break;
+                        case "NumericScale":
+                            if (int.TryParse(field[column].ToString(), out result))
+                                tableColumn.NumericScale = result;
+                            break;
+                        case "ProviderType":
+                            if (int.TryParse(field[column].ToString(), out result))
+                                tableColumn.ProviderType = result;
+                            break;
+                        case "DataType":
+                            tableColumn.Type = field[column].ToString();
+                            break;
+                        case "AllowDBNull":
+                            tableColumn.Nullable = (field[column].ToString().Equals("1")) ? "NULL" : "NOT NULL";
+                            break;
+                        default:
+                            break;
+                    }
                 }
+                Console.WriteLine("Table:{0} | {1}", _tableName, tableColumn.ToString());
+                tableColumns.Add(tableColumn);
             }
 
             var sortedScriptColumns =
@@ -102,60 +121,35 @@ namespace script4db.Connections
             _fieldValues = buildFieldValues.ToString();
         }
 
-        private string GetTableType()
+        private DataTable GetSchemaTable()
         {
-            DataTable table;
-            table = _connection.GetSchema("Tables");
-            if (IsExistName(table)) return "TABLE";
+            //Retrieve records from the table into a DataReader.
+            string cmdText = string.Format("SELECT * FROM {0}", _tableName);
+            OdbcCommand command = new OdbcCommand(cmdText, _connection);
+            OdbcDataReader dataReader = command.ExecuteReader();
 
-            table = _connection.GetSchema("Views");
-            if (IsExistName(table)) return "VIEW";
+            //Retrieve column schema into a DataTable.
+            DataTable schemaTable = dataReader.GetSchemaTable();
 
-            return "";
-        }
-
-        private bool IsExistName(DataTable table)
-        {
-            foreach (DataRow row in table.Rows)
-            {
-                foreach (DataColumn col in table.Columns)
-                {
-                    if (col.ColumnName == "TABLE_NAME" && (string)row[col] == _tableName)
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
+            return schemaTable;
         }
 
         private void Test()
         {
-            // Connect to the database then retrieve the schema information.
-            DataTable table = _connection.GetSchema("Tables");
+            //Retrieve column schema into a DataTable.
+            DataTable schemaTable = GetSchemaTable();
 
-            // Display the contents of the table.
-            DisplayData(table);
-
-            table = _connection.GetSchema("Views");
-            DisplayData(table);
-
-            Console.WriteLine("Press any key to continue.");
-            Console.ReadKey();
-        }
-
-        private static void DisplayData(DataTable table)
-        {
-            foreach (System.Data.DataRow row in table.Rows)
+            //For each field in the table...
+            foreach (DataRow field in schemaTable.Rows)
             {
-                foreach (System.Data.DataColumn col in table.Columns)
+                //For each property of the field...
+                foreach (DataColumn property in schemaTable.Columns)
                 {
-                    Console.WriteLine("{0} = {1}", col.ColumnName, row[col]);
+                    //Display the field name and value.
+                    Console.WriteLine(property.ColumnName + " = " + field[property].ToString());
                 }
-                Console.WriteLine("============================");
+                Console.WriteLine("------------------");
             }
         }
-
     }
 }

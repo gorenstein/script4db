@@ -18,7 +18,7 @@ namespace script4db.Connections
         private string connString;
         private OdbcConnection conn;
         private OdbcDataReader dataReader;
-        private OdbcTableStructure2 tableStructure;
+        private OdbcTableStructure tableStructure;
         private int affected;
         private string scalarResult;
         private string[] nonQueryCmdNames = new string[] { "DROP", "CREATE", "INSERT", "UPDATE", "DELETE", "RENAME", "ALTER" };
@@ -48,7 +48,6 @@ namespace script4db.Connections
             }
         }
 
-        //OdbcDataReader myReader = myCommand.ExecuteReader();
         public OdbcDataReader GetDataReader(string tableName)
         {
             string sql = string.Format("SELECT * FROM {0}", tableName);
@@ -223,7 +222,7 @@ namespace script4db.Connections
                 DbOpenIfClosed();
                 try
                 {
-                    this.tableStructure = new OdbcTableStructure2(Conn, tableName);
+                    this.tableStructure = new OdbcTableStructure(Conn, tableName);
                     tableFields = tableStructure.SkeletonCreate;
                 }
                 catch (OdbcException odbcEx)
@@ -263,11 +262,11 @@ namespace script4db.Connections
             {
                 oldValue = ":" + dataReader.GetName(i);
                 newValue = ValueToString(dataReader, i);
-                Console.WriteLine("-----------");
-                Console.WriteLine(dataReader.GetName(i) + " = " + dataReader.GetValue(i).ToString());
-                Console.WriteLine(dataReader.GetFieldType(i).ToString());
-                Console.WriteLine("===========");
                 fieldValues = fieldValues.Replace(oldValue, newValue);
+                //Console.WriteLine("-----------");
+                //Console.WriteLine(dataReader.GetName(i) + " = " + dataReader.GetValue(i).ToString());
+                //Console.WriteLine(dataReader.GetFieldType(i).ToString());
+                //Console.WriteLine("===========");
             }
 
             return string.Format("INSERT INTO {0} ({1}) VALUES ({2});", tableTarget, fieldNames, fieldValues);
