@@ -274,8 +274,24 @@ namespace script4db.Connections
 
         private string ValueToString(OdbcDataReader dataReader, int fieldNum)
         {
-            string result = dataReader.GetValue(fieldNum).ToString();
-            result = result.Replace("'", "''"); //escaping single quotes 
+            string result = dataReader.GetValue(fieldNum).ToString().TrimEnd();
+
+            if (string.IsNullOrWhiteSpace(result) && tableStructure.IsColumnNumeric(fieldNum))
+            {
+                return "NULL";
+            }
+
+            if (tableStructure.IsColumnDatetime(fieldNum))
+            {
+                DateTime myDate;
+                if (!DateTime.TryParse(result, out myDate))
+                {
+                    throw new System.ArgumentException("Incorrect DateTime format.", this.GetType().Name);
+                }
+
+                return myDate.ToString("s");
+            }
+
 
             switch (dataReader.GetFieldType(fieldNum).FullName)
             {
@@ -285,6 +301,7 @@ namespace script4db.Connections
                     result = result.Replace(",", ".");
                     break;
                 default:
+                    result = result.Replace("'", "''"); //escaping single quotes
                     break;
             }
             return result;

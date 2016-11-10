@@ -12,6 +12,7 @@ namespace script4db.Connections
     {
         private OdbcConnection _connection;
         private string _tableName;
+        private List<TableColumn> tableColumns;
         private string _skeletonCreate;
         private string _fieldNames;
         private string _fieldValues;
@@ -38,7 +39,7 @@ namespace script4db.Connections
         }
         private void ParceStructure()
         {
-            List<TableColumn> tableColumns = new List<TableColumn>();
+            tableColumns = new List<TableColumn>();
             StringBuilder buildCreateSeleton = new StringBuilder(string.Empty);
             StringBuilder buildFieldNames = new StringBuilder(string.Empty);
             StringBuilder buildFieldValues = new StringBuilder(string.Empty);
@@ -68,7 +69,8 @@ namespace script4db.Connections
                             tableColumn.OrdinalPosition = (int)field[column];
                             break;
                         case "ColumnSize":
-                            tableColumn.ColumnSize = field[column].ToString();
+                            if (int.TryParse(field[column].ToString(), out result))
+                                tableColumn.ColumnSize = result;
                             break;
                         case "NumericPrecision":
                             if (int.TryParse(field[column].ToString(), out result))
@@ -80,13 +82,13 @@ namespace script4db.Connections
                             break;
                         case "ProviderType":
                             if (int.TryParse(field[column].ToString(), out result))
-                                tableColumn.ProviderType = result;
+                                tableColumn.ProviderType = (OdbcType)result;
                             break;
                         case "DataType":
-                            tableColumn.Type = field[column].ToString();
+                            tableColumn.DataType = field[column].ToString();
                             break;
                         case "AllowDBNull":
-                            tableColumn.Nullable = (field[column].ToString().Equals("1")) ? "NULL" : "NOT NULL";
+                            tableColumn.Nullable = (field[column].ToString().Equals("True")) ? "NULL" : "NOT NULL";
                             break;
                         default:
                             break;
@@ -108,7 +110,7 @@ namespace script4db.Connections
             // Generate Skeletons "PersonID int, LastName varchar(255)"
             foreach (TableColumn column in tableColumns)
             {
-                //Console.WriteLine(column.ToString());
+                Console.WriteLine(column.ToString());
                 //Console.WriteLine(column.GetCreateFieldDefinition());
                 //Console.WriteLine(column.GetFieldSetValueDefinition());
                 buildCreateSeleton.Append(delimiter + column.GetCreateFieldDefinition());
@@ -119,6 +121,30 @@ namespace script4db.Connections
             _skeletonCreate = buildCreateSeleton.ToString();
             _fieldNames = buildFieldNames.ToString();
             _fieldValues = buildFieldValues.ToString();
+        }
+
+        public bool IsColumnNumeric( int fieldNum)
+        {
+            foreach (TableColumn column in tableColumns)
+            {
+                if (column.OrdinalPosition == fieldNum)
+                {
+                    return column.IsNumeric();
+                }
+            }
+            throw new System.ArgumentException("This part of code must be never reachable in IsColumnNumeric.", this.GetType().Name);
+        }
+
+        public bool IsColumnDatetime(int fieldNum)
+        {
+            foreach (TableColumn column in tableColumns)
+            {
+                if (column.OrdinalPosition == fieldNum)
+                {
+                    return (column.Type == "DATETIME");
+                }
+            }
+            throw new System.ArgumentException("This part of code must be never reachable in IsColumnNumeric.", this.GetType().Name);
         }
 
         private DataTable GetSchemaTable()
