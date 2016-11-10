@@ -276,6 +276,7 @@ namespace script4db.Connections
         private string ValueToString(OdbcDataReader dataReader, int fieldNum)
         {
             string result = dataReader.GetValue(fieldNum).ToString();
+            result = result.Replace("'", "''"); //escaping single quotes 
 
             switch (dataReader.GetFieldType(fieldNum).FullName)
             {
@@ -287,7 +288,6 @@ namespace script4db.Connections
                 default:
                     break;
             }
-
             return result;
         }
 
