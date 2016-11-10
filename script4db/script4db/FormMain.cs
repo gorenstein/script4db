@@ -428,6 +428,8 @@ namespace script4db
                 LogMessage logMsg = new LogMessage(LogMessageTypes.Error, "Worker", e.Error.ToString());
                 this.Logs.AppendMessage(logMsg);
             }
+            worker.DoWork -= Bw_DoWorkScriptCommand;
+            worker.RunWorkerCompleted -= Bw_RunWorkerScriptCompleted;
         }
     }
 }
