@@ -159,7 +159,7 @@ namespace script4db.ScriptProcessors
             bool scalarOrNonQuery;
             string msg;
             string sql;
-            string nodeBaseText = BlockStatuses.Working.ToString();
+            string nodeBaseText = order.ToString() + " " + BlockStatuses.Working.ToString();
             string tableSource = parameters["tableSource"];
             string tableTarget = parameters["tableTarget"];
             Stopwatch sw = new Stopwatch();
