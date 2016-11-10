@@ -46,7 +46,7 @@ namespace script4db.Connections
             //Retrieve column schema into a DataTable.
             DataTable schemaTable = GetSchemaTable();
 
-            Console.WriteLine("{0}:", _tableName);
+            //Console.WriteLine("{0}:", _tableName);
 
             TableColumn tableColumn;
             int result;
@@ -92,7 +92,7 @@ namespace script4db.Connections
                             break;
                     }
                 }
-                Console.WriteLine("Table:{0} | {1}", _tableName, tableColumn.ToString());
+                //Console.WriteLine("Table:{0} | {1}", _tableName, tableColumn.ToString());
                 tableColumns.Add(tableColumn);
             }
 

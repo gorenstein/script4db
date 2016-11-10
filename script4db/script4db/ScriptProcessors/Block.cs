@@ -172,7 +172,7 @@ namespace script4db.ScriptProcessors
             }
             else // Create Target table as copy of Source table structure
             {
-                Console.WriteLine(sql);
+                //Console.WriteLine(sql);
                 scalarOrNonQuery = true;
                 sw.Start();
                 success = connTarget.ExecuteSQL(sql, scalarOrNonQuery);
@@ -203,9 +203,9 @@ namespace script4db.ScriptProcessors
             double avReadSec = 0;
             double avWriteSec = 0;
             double restSec = 0;
-            Console.WriteLine(
-                string.Format("Total {0} records for copy from table '{1}' to '{2}'",
-                                recordCountSource, tableSource, tableTarget));
+            //Console.WriteLine(
+            //    string.Format("Total {0} records for copy from table '{1}' to '{2}'",
+            //                    recordCountSource, tableSource, tableTarget));
             int step = int.Parse(parameters["maxPerLoop"]); // Limit for max Read/Insert records per interation
             int maxLoops = (int)Math.Ceiling((decimal)recordCountSource / step);
 
@@ -251,7 +251,7 @@ namespace script4db.ScriptProcessors
                 if (string.IsNullOrWhiteSpace(sql)) success = false;
                 else // Insert to target - copy next scope of records
                 {
-                    Console.WriteLine(sql);
+                    //Console.WriteLine(sql);
                     scalarOrNonQuery = true;
                     swWrite.Start();
                     success = connTarget.ExecuteSQL(sql, scalarOrNonQuery);
@@ -284,7 +284,7 @@ namespace script4db.ScriptProcessors
 
             msg = String.Format("Elapsed {0:0.000}s : Copied in to table '{1}' {2} records",
                                     swRead.Elapsed.TotalSeconds + swWrite.Elapsed.TotalSeconds, tableTarget, recordCountSource);
-            Console.WriteLine(msg);
+            //Console.WriteLine(msg);
             this.LogMessages.Add(new LogMessage(LogMessageTypes.Info, this.GetType().Name, msg));
             return true;
         }
