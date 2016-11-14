@@ -260,7 +260,7 @@ namespace script4db.Connections
             string oldValue, newValue;
             for (int i = 0; i < dataReader.FieldCount; i++)
             {
-                oldValue = ":" + dataReader.GetName(i);
+                oldValue = ":" + dataReader.GetName(i) + ":";
                 newValue = ValueToString(dataReader, i);
                 fieldValues = fieldValues.Replace(oldValue, newValue);
                 //Console.WriteLine("-----------");

@@ -85,8 +85,8 @@ namespace script4db.Connections
             // INSERT INTO TableName SET col_string=":col_string", col_num=:col_num 
             string sqlSyntax = string.Format("");
 
-            if (!IsNumeric() || Type == "DATETIME") sqlSyntax = string.Format("':{0}'", Name);
-            else sqlSyntax = string.Format(":{0}", Name);
+            if (!IsNumeric() || Type == "DATETIME") sqlSyntax = string.Format("':{0}:'", Name);
+            else sqlSyntax = string.Format(":{0}:", Name);
 
             return sqlSyntax;
         }
