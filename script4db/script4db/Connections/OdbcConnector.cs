@@ -223,7 +223,7 @@ namespace script4db.Connections
                 try
                 {
                     this.tableStructure = new OdbcTableStructure(Conn, tableName);
-                    tableFields = tableStructure.SkeletonCreate;
+                    tableFields = tableStructure.SkeletonCreateTable;
                 }
                 catch (OdbcException odbcEx)
                 {

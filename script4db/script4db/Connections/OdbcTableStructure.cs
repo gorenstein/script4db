@@ -13,7 +13,7 @@ namespace script4db.Connections
         private OdbcConnection _connection;
         private string _tableName;
         private List<TableColumn> tableColumns;
-        private string _skeletonCreate;
+        private string _skeletonCreateTable;
         private string _fieldNames;
         private string _fieldValues;
 
@@ -25,9 +25,9 @@ namespace script4db.Connections
             ParceStructure();
         }
 
-        public string SkeletonCreate
+        public string SkeletonCreateTable
         {
-            get { return _skeletonCreate; }
+            get { return _skeletonCreateTable; }
         }
         public string FieldNames
         {
@@ -118,7 +118,7 @@ namespace script4db.Connections
                 buildFieldValues.Append(delimiter + column.GetFieldSetValuePlaceholder());
                 delimiter = ",";
             }
-            _skeletonCreate = buildCreateSeleton.ToString();
+            _skeletonCreateTable = buildCreateSeleton.ToString();
             _fieldNames = buildFieldNames.ToString();
             _fieldValues = buildFieldValues.ToString();
         }
