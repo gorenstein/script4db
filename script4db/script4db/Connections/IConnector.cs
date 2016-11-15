@@ -15,8 +15,9 @@ namespace script4db.Connections
         bool ExecuteSQL(string sql, bool scalar);
         string ScalarResult { get; }
         int Affected { get; }
-        string GetTableFields(string tableName);
-        string GetInsertSql(OdbcDataReader dataReader, string tableTarget);
+        string DataSource { get; }
+        string GetTableFieldsListAsSqlSyntax(string tableName, string targetSqlSyntax);
+        string GetInsertSql(OdbcDataReader dataReader, string tableTarget, string targetSqlSyntax);
         OdbcDataReader GetDataReader(string tableName);
         LogMessageTypes ErrorLevel { get; set; }
         ArrayList LogMessages { get; }

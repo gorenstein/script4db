@@ -37,9 +37,9 @@ namespace script4db.Connections
             }
         }
 
-        public string GetInsertSql(OdbcDataReader dataReader, string tableTarget)
+        public string GetInsertSql(OdbcDataReader dataReader, string tableTarget, string targetSqlSyntax)
         {
-            string sql = connector.GetInsertSql(dataReader, tableTarget);
+            string sql = connector.GetInsertSql(dataReader, tableTarget, targetSqlSyntax);
 
             if (string.IsNullOrWhiteSpace(sql))
             {
@@ -68,10 +68,10 @@ namespace script4db.Connections
             }
         }
 
-        public string GetCreateTableSql(string tableSource, string tableTarget)
+        public string GetCreateTableSql(string tableSource, string tableTarget, string targetSqlSyntax)
         {
             string sql;
-            string tableFields = connector.GetTableFields(tableSource);
+            string tableFields = connector.GetTableFieldsListAsSqlSyntax(tableSource, targetSqlSyntax);
 
             if (string.IsNullOrWhiteSpace(tableFields))
             {

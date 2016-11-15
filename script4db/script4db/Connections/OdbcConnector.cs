@@ -196,6 +196,14 @@ namespace script4db.Connections
             }
         }
 
+        public string DataSource
+        {
+            get {
+                DbOpenIfClosed();
+                return Conn.DataSource;
+            }
+        }
+
         public bool KeepAlive
         {
             get { return keepAlive; }
@@ -213,7 +221,7 @@ namespace script4db.Connections
             get { return this.scalarResult; }
         }
 
-        public string GetTableFields(string tableName)
+        public string GetTableFieldsListAsSqlSyntax(string tableName, string targetSqlSyntax)
         {
             string tableFields = "";
 
@@ -222,7 +230,7 @@ namespace script4db.Connections
                 DbOpenIfClosed();
                 try
                 {
-                    this.tableStructure = new OdbcTableStructure(Conn, tableName);
+                    this.tableStructure = new OdbcTableStructure(Conn, tableName, targetSqlSyntax);
                     tableFields = tableStructure.SkeletonCreateTable;
                 }
                 catch (OdbcException odbcEx)
@@ -245,7 +253,7 @@ namespace script4db.Connections
             return tableFields;
         }
 
-        public string GetInsertSql(OdbcDataReader dataReader, string tableTarget)
+        public string GetInsertSql(OdbcDataReader dataReader, string tableTarget, string targetSqlSyntax)
         {
             string fieldNames = tableStructure.FieldNames;
             string fieldValues = tableStructure.FieldValues;
@@ -261,7 +269,7 @@ namespace script4db.Connections
             for (int i = 0; i < dataReader.FieldCount; i++)
             {
                 oldValue = ":" + dataReader.GetName(i) + ":";
-                newValue = ValueToString(dataReader, i);
+                newValue = ValueToString(dataReader, i, targetSqlSyntax);
                 fieldValues = fieldValues.Replace(oldValue, newValue);
                 //Console.WriteLine("-----------");
                 //Console.WriteLine(dataReader.GetName(i) + " = " + dataReader.GetValue(i).ToString());
@@ -272,7 +280,7 @@ namespace script4db.Connections
             return string.Format("INSERT INTO {0} ({1}) VALUES ({2});", tableTarget, fieldNames, fieldValues);
         }
 
-        private string ValueToString(OdbcDataReader dataReader, int fieldNum)
+        private string ValueToString(OdbcDataReader dataReader, int fieldNum, string targetSqlSyntax)
         {
             string result = dataReader.GetValue(fieldNum).ToString().TrimEnd();
 
@@ -287,6 +295,10 @@ namespace script4db.Connections
                 if (!DateTime.TryParse(result, out myDate))
                 {
                     throw new System.ArgumentException("Incorrect DateTime format.", this.GetType().Name);
+                }
+                if (targetSqlSyntax == "ACCESS")
+                {
+                    return myDate.ToString("yyyy-MM-dd H:mm:ss");
                 }
 
                 return myDate.ToString("s");

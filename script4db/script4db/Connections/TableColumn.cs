@@ -80,15 +80,25 @@ namespace script4db.Connections
         public string DataType { get; set; }
         public string Nullable { get; set; }
 
-        public string GetFieldSetValuePlaceholder()
+        public string GetFieldSetValuePlaceholder(string targetSqlSyntax)
         {
-            // INSERT INTO TableName SET col_string=":col_string", col_num=:col_num 
-            string sqlSyntax = string.Format("");
+            // INSERT INTO TableName SET col_string=":col_string:", col_num=:col_num: 
+            string sqlFormat;
 
-            if (!IsNumeric() || Type == "DATETIME") sqlSyntax = string.Format("':{0}:'", Name);
-            else sqlSyntax = string.Format(":{0}:", Name);
+            if (targetSqlSyntax == "ACCESS" && this.Type == "DATETIME")
+            {
+                sqlFormat = "#:{0}:#";
+            }
+            else if (IsNumeric())
+            {
+                sqlFormat = ":{0}:";
+            }
+            else
+            {
+                sqlFormat = "':{0}:'";
+            }
 
-            return sqlSyntax;
+            return string.Format(sqlFormat, Name);
         }
 
         public bool IsNumeric()
@@ -96,7 +106,7 @@ namespace script4db.Connections
             return !stringFieldTypes.Contains(Type);
         }
 
-        public string GetCreateFieldDefinition()
+        public string GetCreateFieldDefinition(string targetSqlSyntax)
         {
             string sqlSyntax = string.Format("");
             string nulable = "NULL"; //override this.Nullable

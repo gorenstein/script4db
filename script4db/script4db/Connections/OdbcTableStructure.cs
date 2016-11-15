@@ -12,15 +12,17 @@ namespace script4db.Connections
     {
         private OdbcConnection _connection;
         private string _tableName;
+        private string _targetSqlSyntax;
         private List<TableColumn> tableColumns;
         private string _skeletonCreateTable;
         private string _fieldNames;
         private string _fieldValues;
 
-        public OdbcTableStructure(OdbcConnection connection, string tableName)
+        public OdbcTableStructure(OdbcConnection connection, string tableName, string targetSqlSyntax)
         {
             _connection = connection;
             _tableName = tableName;
+            _targetSqlSyntax = targetSqlSyntax;
             //Test();
             ParceStructure();
         }
@@ -46,8 +48,6 @@ namespace script4db.Connections
 
             //Retrieve column schema into a DataTable.
             DataTable schemaTable = GetSchemaTable();
-
-            //Console.WriteLine("{0}:", _tableName);
 
             TableColumn tableColumn;
             int result;
@@ -113,9 +113,9 @@ namespace script4db.Connections
                 Console.WriteLine(column.ToString());
                 //Console.WriteLine(column.GetCreateFieldDefinition());
                 //Console.WriteLine(column.GetFieldSetValueDefinition());
-                buildCreateSeleton.Append(delimiter + column.GetCreateFieldDefinition());
+                buildCreateSeleton.Append(delimiter + column.GetCreateFieldDefinition(_targetSqlSyntax));
                 buildFieldNames.Append(delimiter + column.Name);
-                buildFieldValues.Append(delimiter + column.GetFieldSetValuePlaceholder());
+                buildFieldValues.Append(delimiter + column.GetFieldSetValuePlaceholder(_targetSqlSyntax));
                 delimiter = ",";
             }
             _skeletonCreateTable = buildCreateSeleton.ToString();
@@ -123,7 +123,7 @@ namespace script4db.Connections
             _fieldValues = buildFieldValues.ToString();
         }
 
-        public bool IsColumnNumeric( int fieldNum)
+        public bool IsColumnNumeric(int fieldNum)
         {
             foreach (TableColumn column in tableColumns)
             {
@@ -162,20 +162,27 @@ namespace script4db.Connections
 
         private void Test()
         {
-            //Retrieve column schema into a DataTable.
-            DataTable schemaTable = GetSchemaTable();
 
-            //For each field in the table...
-            foreach (DataRow field in schemaTable.Rows)
-            {
-                //For each property of the field...
-                foreach (DataColumn property in schemaTable.Columns)
-                {
-                    //Display the field name and value.
-                    Console.WriteLine(property.ColumnName + " = " + field[property].ToString());
-                }
-                Console.WriteLine("------------------");
-            }
+            //Console.WriteLine("Table:{0}", _tableName);
+            //Console.WriteLine(string.Format("ServerVersion:{0}", _connection.ServerVersion));
+            //Console.WriteLine(string.Format("Database:{0}", _connection.Database));
+            Console.WriteLine(string.Format("DataSource:{0}", _connection.DataSource));
+            return;
+
+            ////Retrieve column schema into a DataTable.
+            //DataTable schemaTable = GetSchemaTable();
+
+            ////For each field in the table...
+            //foreach (DataRow field in schemaTable.Rows)
+            //{
+            //    //For each property of the field...
+            //    foreach (DataColumn property in schemaTable.Columns)
+            //    {
+            //        //Display the field name and value.
+            //        Console.WriteLine(property.ColumnName + " = " + field[property].ToString());
+            //    }
+            //    Console.WriteLine("------------------");
+            //}
         }
     }
 }

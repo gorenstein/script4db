@@ -164,7 +164,7 @@ namespace script4db.ScriptProcessors
             string tableTarget = parameters["tableTarget"];
             Stopwatch sw = new Stopwatch();
 
-            sql = connSource.GetCreateTableSql(tableSource, tableTarget);
+            sql = connSource.GetCreateTableSql(tableSource, tableTarget, connTarget.Connector.DataSource);
             if (string.IsNullOrWhiteSpace(sql))
             {
                 foreach (LogMessage logMsg in connSource.LogMessages) this.LogMessages.Add(logMsg);
@@ -241,7 +241,7 @@ namespace script4db.ScriptProcessors
                 {
                     if (dataReader.Read())
                     {
-                        sql += connSource.GetInsertSql(dataReader, tableTarget);
+                        sql += connSource.GetInsertSql(dataReader, tableTarget, connTarget.Connector.DataSource);
                     }
                     else break;
                 }
