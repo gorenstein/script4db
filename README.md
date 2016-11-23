@@ -16,6 +16,7 @@ Features include:
 Documentation
 -------------
 For details see “example.script4db” file.
+Mapping notes see [mapping.md](https://github.com/gorenstein/script4db/blob/master/mapping.md)
 
 Installation
 ------------
