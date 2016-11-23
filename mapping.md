@@ -9,13 +9,13 @@ Mapped ODBC fields types
 ------------------------
 In target database will created table with fields types:
 - OdbcType.BigInt, OdbcType.Int, OdbcType.SmallInt, OdbcType.TinyInt, OdbcType.Bit
- as 'INT'
+	- as 'INT'
 - OdbcType.Char, OdbcType.NChar, OdbcType.NVarChar, OdbcType.VarChar, OdbcType.NText, OdbcType.Text
- if string is =< 255 chars as 'VARCHAR' 
- if string is > 255 chars as 'MEMO' for Access or as 'TEXT' for MySQL and others
+	- if string is =< 255 chars as 'VARCHAR' 
+	- if string is > 255 chars as 'MEMO' for Access or as 'TEXT' for MySQL and others
 - OdbcType.DateTime, OdbcType.Timestamp; OdbcType.Date, OdbcType.Time, OdbcType.SmallDateTime:
- as 'DATETIME'
+	- as 'DATETIME'
 - OdbcType.Decimal, OdbcType.Numeric, OdbcType.Double, OdbcType.Real:
- as 'DOUBLE'
+	- as 'DOUBLE'
 - OdbcType.Binary, OdbcType.Image, OdbcType.UniqueIdentifier, OdbcType.VarBinary:
- as 'MEMO' for Access or as 'TEXT' for MySQL and others
+	- as 'MEMO' for Access or as 'TEXT' for MySQL and others
