@@ -9,7 +9,7 @@ Can be used for running batch commands on PC to make routine jobs with different
 Features include:
 - Run non query SQL command (INSERT, UPDATE, DELETE, CREATE, DROP, RENAME, ALTER)
 
-- Copy tables between two different databases *(fields types mapping matrix see [mapping.md](https://github.com/gorenstein/script4db/blob/master/README.md))*
+- Copy tables between two different databases *(fields types mapping matrix see [mapping.md](https://github.com/gorenstein/script4db/blob/master/mapping.md))*
 - Support ODBC as preconfigured by name or as connection string *(tested on Access & MySQL connection)*
 
 - For each command you can define behavior on error: stop script or skip/continue
