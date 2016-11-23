@@ -15,77 +15,58 @@ namespace script4db.Connections
             ColumnSize = 255;
             ProviderType = OdbcType.VarChar;
         }
-        private string[] stringFieldTypes =
-            new string[]
-            {
-                "CHAR", "VARCHAR",
-                "BINARY", "VARBINARY",
-                "BLOB", "TINYBLOB", "MEDIUMBLOB", "LONGBLOB",
-                "TEXT", "TINYTEXT", "MEDIUMTEXT", "LONGTEXT",
-                "ENUM", "SET", "JSON"
-            };
-        private OdbcType _providerType;
-        public string Type { get; set; }
+
+        private OdbcType[] odbcTypeNumeric = new OdbcType[]
+        {
+            OdbcType.BigInt,
+            OdbcType.Int,
+            OdbcType.SmallInt,
+            OdbcType.TinyInt,
+            OdbcType.Bit,
+            OdbcType.Decimal,
+            OdbcType.Numeric,
+            OdbcType.Double,
+            OdbcType.Real
+        };
+
+        private OdbcType[] odbcTypeString = new OdbcType[]
+        {
+            OdbcType.Char,
+            OdbcType.NChar,
+            OdbcType.NVarChar,
+            OdbcType.VarChar,
+            OdbcType.NText,
+            OdbcType.Text,
+            OdbcType.Binary,
+            OdbcType.Image,
+            OdbcType.UniqueIdentifier,
+            OdbcType.VarBinary
+        };
+
+        private OdbcType[] odbcTypeDatetime = new OdbcType[]
+        {
+            OdbcType.DateTime,
+            OdbcType.Timestamp,
+            OdbcType.Date,
+            OdbcType.Time,
+            OdbcType.SmallDateTime
+        };
+
         public string Name { get; set; }
         public int OrdinalPosition { get; set; }
         public int ColumnSize { get; set; }
         public int NumericPrecision { get; set; }
         public int NumericScale { get; set; }
-        public OdbcType ProviderType
-        {
-            get { return _providerType; }
-            set
-            {
-                _providerType = value;
-                switch (_providerType)
-                {
-                    case OdbcType.BigInt:
-                    case OdbcType.Int:
-                    case OdbcType.SmallInt:
-                    case OdbcType.TinyInt:
-                    case OdbcType.Bit:
-                        Type = "INT";
-                        break;
-                    case OdbcType.Char:
-                    case OdbcType.NChar:
-                    case OdbcType.NVarChar:
-                    case OdbcType.VarChar:
-                    case OdbcType.NText:
-                    case OdbcType.Text:
-                        Type = "VARCHAR";
-                        break;
-                    case OdbcType.DateTime:
-                    case OdbcType.Timestamp:
-                    case OdbcType.Date:
-                    case OdbcType.Time:
-                    case OdbcType.SmallDateTime:
-                        Type = "DATETIME";
-                        break;
-                    case OdbcType.Decimal:
-                    case OdbcType.Numeric:
-                    case OdbcType.Double:
-                    case OdbcType.Real:
-                        Type = "DOUBLE";
-                        break;
-                    case OdbcType.Binary:
-                    case OdbcType.Image:
-                    case OdbcType.UniqueIdentifier:
-                    case OdbcType.VarBinary:
-                    default:
-                        Type = "VARCHAR";
-                        break;
-                }
-            }
-        }
+        public OdbcType ProviderType { get; set; }
         public string DataType { get; set; }
         public string Nullable { get; set; }
 
-        public string GetFieldSetValuePlaceholder(string targetSqlSyntax)
+        public string GetFieldSetValuePlaceholder(DbType targetDbType)
         {
             // INSERT INTO TableName SET col_string=":col_string:", col_num=:col_num: 
             string sqlFormat;
 
-            if (targetSqlSyntax == "ACCESS" && this.Type == "DATETIME")
+            if (targetDbType == DbType.Access && IsDatetime())
             {
                 sqlFormat = "#:{0}:#";
             }
@@ -103,31 +84,120 @@ namespace script4db.Connections
 
         public bool IsNumeric()
         {
-            return !stringFieldTypes.Contains(Type);
+            return odbcTypeNumeric.Contains(this.ProviderType);
+        }
+        public bool IsString()
+        {
+            return odbcTypeString.Contains(this.ProviderType);
+        }
+        public bool IsStringShort()
+        {
+            return ColumnSize <= 255 && IsString();
+        }
+        public bool IsStringLong()
+        {
+            return ColumnSize > 255 && IsString();
         }
 
-        public string GetCreateFieldDefinition(string targetSqlSyntax)
+        public bool IsDatetime()
+        {
+            return odbcTypeDatetime.Contains(this.ProviderType);
+        }
+        public string GetCreateFieldDefinition(DbType targetDbType)
         {
             string sqlSyntax = string.Format("");
             string nulable = "NULL"; //override this.Nullable
 
-            if (stringFieldTypes.Contains(Type))
+            if (IsStringShort())
             {
-                int size = (ColumnSize > 255) ? 255 : ColumnSize;
-                sqlSyntax = string.Format("{0} {1}({2}) {3}", Name, Type, size, nulable);
+                sqlSyntax = string.Format("{0} {1}({2}) {3}", Name, GetSqlSyntaxName(targetDbType), ColumnSize, nulable);
             }
             else
             {
-                sqlSyntax = string.Format("{0} {1} {2}", Name, Type, nulable);
+                sqlSyntax = string.Format("{0} {1} {2}", Name, GetSqlSyntaxName(targetDbType), nulable);
             }
 
             return sqlSyntax;
         }
+
+        private string GetSqlSyntaxName(DbType targetDbType)
+        {
+            string sqlName;
+            switch (ProviderType)
+            {
+                case OdbcType.BigInt:
+                case OdbcType.Int:
+                case OdbcType.SmallInt:
+                case OdbcType.TinyInt:
+                case OdbcType.Bit:
+                    sqlName = "INT";
+                    break;
+                case OdbcType.Char:
+                case OdbcType.NChar:
+                case OdbcType.NVarChar:
+                case OdbcType.VarChar:
+                case OdbcType.NText:
+                case OdbcType.Text:
+                    if (IsStringShort()) sqlName = "VARCHAR";
+                    else if (IsStringLong()) sqlName = GetSqlSyntaxNameForLongString(targetDbType);
+                    else throw new System.ArgumentException("Can't define SqlSyntaxName for string field.", this.GetType().Name);
+                    break;
+                case OdbcType.DateTime:
+                case OdbcType.Timestamp:
+                case OdbcType.Date:
+                case OdbcType.Time:
+                case OdbcType.SmallDateTime:
+                    sqlName = "DATETIME";
+                    break;
+                case OdbcType.Decimal:
+                case OdbcType.Numeric:
+                case OdbcType.Double:
+                case OdbcType.Real:
+                    sqlName = "DOUBLE";
+                    break;
+                case OdbcType.Binary:
+                case OdbcType.Image:
+                case OdbcType.UniqueIdentifier:
+                case OdbcType.VarBinary:
+                default:
+                    sqlName = "VARCHAR";
+                    break;
+            }
+
+            return sqlName;
+        }
+
+        private string GetSqlSyntaxNameForLongString(DbType targetDbType)
+        {
+            string sqlName;
+            switch (targetDbType)
+            {
+                case DbType.Access:
+                    sqlName = "MEMO";
+                    break;
+                case DbType.MySQL:
+                    sqlName = "TEXT";
+                    break;
+                case DbType.MSSQL:
+                    sqlName = "TEXT";
+                    break;
+                case DbType.Oracle:
+                    sqlName = "TEXT";
+                    break;
+                case DbType.undefined:
+                case DbType.unknow:
+                default:
+                    throw new System.ArgumentException(string.Format("Not allowed targetDbType: '{0}'.", targetDbType.ToString()), this.GetType().Name);
+            }
+
+            return sqlName;
+        }
+
         public override string ToString()
         {
             string tblColumn =
-                string.Format("Pos: {0} | ColName:{1} | Type:{2}/{3}/{4}/{5} | Size:{6} | {7}",
-                                OrdinalPosition, Name, DataType, Type, _providerType.ToString(), (int)_providerType, ColumnSize, Nullable
+                string.Format("Pos: {0} | ColName:{1} | Type:{2}/{3}/{4} | Size:{5} | {6}",
+                                OrdinalPosition, Name, DataType, ProviderType.ToString(), (int)ProviderType, ColumnSize, Nullable
                              );
 
             return tblColumn;

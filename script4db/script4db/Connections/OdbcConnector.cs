@@ -24,6 +24,7 @@ namespace script4db.Connections
         private string[] nonQueryCmdNames = new string[] { "DROP", "CREATE", "INSERT", "UPDATE", "DELETE", "RENAME", "ALTER" };
         private ArrayList logMessages = new ArrayList();
         private bool keepAlive;
+        private DbType dataBaseType = DbType.undefined;
         private LogMessageTypes errorLevel;
 
         public OdbcConnector(string _source)
@@ -196,11 +197,15 @@ namespace script4db.Connections
             }
         }
 
-        public string DataSource
+        public DbType DataBaseType
         {
-            get {
-                DbOpenIfClosed();
-                return Conn.DataSource;
+            get
+            {
+                if (this.dataBaseType == DbType.undefined)
+                {
+                    this.dataBaseType = OdbcUtil.GetDbType(Conn);
+                }
+                return this.dataBaseType;
             }
         }
 
@@ -221,7 +226,7 @@ namespace script4db.Connections
             get { return this.scalarResult; }
         }
 
-        public string GetTableFieldsListAsSqlSyntax(string tableName, string targetSqlSyntax)
+        public string GetTableFieldsListAsSqlSyntax(string tableName, DbType targetDbType)
         {
             string tableFields = "";
 
@@ -230,7 +235,7 @@ namespace script4db.Connections
                 DbOpenIfClosed();
                 try
                 {
-                    this.tableStructure = new OdbcTableStructure(Conn, tableName, targetSqlSyntax);
+                    this.tableStructure = new OdbcTableStructure(Conn, tableName, targetDbType);
                     tableFields = tableStructure.SkeletonCreateTable;
                 }
                 catch (OdbcException odbcEx)
@@ -253,7 +258,7 @@ namespace script4db.Connections
             return tableFields;
         }
 
-        public string GetInsertSql(OdbcDataReader dataReader, string tableTarget, string targetSqlSyntax)
+        public string GetInsertSql(OdbcDataReader dataReader, string tableTarget, DbType targetDbType)
         {
             string fieldNames = tableStructure.FieldNames;
             string fieldValues = tableStructure.FieldValues;
@@ -269,7 +274,7 @@ namespace script4db.Connections
             for (int i = 0; i < dataReader.FieldCount; i++)
             {
                 oldValue = ":" + dataReader.GetName(i) + ":";
-                newValue = ValueToString(dataReader, i, targetSqlSyntax);
+                newValue = ValueToString(dataReader, i, targetDbType);
                 fieldValues = fieldValues.Replace(oldValue, newValue);
                 //Console.WriteLine("-----------");
                 //Console.WriteLine(dataReader.GetName(i) + " = " + dataReader.GetValue(i).ToString());
@@ -280,7 +285,7 @@ namespace script4db.Connections
             return string.Format("INSERT INTO {0} ({1}) VALUES ({2});", tableTarget, fieldNames, fieldValues);
         }
 
-        private string ValueToString(OdbcDataReader dataReader, int fieldNum, string targetSqlSyntax)
+        private string ValueToString(OdbcDataReader dataReader, int fieldNum, DbType targetDbType)
         {
             string result = dataReader.GetValue(fieldNum).ToString().TrimEnd();
 
@@ -296,7 +301,7 @@ namespace script4db.Connections
                 {
                     throw new System.ArgumentException("Incorrect DateTime format.", this.GetType().Name);
                 }
-                if (targetSqlSyntax == "ACCESS")
+                if (targetDbType == DbType.Access)
                 {
                     return myDate.ToString("yyyy-MM-dd H:mm:ss");
                 }

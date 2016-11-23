@@ -7,6 +7,16 @@ using System.Data.Odbc;
 
 namespace script4db.Connections
 {
+    enum DbType
+    {
+        undefined,
+        unknow,
+        Access,
+        MySQL,
+        MSSQL,
+        Oracle
+    }
+
     interface IConnector
     {
         void DbCloseIfOpen();
@@ -15,9 +25,9 @@ namespace script4db.Connections
         bool ExecuteSQL(string sql, bool scalar);
         string ScalarResult { get; }
         int Affected { get; }
-        string DataSource { get; }
-        string GetTableFieldsListAsSqlSyntax(string tableName, string targetSqlSyntax);
-        string GetInsertSql(OdbcDataReader dataReader, string tableTarget, string targetSqlSyntax);
+        DbType DataBaseType { get; }
+        string GetTableFieldsListAsSqlSyntax(string tableName, DbType targetDbType);
+        string GetInsertSql(OdbcDataReader dataReader, string tableTarget, DbType targetDbType);
         OdbcDataReader GetDataReader(string tableName);
         LogMessageTypes ErrorLevel { get; set; }
         ArrayList LogMessages { get; }

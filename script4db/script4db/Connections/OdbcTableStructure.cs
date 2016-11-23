@@ -12,17 +12,17 @@ namespace script4db.Connections
     {
         private OdbcConnection _connection;
         private string _tableName;
-        private string _targetSqlSyntax;
+        private DbType _targetDbType;
         private List<TableColumn> tableColumns;
         private string _skeletonCreateTable;
         private string _fieldNames;
         private string _fieldValues;
 
-        public OdbcTableStructure(OdbcConnection connection, string tableName, string targetSqlSyntax)
+        public OdbcTableStructure(OdbcConnection connection, string tableName, DbType targetDbType)
         {
             _connection = connection;
             _tableName = tableName;
-            _targetSqlSyntax = targetSqlSyntax;
+            _targetDbType = targetDbType;
             //Test();
             ParceStructure();
         }
@@ -113,9 +113,9 @@ namespace script4db.Connections
                 Console.WriteLine(column.ToString());
                 //Console.WriteLine(column.GetCreateFieldDefinition());
                 //Console.WriteLine(column.GetFieldSetValueDefinition());
-                buildCreateSeleton.Append(delimiter + column.GetCreateFieldDefinition(_targetSqlSyntax));
+                buildCreateSeleton.Append(delimiter + column.GetCreateFieldDefinition(_targetDbType));
                 buildFieldNames.Append(delimiter + column.Name);
-                buildFieldValues.Append(delimiter + column.GetFieldSetValuePlaceholder(_targetSqlSyntax));
+                buildFieldValues.Append(delimiter + column.GetFieldSetValuePlaceholder(_targetDbType));
                 delimiter = ",";
             }
             _skeletonCreateTable = buildCreateSeleton.ToString();
@@ -141,7 +141,7 @@ namespace script4db.Connections
             {
                 if (column.OrdinalPosition == fieldNum)
                 {
-                    return (column.Type == "DATETIME");
+                    return column.IsDatetime();
                 }
             }
             throw new System.ArgumentException("This part of code must be never reachable in IsColumnNumeric.", this.GetType().Name);
