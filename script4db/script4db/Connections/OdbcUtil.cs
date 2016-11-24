@@ -34,7 +34,7 @@ namespace script4db.Connections
                 case "ACCESS":
                     dbType = DbType.Access;
                     break;
-                case "MSSQL":
+                case "Microsoft SQL Server":
                     dbType = DbType.MSSQL;
                     break;
                 case "MySQL":
