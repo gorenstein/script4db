@@ -31,6 +31,7 @@ namespace script4db.ScriptProcessors
         private BlockStatuses _status;
         public int order;
         public TreeNode node;
+        private string _nodeName;
         private Color[] ColorByStatus = new Color[] { Color.DarkGray, Color.Black, Color.DarkOrange, Color.DarkGreen, Color.DarkOrange, Color.Red };
         Dictionary<string, string> parameters = new Dictionary<string, string>();
         private ArrayList logMessages = new ArrayList();
@@ -50,9 +51,7 @@ namespace script4db.ScriptProcessors
             _name = blockName;
             _status = BlockStatuses.Init;
 
-
             DateTime dtNow = DateTime.Now;
-
             integratedConstants.Add("${TIMESTAMP}", dtNow.ToString("yyyyMMddHHmmssffff"));
             integratedConstants.Add("${YEAR}", dtNow.ToString("yyyy"));
             integratedConstants.Add("${MONTH}", dtNow.ToString("MM"));
@@ -134,7 +133,7 @@ namespace script4db.ScriptProcessors
                 this.LogMessages.Add(new LogMessage(LogMessageTypes.Info, this.GetType().Name, msg));
 
                 Status = BlockStatuses.Done;
-                node.Text += String.Format(" - Ok : Affected {0} rec : Elapsed {1:0.000}s", connection.Connector.Affected, sw.Elapsed.TotalSeconds);
+                node.Text = String.Format("{0} - Ok : Affected {1} rec : Elapsed {2:0.000}s", NodeName, connection.Connector.Affected, sw.Elapsed.TotalSeconds);
 
                 return true;
             }
@@ -159,7 +158,7 @@ namespace script4db.ScriptProcessors
             bool scalarOrNonQuery;
             string msg;
             string sql;
-            string nodeBaseText = order.ToString() + " " + BlockStatuses.Working.ToString();
+            string nodeBaseText = NodeName + " " + BlockStatuses.Working.ToString();
             string tableSource = parameters["tableSource"];
             string tableTarget = parameters["tableTarget"];
             Stopwatch sw = new Stopwatch();
@@ -181,7 +180,7 @@ namespace script4db.ScriptProcessors
 
             if (success)
             {
-                node.Text = String.Format("{0} : Copy table '{1}' structure : Elapsed {2:0.000}s", nodeBaseText, tableSource, sw.Elapsed.TotalSeconds);
+                node.Text = String.Format("{0} : Copy table structure : Elapsed {1:0.000}s", nodeBaseText, sw.Elapsed.TotalSeconds);
                 msg = String.Format("Elapsed {0:0.000}s : '{1}'", sw.Elapsed.TotalSeconds, sql);
                 this.LogMessages.Add(new LogMessage(LogMessageTypes.Info, this.GetType().Name, msg));
             }
@@ -278,9 +277,9 @@ namespace script4db.ScriptProcessors
             avReadSec = swRead.Elapsed.TotalSeconds / maxLoops;
             avWriteSec = swWrite.Elapsed.TotalSeconds / maxLoops;
 
-            node.Text += String.Format(
-                    " - Ok : Copied {0} records : Average r/w {1:0.0000} / {2:0.0000} rec/s : Elapsed {3:0.0}s",
-                      recordCountSource, avReadSec, avWriteSec, swRead.Elapsed.TotalSeconds + swWrite.Elapsed.TotalSeconds);
+            node.Text = String.Format(
+                    "{0} - Ok : Copied {1} records : Average r/w {2:0.0000} / {3:0.0000} rec/s : Elapsed {4:0.0}s",
+                      NodeName, recordCountSource, avReadSec, avWriteSec, swRead.Elapsed.TotalSeconds + swWrite.Elapsed.TotalSeconds);
 
             msg = String.Format("Elapsed {0:0.000}s : Copied in to table '{1}' {2} records",
                                     swRead.Elapsed.TotalSeconds + swWrite.Elapsed.TotalSeconds, tableTarget, recordCountSource);
@@ -531,10 +530,56 @@ namespace script4db.ScriptProcessors
                 _status = value;
                 if (_name == BlockNames.command)
                 {
-                    node.Text = order.ToString() + " " + value.ToString();
+                    //node.Text = NodeName + " - " + value.ToString();
                     node.ForeColor = ColorByStatus[(int)value];
                 }
             }
         }
+
+        public string NodeName
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(_nodeName))
+                {
+                    _nodeName = order.ToString();
+
+                    if (Name == BlockNames.command)
+                    {
+                        switch (this.parameters["type"])
+                        {
+                            case "simple":
+                                int len = parameters["sql"].IndexOf(" "); // DROP TABLE Xyz
+                                string word = parameters["sql"].Substring(0, Math.Max(len, 4));
+                                word = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(word.ToLower());
+                                _nodeName += " " + word;
+                                break;
+                            case "exportTable":
+                                _nodeName += " Export";
+                                break;
+                            default:
+                                _nodeName += " " + parameters["type"];
+                                break;
+                        }
+                    }
+                }
+                return _nodeName;
+            }
+        }
+    }
+}
+public static class extensions
+{
+    public static int IndexOfNth(this string str, string value, int nth = 1)
+    {
+        if (nth <= 0)
+            throw new ArgumentException("Can not find the zeroth index of substring in string. Must start with 1");
+        int offset = str.IndexOf(value);
+        for (int i = 1; i < nth; i++)
+        {
+            if (offset == -1) return -1;
+            offset = str.IndexOf(value, offset + 1);
+        }
+        return offset;
     }
 }

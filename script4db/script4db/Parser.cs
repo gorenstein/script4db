@@ -122,7 +122,7 @@ namespace script4db
             {
                 i++;
                 block.order = i;
-                block.node = new TreeNode(i.ToString());
+                block.node = new TreeNode(block.NodeName);
                 block.node.NodeFont = new Font("Arial", 11);
                 this.AddNodeParameters(block);
                 node.Nodes.Add(block.node);
