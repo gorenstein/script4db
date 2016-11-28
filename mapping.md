@@ -18,4 +18,4 @@ In target database will created table with fields types:
 - OdbcType.Decimal, OdbcType.Numeric, OdbcType.Double, OdbcType.Real:
 	- as 'DOUBLE'
 - OdbcType.Binary, OdbcType.Image, OdbcType.UniqueIdentifier, OdbcType.VarBinary:
-	- as 'MEMO' for Access or as 'TEXT' for MySQL and others
+	- as 'MEMO' for Access; 'BLOB' for MySQL; 'NVARCHAR' for MSSQL and as 'TEXT' for Oracle
