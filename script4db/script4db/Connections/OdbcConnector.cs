@@ -297,10 +297,15 @@ namespace script4db.Connections
             if (tableStructure.IsColumnDatetime(fieldNum))
             {
                 DateTime myDate;
-                if (!DateTime.TryParse(result, out myDate))
+                if (string.IsNullOrWhiteSpace(result))
+                {
+                    myDate = DateTime.MinValue;
+                }
+                else if (!DateTime.TryParse(result, out myDate))
                 {
                     throw new System.ArgumentException("Incorrect DateTime format.", this.GetType().Name);
                 }
+
                 if (targetDbType == DbType.Access)
                 {
                     return myDate.ToString("yyyy-MM-dd H:mm:ss");
