@@ -24,7 +24,7 @@ For details see [example.script4db](https://github.com/gorenstein/script4db/blob
 Installation
 ------------
 No need for any installation.
-Use script4db.exe to run (compiled for any processor).
+Use [script4db.exe](https://github.com/gorenstein/script4db/blob/master/script4db.exe) to run (compiled for any processor).
 
 Drivers for used ODBC connections must be installed.
 Required .NET Framework 4.5.2 or above.
