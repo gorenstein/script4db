@@ -94,7 +94,7 @@ namespace script4db.Connections
                             break;
                     }
                 }
-                //Console.WriteLine("Table:{0} | {1}", _tableName, tableColumn.ToString());
+                Console.WriteLine("Table:{0} | {1}", _tableName, tableColumn.ToString());
                 tableColumns.Add(tableColumn);
             }
 

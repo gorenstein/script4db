@@ -16,6 +16,53 @@ namespace script4db.Connections
             ProviderType = OdbcType.VarChar;
         }
 
+        private string[] sqlFieldTypeWithLength = new string[]
+        {
+            "INT",
+            "VARCHAR",
+            "CHAR",
+            "BIT",
+            "TINYINT",
+            "SMALLINT",
+            "MEDIUMINT",
+            "INTEGER",
+            "BIGINT",
+            "BINARY",
+            "VARBINARY"
+        };
+
+        private string[] sqlFieldTypeWithLengthAndDecimals = new string[]
+        {
+            "REAL",
+            "DOUBLE",
+            "FLOAT",
+            "DECIMAL",
+            "NUMERIC"
+        };
+
+        private string[] sqlFieldTypeWithoutLength = new string[]
+        {
+            "DATE",
+            "TIME",
+            "TIMESTAMP",
+            "DATETIME",
+            "YEAR",
+            "TINYBLOB",
+            "BLOB",
+            "MEDIUMBLOB",
+            "LONGBLOB",
+            "TINYTEXT",
+            "TEXT",
+            "MEDIUMTEXT",
+            "LONGTEXT",
+            "JSON"
+        };
+
+        /*
+          ENUM(value1,value2,value3,...)
+          SET(value1,value2,value3,...)
+         */
+
         private OdbcType[] odbcTypeNumeric = new OdbcType[]
         {
             OdbcType.BigInt,
@@ -98,24 +145,41 @@ namespace script4db.Connections
         {
             return ColumnSize > 255 && IsString();
         }
-
         public bool IsDatetime()
         {
             return odbcTypeDatetime.Contains(this.ProviderType);
+        }
+        public bool IsWithLenght(string sqlFieldTypeName)
+        {
+            return sqlFieldTypeWithLength.Contains(sqlFieldTypeName);
+        }
+        public bool IsWithoutLenght(string sqlFieldTypeName)
+        {
+            return sqlFieldTypeWithoutLength.Contains(sqlFieldTypeName);
+        }
+        public bool IsWithLenghtAndDecimals(string sqlFieldTypeName)
+        {
+            return sqlFieldTypeWithLengthAndDecimals.Contains(sqlFieldTypeName);
         }
         public string GetCreateFieldDefinition(DbType targetDbType)
         {
             string sqlSyntax = string.Format("");
             string nulable = "NULL"; //override this.Nullable
+            string sqlSyntaxName = GetSqlSyntaxName(targetDbType);
 
-            if (IsStringShort())
+            if (IsWithLenght(sqlSyntaxName))
             {
                 sqlSyntax = string.Format("{0} {1}({2}) {3}", Name, GetSqlSyntaxName(targetDbType), ColumnSize, nulable);
             }
-            else
+            else if (IsWithLenghtAndDecimals(sqlSyntaxName))
+            {
+                sqlSyntax = string.Format("{0} {1}({2},{3}) {4}", Name, GetSqlSyntaxName(targetDbType), NumericPrecision, NumericScale, nulable);
+            }
+            else if (IsWithoutLenght(sqlSyntaxName))
             {
                 sqlSyntax = string.Format("{0} {1} {2}", Name, GetSqlSyntaxName(targetDbType), nulable);
             }
+            else throw new System.ArgumentException("Can't define Sql Syntax for Field Definition.", this.GetType().Name);
 
             return sqlSyntax;
         }
@@ -160,7 +224,7 @@ namespace script4db.Connections
                 case OdbcType.UniqueIdentifier:
                 case OdbcType.VarBinary:
                 default:
-                    sqlName = "VARCHAR";
+                    sqlName = GetSqlSyntaxNameForBinary(targetDbType);
                     break;
             }
 
@@ -193,11 +257,36 @@ namespace script4db.Connections
             return sqlName;
         }
 
+        private string GetSqlSyntaxNameForBinary(DbType targetDbType)
+        {
+            string sqlName;
+            switch (targetDbType)
+            {
+                case DbType.Access:
+                    sqlName = "MEMO";
+                    break;
+                case DbType.MySQL:
+                    sqlName = "BLOB";
+                    break;
+                case DbType.MSSQL:
+                    sqlName = "NVARCHAR";
+                    break;
+                case DbType.Oracle:
+                    sqlName = "TEXT";
+                    break;
+                case DbType.undefined:
+                case DbType.unknow:
+                default:
+                    throw new System.ArgumentException(string.Format("Not allowed targetDbType: '{0}'.", targetDbType.ToString()), this.GetType().Name);
+            }
+
+            return sqlName;
+        }
         public override string ToString()
         {
             string tblColumn =
-                string.Format("Pos: {0} | ColName:{1} | Type:{2}/{3}/{4} | Size:{5} | {6}",
-                                OrdinalPosition, Name, DataType, ProviderType.ToString(), (int)ProviderType, ColumnSize, Nullable
+                string.Format("Pos: {0} | ColName:{1} | Type:{2}/{3}/{4} | Size:{5} | Precision:{6} | Scale:{7} | {8}",
+                                OrdinalPosition, Name, DataType, ProviderType.ToString(), (int)ProviderType, ColumnSize, NumericPrecision, NumericScale, Nullable
                              );
 
             return tblColumn;
