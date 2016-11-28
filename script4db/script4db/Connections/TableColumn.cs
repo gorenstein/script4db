@@ -169,15 +169,15 @@ namespace script4db.Connections
 
             if (IsWithLenght(sqlSyntaxName))
             {
-                sqlSyntax = string.Format("{0} {1}({2}) {3}", Name, GetSqlSyntaxName(targetDbType), ColumnSize, nulable);
+                sqlSyntax = string.Format("`{0}` {1}({2}) {3}", Name, GetSqlSyntaxName(targetDbType), ColumnSize, nulable);
             }
             else if (IsWithLenghtAndDecimals(sqlSyntaxName))
             {
-                sqlSyntax = string.Format("{0} {1}({2},{3}) {4}", Name, GetSqlSyntaxName(targetDbType), NumericPrecision, NumericScale, nulable);
+                sqlSyntax = string.Format("`{0}` {1}({2},{3}) {4}", Name, GetSqlSyntaxName(targetDbType), NumericPrecision, NumericScale, nulable);
             }
             else if (IsWithoutLenght(sqlSyntaxName))
             {
-                sqlSyntax = string.Format("{0} {1} {2}", Name, GetSqlSyntaxName(targetDbType), nulable);
+                sqlSyntax = string.Format("`{0}` {1} {2}", Name, GetSqlSyntaxName(targetDbType), nulable);
             }
             else throw new System.ArgumentException("Can't define Sql Syntax for Field Definition.", this.GetType().Name);
 
