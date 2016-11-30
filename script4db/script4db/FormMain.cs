@@ -378,7 +378,8 @@ namespace script4db
                 // Do next step of Work
                 worker.ReportProgress(progress);
                 bool success = block.Run(worker);
-                foreach (LogMessage logMsg in block.LogMessages) workerMsgs.Add(logMsg);
+                //foreach (LogMessage logMsg in block.LogMessages) workerMsgs.Add(logMsg);
+                foreach (LogMessage logMsg in block.LogMessages) this.Logs.AppendMessage(logMsg);
 
                 if (!success)
                 {
