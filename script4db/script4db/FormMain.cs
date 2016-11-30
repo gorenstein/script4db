@@ -377,13 +377,21 @@ namespace script4db
 
                 // Do next step of Work
                 worker.ReportProgress(progress);
-                bool success = block.Run();
+                bool success = block.Run(worker);
                 foreach (LogMessage logMsg in block.LogMessages) workerMsgs.Add(logMsg);
 
                 if (!success)
                 {
-                    workerMsgs.Add(new LogMessage(LogMessageTypes.Warning, "Worker", "Error by Run command"));
-                    e.Result = new WorkerResult(WorkerResultStatuses.Error, workerMsgs);
+                    if (worker.CancellationPending == true)
+                    {
+                        workerMsgs.Add(new LogMessage(LogMessageTypes.Warning, "Run Script command", "Aborted by user"));
+                        e.Result = new WorkerResult(WorkerResultStatuses.Cancel, workerMsgs);
+                    }
+                    else
+                    {
+                        workerMsgs.Add(new LogMessage(LogMessageTypes.Warning, "Worker", "Error by Run command"));
+                        e.Result = new WorkerResult(WorkerResultStatuses.Error, workerMsgs);
+                    }
                     return;
                 }
                 progress += progressStep;

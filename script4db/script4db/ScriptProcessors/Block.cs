@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Windows.Forms;
 using script4db.Connections;
+using System.ComponentModel;
 
 namespace script4db.ScriptProcessors
 {
@@ -64,7 +65,7 @@ namespace script4db.ScriptProcessors
             integratedConstants.Add("${WEEK_NEXT}", cal.GetWeekOfYear(dtNow.AddDays(7), dfi.CalendarWeekRule, dfi.FirstDayOfWeek).ToString());
         }
 
-        public bool Run()
+        public bool Run(BackgroundWorker worker)
         {
             if (_name != BlockNames.command)
             {
@@ -88,7 +89,7 @@ namespace script4db.ScriptProcessors
                     success = RunSimlpe(executeErrorLevel);
                     break;
                 case "exportTable":
-                    success = RunExportTable(executeErrorLevel);
+                    success = RunExportTable(executeErrorLevel, worker);
                     break;
                 default:
                     string msg = String.Format("Value for Command parameter type='{0}' is not supported", this.parameters["type"]);
@@ -144,7 +145,7 @@ namespace script4db.ScriptProcessors
             }
         }
 
-        private bool RunExportTable(LogMessageTypes executeErrorLevel)
+        private bool RunExportTable(LogMessageTypes executeErrorLevel, BackgroundWorker worker)
         {
             // Define Connections for Source & Target
             Connection connSource = new Connection(this.parameters["connectionSource"]);
@@ -221,6 +222,9 @@ namespace script4db.ScriptProcessors
 
             for (int loop = 0; loop < maxLoops; loop += step)
             {
+                // User sended Cancel ?
+                if (worker.CancellationPending == true) return false;
+
                 avReadSec = swRead.Elapsed.TotalSeconds / (loop + 1);
                 avWriteSec = swWrite.Elapsed.TotalSeconds / (loop + 1);
                 restSec = (avReadSec + avWriteSec) * (maxLoops - loop);
