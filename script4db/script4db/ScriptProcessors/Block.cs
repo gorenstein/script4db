@@ -223,7 +223,12 @@ namespace script4db.ScriptProcessors
             for (int loop = 0; loop < maxLoops; loop += step)
             {
                 // User sended Cancel ?
-                if (worker.CancellationPending == true) return false;
+                if (worker.CancellationPending == true)
+                {
+                    connSource.Connector.DbCloseIfOpen();
+                    connTarget.Connector.DbCloseIfOpen();
+                    return false;
+                }
 
                 avReadSec = swRead.Elapsed.TotalSeconds / (loop + 1);
                 avWriteSec = swWrite.Elapsed.TotalSeconds / (loop + 1);
