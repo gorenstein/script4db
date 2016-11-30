@@ -18,7 +18,7 @@ namespace script4db.Connections
 
         private string[] sqlFieldTypeWithLength = new string[]
         {
-            "INT",
+            //"INT",
             "VARCHAR",
             "CHAR",
             "BIT",
@@ -42,6 +42,7 @@ namespace script4db.Connections
 
         private string[] sqlFieldTypeWithoutLength = new string[]
         {
+            "INT",
             "DATE",
             "TIME",
             "TIMESTAMP",
@@ -55,7 +56,9 @@ namespace script4db.Connections
             "TEXT",
             "MEDIUMTEXT",
             "LONGTEXT",
-            "JSON"
+            "JSON",
+            "NVARCHAR(MAX)",
+            "NUMBER"
         };
 
         /*
@@ -108,25 +111,9 @@ namespace script4db.Connections
         public string DataType { get; set; }
         public string Nullable { get; set; }
 
-        public string GetFieldSetValuePlaceholder(DbType targetDbType)
+        public string GetFieldSetValuePlaceholder()
         {
-            // INSERT INTO TableName SET col_string=":col_string:", col_num=:col_num: 
-            string sqlFormat;
-
-            if (targetDbType == DbType.Access && IsDatetime())
-            {
-                sqlFormat = "#:{0}:#";
-            }
-            else if (IsNumeric())
-            {
-                sqlFormat = ":{0}:";
-            }
-            else
-            {
-                sqlFormat = "':{0}:'";
-            }
-
-            return string.Format(sqlFormat, Name);
+            return string.Format(":{0}:", Name);
         }
 
         public bool IsNumeric()
@@ -165,19 +152,20 @@ namespace script4db.Connections
         {
             string sqlSyntax = string.Format("");
             string nulable = "NULL"; //override this.Nullable
-            string sqlSyntaxName = GetSqlSyntaxName(targetDbType);
+            string sqlFieldTypeName = GetSqlSyntaxName(targetDbType);
+            string escName = GetEscapedName(Name, targetDbType);
 
-            if (IsWithLenght(sqlSyntaxName))
+            if (IsWithLenght(sqlFieldTypeName))
             {
-                sqlSyntax = string.Format("`{0}` {1}({2}) {3}", Name, GetSqlSyntaxName(targetDbType), ColumnSize, nulable);
+                sqlSyntax = string.Format("{0} {1}({2}) {3}", escName, sqlFieldTypeName, ColumnSize, nulable);
             }
-            else if (IsWithLenghtAndDecimals(sqlSyntaxName))
+            else if (IsWithLenghtAndDecimals(sqlFieldTypeName))
             {
-                sqlSyntax = string.Format("`{0}` {1}({2},{3}) {4}", Name, GetSqlSyntaxName(targetDbType), NumericPrecision, NumericScale, nulable);
+                sqlSyntax = string.Format("{0} {1}({2},{3}) {4}", escName, sqlFieldTypeName, NumericPrecision, NumericScale, nulable);
             }
-            else if (IsWithoutLenght(sqlSyntaxName))
+            else if (IsWithoutLenght(sqlFieldTypeName))
             {
-                sqlSyntax = string.Format("`{0}` {1} {2}", Name, GetSqlSyntaxName(targetDbType), nulable);
+                sqlSyntax = string.Format("{0} {1} {2}", escName, sqlFieldTypeName, nulable);
             }
             else throw new System.ArgumentException("Can't define Sql Syntax for Field Definition.", this.GetType().Name);
 
@@ -217,7 +205,24 @@ namespace script4db.Connections
                 case OdbcType.Numeric:
                 case OdbcType.Double:
                 case OdbcType.Real:
-                    sqlName = "DOUBLE";
+                    switch (targetDbType)
+                    {
+                        case DbType.Access:
+                            sqlName = "NUMBER";
+                            break;
+                        case DbType.MySQL:
+                        case DbType.MSSQL:
+                        case DbType.Oracle:
+                            sqlName = "DECIMAL";
+                            break;
+                        case DbType.undefined:
+                        case DbType.unknow:
+                            sqlName = "-=ERROR=-";
+                            break;
+                        default:
+                            sqlName = "DOUBLE";
+                            break;
+                    }
                     break;
                 case OdbcType.Binary:
                 case OdbcType.Image:
@@ -237,7 +242,7 @@ namespace script4db.Connections
             switch (targetDbType)
             {
                 case DbType.Access:
-                    sqlName = "MEMO";
+                    sqlName = "LONGTEXT";
                     break;
                 case DbType.MySQL:
                     sqlName = "TEXT";
@@ -263,13 +268,13 @@ namespace script4db.Connections
             switch (targetDbType)
             {
                 case DbType.Access:
-                    sqlName = "MEMO";
+                    sqlName = "LONGTEXT";
                     break;
                 case DbType.MySQL:
                     sqlName = "BLOB";
                     break;
                 case DbType.MSSQL:
-                    sqlName = "NVARCHAR";
+                    sqlName = "NVARCHAR(MAX)";
                     break;
                 case DbType.Oracle:
                     sqlName = "TEXT";
@@ -282,6 +287,31 @@ namespace script4db.Connections
 
             return sqlName;
         }
+
+        public string GetEscapedName(string nameToEscape, DbType targetDbType)
+        {
+            string escName;
+            switch (targetDbType)
+            {
+                case DbType.Access:
+                case DbType.MySQL:
+                    escName = string.Format("`{0}`", nameToEscape);
+                    break;
+                case DbType.MSSQL:
+                    escName = string.Format("[{0}]", nameToEscape);
+                    break;
+                case DbType.Oracle:
+                    escName = nameToEscape;
+                    break;
+                case DbType.undefined:
+                case DbType.unknow:
+                default:
+                    throw new System.ArgumentException(string.Format("Not allowed targetDbType: '{0}'.", targetDbType.ToString()), this.GetType().Name);
+            }
+
+            return escName;
+        }
+
         public override string ToString()
         {
             string tblColumn =

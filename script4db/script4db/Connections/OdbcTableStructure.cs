@@ -114,8 +114,8 @@ namespace script4db.Connections
                 //Console.WriteLine(column.GetCreateFieldDefinition());
                 //Console.WriteLine(column.GetFieldSetValueDefinition());
                 buildCreateSeleton.Append(delimiter + column.GetCreateFieldDefinition(_targetDbType));
-                buildFieldNames.Append(delimiter + column.Name);
-                buildFieldValues.Append(delimiter + column.GetFieldSetValuePlaceholder(_targetDbType));
+                buildFieldNames.Append(delimiter + column.GetEscapedName(column.Name, _targetDbType));
+                buildFieldValues.Append(delimiter + column.GetFieldSetValuePlaceholder());
                 delimiter = ",";
             }
             _skeletonCreateTable = buildCreateSeleton.ToString();

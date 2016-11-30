@@ -11,7 +11,7 @@ Features include:
 
 - Copy tables between two different databases *(fields types mapping matrix see [mapping.md](https://github.com/gorenstein/script4db/blob/master/mapping.md))*
 
-- Support ODBC as preconfigured by name or as connection string *(tested on Access & MySQL connection)*
+- Support ODBC as preconfigured by name or as connection string *(tested on Access 2016 & MySQL 5.7 connection & MS SQL Server 2014)*
 
 - For each command you can define behavior on error: stop script or skip/continue
 

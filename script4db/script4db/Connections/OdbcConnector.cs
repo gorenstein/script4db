@@ -289,31 +289,31 @@ namespace script4db.Connections
         {
             string result = dataReader.GetValue(fieldNum).ToString().TrimEnd();
 
-            if (string.IsNullOrWhiteSpace(result) && tableStructure.IsColumnNumeric(fieldNum))
+            if (string.IsNullOrWhiteSpace(result) && (tableStructure.IsColumnNumeric(fieldNum) || tableStructure.IsColumnDatetime(fieldNum)))
             {
                 return "NULL";
             }
+            if (result == "True") return "1";
+            if (result == "False") return "0";
 
             if (tableStructure.IsColumnDatetime(fieldNum))
             {
                 DateTime myDate;
-                if (string.IsNullOrWhiteSpace(result))
+                if (!DateTime.TryParse(result, out myDate))
                 {
-                    myDate = DateTime.MinValue;
-                }
-                else if (!DateTime.TryParse(result, out myDate))
-                {
-                    throw new System.ArgumentException("Incorrect DateTime format.", this.GetType().Name);
+                    throw new System.ArgumentException("Incorrect DateTime format - '" + result + "'.", this.GetType().Name);
                 }
 
                 if (targetDbType == DbType.Access)
                 {
-                    return myDate.ToString("yyyy-MM-dd H:mm:ss");
+                    result = "#" + myDate.ToString("yyyy-MM-dd H:mm:ss") +"#";
+                } else
+                {
+                    result = "'" + myDate.ToString("s") + "'";
                 }
 
-                return myDate.ToString("s");
+                return result;
             }
-
 
             switch (dataReader.GetFieldType(fieldNum).FullName)
             {
@@ -322,8 +322,8 @@ namespace script4db.Connections
                 case "System.Decimal":
                     result = result.Replace(",", ".");
                     break;
-                default:
-                    result = result.Replace("'", "''"); //escaping single quotes
+                default: // string values
+                    result = "'" + result.Replace("'", "''") + "'"; //escaping single quotes
                     break;
             }
             return result;

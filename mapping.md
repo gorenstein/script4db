@@ -12,10 +12,10 @@ In target database will created table with fields types:
 	- as 'INT'
 - OdbcType.Char, OdbcType.NChar, OdbcType.NVarChar, OdbcType.VarChar, OdbcType.NText, OdbcType.Text
 	- if string is =< 255 chars as 'VARCHAR' 
-	- if string is > 255 chars as 'MEMO' for Access or as 'TEXT' for MySQL and others
+	- if string is > 255 chars as 'LONGTEXT' for Access or as 'TEXT' for MySQL and others
 - OdbcType.DateTime, OdbcType.Timestamp; OdbcType.Date, OdbcType.Time, OdbcType.SmallDateTime:
-	- as 'DATETIME' (NULL or empty will as DateTime.MinValue / 0001-01-01 00:00:00 exported)
+	- as 'DATETIME'
 - OdbcType.Decimal, OdbcType.Numeric, OdbcType.Double, OdbcType.Real:
-	- as 'DOUBLE'
+	- as 'NUMBER' for Access; 'DECIMAL' for others
 - OdbcType.Binary, OdbcType.Image, OdbcType.UniqueIdentifier, OdbcType.VarBinary:
-	- as 'MEMO' for Access; 'BLOB' for MySQL; 'NVARCHAR' for MSSQL and as 'TEXT' for Oracle
+	- as 'LONGTEXT' for Access; 'BLOB' for MySQL; 'NVARCHAR(MAX)' for MSSQL and as 'TEXT' for Oracle
