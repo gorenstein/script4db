@@ -161,7 +161,8 @@ namespace script4db.Connections
             }
             else if (IsWithLenghtAndDecimals(sqlFieldTypeName))
             {
-                sqlSyntax = string.Format("{0} {1}({2},{3}) {4}", escName, sqlFieldTypeName, NumericPrecision, NumericScale, nulable);
+                int decimalPlace = (NumericScale == 0) ? 2 : NumericScale;
+                sqlSyntax = string.Format("{0} {1}({2},{3}) {4}", escName, sqlFieldTypeName, NumericPrecision, decimalPlace, nulable);
             }
             else if (IsWithoutLenght(sqlFieldTypeName))
             {
