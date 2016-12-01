@@ -85,7 +85,7 @@ namespace script4db.ScriptProcessors
             switch (this.parameters["type"])
             {
                 case "simple":
-                    node.Text += " : 1 of 1";
+                    node.Text += " : 1 of 1 working...";
                     success = RunSimlpe(executeErrorLevel);
                     break;
                 case "exportTable":
@@ -238,7 +238,7 @@ namespace script4db.ScriptProcessors
                 if ((loop % 142) == 0)
                 {
                     node.Text = String.Format(
-                        "{0} : Rest {1} rec / {3:0.0} s : Average r/w {4:0.0000} / {5:0.0000} rec/s",
+                        "{0} : Rest {1} rec / {3:0.0} s : Average r/w {4:0.0000} / {5:0.0000} s per record",
                         nodeBaseText, restToCopy, recordCountSource, restSec, avReadSec, avWriteSec);
                 }
 
@@ -287,7 +287,7 @@ namespace script4db.ScriptProcessors
             avWriteSec = swWrite.Elapsed.TotalSeconds / maxLoops;
 
             node.Text = String.Format(
-                    "{0} - Ok : Copied {1} records : Average r/w {2:0.0000} / {3:0.0000} rec/s : Elapsed {4:0.0}s",
+                    "{0} - Ok : Copied {1} records : Average r/w {2:0.0000} / {3:0.0000} s per record : Elapsed {4:0.0}s",
                       NodeName, recordCountSource, avReadSec, avWriteSec, swRead.Elapsed.TotalSeconds + swWrite.Elapsed.TotalSeconds);
 
             msg = String.Format("Elapsed {0:0.000}s : Copied in to table '{1}' {2} records",
