@@ -153,8 +153,19 @@ namespace script4db.ScriptProcessors.Default
                     return false;
                 }
             }
+
             // It's Last block, save if any
-            return AddBlockIfAny(block);
+            if (!AddBlockIfAny(block)) return false;
+
+            // Check if exist at least one block
+            if (!this.blocks.BlocksGroup.ContainsKey(BlockNames.command))
+            {
+                string msg = "No command block in script";
+                LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
+                return false;
+            }
+
+            return true;
         }
 
         // Pass for replace variable placeholders 
