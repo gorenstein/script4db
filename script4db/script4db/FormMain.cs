@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.IO;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -439,6 +435,27 @@ namespace script4db
             }
             worker.DoWork -= Bw_DoWorkScriptCommand;
             worker.RunWorkerCompleted -= Bw_RunWorkerScriptCompleted;
+        }
+    }
+}
+
+public static class ControlExtensions
+{
+    /// <summary>
+    /// Executes the Action asynchronously on the UI thread, does not block execution on the calling thread.
+    /// Using: this.UIThread(() => this.myLabel.Text = "Text Goes Here");
+    /// </summary>
+    /// <param name="control"></param>
+    /// <param name="code"></param>
+    public static void UIThread(this Control @this, Action code)
+    {
+        if (@this.InvokeRequired)
+        {
+            @this.BeginInvoke(code);
+        }
+        else
+        {
+            code.Invoke();
         }
     }
 }
