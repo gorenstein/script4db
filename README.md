@@ -26,7 +26,7 @@ Installation
 No need for any installation.
 Use [script4db.exe](https://github.com/gorenstein/script4db/blob/master/script4db.exe) to run (compiled for any processor).
 
-Drivers for used ODBC connections must be installed.
+Drivers (32bit/x86) for used ODBC connections must be installed.
 Required .NET Framework 4.5.2 or above.
 
 License
