@@ -62,7 +62,7 @@ namespace script4db
             if (File.Exists(fileForParce))
             {
                 this.fileName = fileForParce;
-                this.textRaw = File.ReadAllText(this.fileName);
+                this.textRaw = this.CheckLineEndingFormat(File.ReadAllText(this.fileName));
                 this.currentStatus = ParserStatuses.FileLoaded;
                 LogMessages.Add(new LogMessage(LogMessageTypes.Info, "Parser", "Loaded script file: " + this.fileName));
                 return true;
@@ -73,6 +73,23 @@ namespace script4db
                 LogMessages.Add(new LogMessage(LogMessageTypes.Error, "Parser", "Can't load script file: " + this.fileName));
                 return false;
             }
+        }
+
+        private String CheckLineEndingFormat(String inString)
+        {
+            String outString = "";
+
+            if (!inString.Contains("\r\n") && inString.Contains("\n"))
+            {
+                // It's file with unix style line ending
+                outString = inString.Replace("\n", "\r\n");
+            }
+            else
+            {
+                outString = inString;
+            }
+
+            return outString;
         }
 
         public void FillBlocksTree(TreeView treeView)
