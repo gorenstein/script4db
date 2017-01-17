@@ -37,6 +37,34 @@ namespace script4db.Connections
             }
         }
 
+        public string GetInsertSqlHead(string tableTarget)
+        {
+            string sqlHead = connector.GetInsertSqlHead(tableTarget);
+
+            if (string.IsNullOrWhiteSpace(sqlHead))
+            {
+                foreach (LogMessage logMsg in Connector.LogMessages) this.LogMessages.Add(logMsg);
+                string msg = string.Format("Insert HEAD skeleton is not defined for table '{0}' ", tableTarget);
+                this.LogMessages.Add(new LogMessage(connector.ErrorLevel, this.GetType().Name, msg));
+            }
+
+            return sqlHead;
+        }
+
+        public string GetInsertSqlValues(OdbcDataReader dataReader, string tableTarget, DbType targetDbType)
+        {
+            string sqlValues = connector.GetInsertSqlValues(dataReader, tableTarget, targetDbType);
+
+            if (string.IsNullOrWhiteSpace(sqlValues))
+            {
+                foreach (LogMessage logMsg in Connector.LogMessages) this.LogMessages.Add(logMsg);
+                string msg = string.Format("Insert VALUES skeleton is not defined for table '{0}' ", tableTarget);
+                this.LogMessages.Add(new LogMessage(connector.ErrorLevel, this.GetType().Name, msg));
+            }
+
+            return sqlValues;
+        }
+
         public string GetInsertSql(OdbcDataReader dataReader, string tableTarget, DbType targetDbType)
         {
             string sql = connector.GetInsertSql(dataReader, tableTarget, targetDbType);

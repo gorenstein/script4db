@@ -105,7 +105,7 @@ namespace script4db.ScriptProcessors
             {
                 //Status = BlockStatuses.Warning;
                 Status = BlockStatuses.Done;
-                node.Text += " (skipped error)";
+                node.Text += " : Skipped";
                 success = true;
             }
             else
@@ -140,6 +140,7 @@ namespace script4db.ScriptProcessors
             }
             else
             {
+                node.Text = String.Format("{0} - error", NodeName);
                 foreach (LogMessage logMsg in connection.LogMessages) this.LogMessages.Add(logMsg);
                 return false;
             }
@@ -203,11 +204,26 @@ namespace script4db.ScriptProcessors
             double avReadSec = 0;
             double avWriteSec = 0;
             double restSec = 0;
-            //Console.WriteLine(
-            //    string.Format("Total {0} records for copy from table '{1}' to '{2}'",
-            //                    recordCountSource, tableSource, tableTarget));
-            int step = int.Parse(parameters["maxPerLoop"]); // Limit for max Read/Insert records per interation
-            int maxLoops = (int)Math.Ceiling((decimal)recordCountSource / step);
+
+            int perLoop; // Limit for max Read/Insert records per interation
+            if (connTarget.Connector.DataBaseType == Connections.DbType.MySQL || connTarget.Connector.DataBaseType == Connections.DbType.MSSQL)
+            {
+                int n;
+                bool isNumeric = int.TryParse(parameters["maxPerLoop"], out n);
+                if (!isNumeric || n < 0)
+                {
+                    perLoop = 1;
+                    msg = String.Format("Set 'maxPerLoop' to default value '1'. Check on Error the script file.");
+                    this.LogMessages.Add(new LogMessage(LogMessageTypes.Warning, this.GetType().Name, msg));
+                }
+                else perLoop = n;  // Use value from script
+            }
+            else
+            {
+                perLoop = 1; // Access NOT supported multiple rows INSERT
+            }
+            int maxLoops = (int)Math.Ceiling((decimal)recordCountSource / perLoop);
+            int updRate = (int)(Math.Exp(Math.Log10(maxLoops)));
 
             OdbcDataReader dataReader = connSource.Connector.GetDataReader(tableSource);
             if (!dataReader.HasRows) // No data for copy
@@ -220,7 +236,10 @@ namespace script4db.ScriptProcessors
                 return false;
             }
 
-            for (int loop = 0; loop < maxLoops; loop += step)
+            String insertSqlHead = connSource.GetInsertSqlHead(tableTarget);
+            String insertSqlValues;
+
+            for (int loop = 0; loop < maxLoops; loop++)
             {
                 // User sended Cancel ?
                 if (worker.CancellationPending == true)
@@ -230,30 +249,33 @@ namespace script4db.ScriptProcessors
                     return false;
                 }
 
-                avReadSec = swRead.Elapsed.TotalSeconds / (loop + 1);
-                avWriteSec = swWrite.Elapsed.TotalSeconds / (loop + 1);
-                restSec = (avReadSec + avWriteSec) * (maxLoops - loop);
-                restToCopy = recordCountSource - (loop * step + 1);
+                avReadSec = (double)swRead.Elapsed.TotalSeconds / (double)((loop + 1) * perLoop);
+                avWriteSec = (double)swWrite.Elapsed.TotalSeconds / (double)((loop + 1) * perLoop);
+                restToCopy = recordCountSource - (loop * perLoop);
+                restSec = (double)restToCopy * (avReadSec + avWriteSec);
 
-                if ((loop % 142) == 0)
+                if ((loop % updRate) == 0)
                 {
                     node.Text = String.Format(
-                        "{0} : Rest {1} rec / {3:0.0} s : Average r/w {4:0.0000} / {5:0.0000} s per record",
+                        "{0} : Rest {1} rec / {3:0.00} s : Average r/w {4:0.00000} / {5:0.00000} s per record",
                         nodeBaseText, restToCopy, recordCountSource, restSec, avReadSec, avWriteSec);
                 }
 
                 // Read
-                sql = "";
+                insertSqlValues = "";
                 swRead.Start();
-                for (int i = 0; i < step; i++)
+                for (int i = 0; i < perLoop; i++)
                 {
                     if (dataReader.Read())
                     {
-                        sql += connSource.GetInsertSql(dataReader, tableTarget, connTarget.Connector.DataBaseType);
+                        if (!String.IsNullOrWhiteSpace(insertSqlValues)) insertSqlValues += ",";
+                        insertSqlValues += connSource.GetInsertSqlValues(dataReader, tableTarget, connTarget.Connector.DataBaseType);
                     }
                     else break;
                 }
                 swRead.Stop();
+
+                sql = insertSqlHead + insertSqlValues + ";";
 
                 // Write
                 if (string.IsNullOrWhiteSpace(sql)) success = false;
@@ -268,7 +290,7 @@ namespace script4db.ScriptProcessors
 
                 if (!success)
                 {
-                    msg = String.Format("Copy scope from record '{0}' next '{1}'", loop, step);
+                    msg = String.Format("Copy scope from record '{0}' next '{1}'", loop, perLoop);
                     this.LogMessages.Add(new LogMessage(LogMessageTypes.Info, this.GetType().Name, msg));
                     foreach (LogMessage logMsg in connSource.LogMessages) this.LogMessages.Add(logMsg);
                     foreach (LogMessage logMsg in connTarget.LogMessages) this.LogMessages.Add(logMsg);
@@ -283,11 +305,11 @@ namespace script4db.ScriptProcessors
 
             Status = BlockStatuses.Done;
 
-            avReadSec = swRead.Elapsed.TotalSeconds / maxLoops;
-            avWriteSec = swWrite.Elapsed.TotalSeconds / maxLoops;
+            avReadSec = (double)swRead.Elapsed.TotalSeconds / (double)recordCountSource;
+            avWriteSec = (double)swWrite.Elapsed.TotalSeconds / (double)recordCountSource;
 
             node.Text = String.Format(
-                    "{0} - Ok : Copied {1} records : Average r/w {2:0.0000} / {3:0.0000} s per record : Elapsed {4:0.0}s",
+                    "{0} - Ok : Copied {1} records : Average r/w {2:0.00000} / {3:0.00000} s per record : Elapsed {4:0.00}s",
                       NodeName, recordCountSource, avReadSec, avWriteSec, swRead.Elapsed.TotalSeconds + swWrite.Elapsed.TotalSeconds);
 
             msg = String.Format("Elapsed {0:0.000}s : Copied in to table '{1}' {2} records",
@@ -460,20 +482,31 @@ namespace script4db.ScriptProcessors
                 if (this.parameters.Keys.Contains(paramName))
                 {
                     string paramValue = this.parameters[paramName];
-                    int n;
-                    bool isNumeric = int.TryParse(paramValue, out n);
-
-                    if (!isNumeric || n < 0)
+                    if (IsPlaceHolder(paramValue)) return true;
+                    else
                     {
-                        string msg = String.Format("Value '{0}' for parameter '{1}' is not supported", paramValue, paramName);
-                        this.LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
-                        return false;
+                        int n;
+                        bool isNumeric = int.TryParse(paramValue, out n);
+
+                        if (!isNumeric || n < 0)
+                        {
+                            string msg = String.Format("Value '{0}' for parameter '{1}' is not supported", paramValue, paramName);
+                            this.LogMessages.Add(new LogMessage(LogMessageTypes.Error, this.GetType().Name, msg));
+                            return false;
+                        }
                     }
                 }
                 else this.AddParameter(paramName, defValue);
             }
 
             return true;
+        }
+
+        private bool IsPlaceHolder(String value)
+        {
+            value = value.Trim();
+            if (value.StartsWith("${") && value.EndsWith("}")) return true;
+            else return false;
         }
 
         public bool AddParameter(string key, string value)

@@ -326,8 +326,6 @@ namespace script4db
                             RefreshControls(appStatuses.Cancel);
                             break;
                         case WorkerResultStatuses.Success:
-                            worker.DoWork -= Bw_DoWorkCheckConnection;
-                            worker.RunWorkerCompleted -= Bw_RunWorkerCheckCompleted;
                             RunScriptCommand();
                             break;
                         case WorkerResultStatuses.Error:
@@ -342,6 +340,9 @@ namespace script4db
                 LogMessage logMsg = new LogMessage(LogMessageTypes.Error, "Worker", e.Error.ToString());
                 this.Logs.AppendMessage(logMsg);
             }
+
+            worker.DoWork -= Bw_DoWorkCheckConnection;
+            worker.RunWorkerCompleted -= Bw_RunWorkerCheckCompleted;
         }
 
         private void RunScriptCommand()

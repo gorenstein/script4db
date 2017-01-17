@@ -27,6 +27,8 @@ namespace script4db.Connections
         int Affected { get; }
         DbType DataBaseType { get; }
         string GetTableFieldsListAsSqlSyntax(string tableName, DbType targetDbType);
+        string GetInsertSqlHead(string tableTarget);
+        string GetInsertSqlValues(OdbcDataReader dataReader, string tableTarget, DbType targetDbType);
         string GetInsertSql(OdbcDataReader dataReader, string tableTarget, DbType targetDbType);
         OdbcDataReader GetDataReader(string tableName);
         LogMessageTypes ErrorLevel { get; set; }

@@ -258,6 +258,47 @@ namespace script4db.Connections
             return tableFields;
         }
 
+
+        public string GetInsertSqlHead(string tableTarget)
+        {
+            string fieldNames = tableStructure.FieldNames;
+
+            if (string.IsNullOrWhiteSpace(fieldNames)) // error
+            {
+                string msg = string.Format("Insert HEAD skeleton is not defined for table '{0}' ", tableTarget);
+                this.LogMessages.Add(new LogMessage(ErrorLevel, this.GetType().Name, msg));
+                return "";
+            }
+
+            return string.Format("INSERT INTO {0} ({1}) VALUES ", tableTarget, fieldNames);
+        }
+
+        public string GetInsertSqlValues(OdbcDataReader dataReader, string tableTarget, DbType targetDbType)
+        {
+            string fieldValues = tableStructure.FieldValues;
+
+            if (string.IsNullOrWhiteSpace(fieldValues)) // error
+            {
+                string msg = string.Format("Insert VALUES skeleton is not defined for table '{0}' ", tableTarget);
+                this.LogMessages.Add(new LogMessage(ErrorLevel, this.GetType().Name, msg));
+                return "";
+            }
+
+            string oldValue, newValue;
+            for (int i = 0; i < dataReader.FieldCount; i++)
+            {
+                oldValue = ":" + dataReader.GetName(i) + ":";
+                newValue = ValueToString(dataReader, i, targetDbType);
+                fieldValues = fieldValues.Replace(oldValue, newValue);
+                //Console.WriteLine("-----------");
+                //Console.WriteLine(dataReader.GetName(i) + " = " + dataReader.GetValue(i).ToString());
+                //Console.WriteLine(dataReader.GetFieldType(i).ToString());
+                //Console.WriteLine("===========");
+            }
+
+            return string.Format("({0})", fieldValues);
+        }
+
         public string GetInsertSql(OdbcDataReader dataReader, string tableTarget, DbType targetDbType)
         {
             string fieldNames = tableStructure.FieldNames;
