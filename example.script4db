@@ -9,7 +9,10 @@ connAnotherOne=OdbcString>>Driver={MySQL ODBC 5.3 Unicode Driver};Server=host;Da
 ; See details for Odbc String syntax on www.connectionstrings.com
 
 ;[command] - syntax
-;type= "simple" | "exportTable"   
+;type= "simple" | "exportTable"  
+;maxPerLoop= "Integer" | if not set uses default value "1"
+;  Multi-row insert parameter, only for command type=exportTable 
+;  For Access as target DB always  "1"
 ;onErrorContinue= "true" | "false" | if not set uses default value "false"
 ;connection= ODBC>>source>>user>>password
 ;  or
@@ -32,6 +35,7 @@ connAnotherOne=OdbcString>>Driver={MySQL ODBC 5.3 Unicode Driver};Server=host;Da
 ; Command type "exportTable" -> uses two connections 
 [command]
  type=exportTable
+ maxPerLoop=100
  connectionSource=${connByName}
  tableSource=${var1}
  connectionTarget=${connByString}
