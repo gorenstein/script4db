@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using script4db.ScriptProcessors;
 
@@ -39,7 +35,7 @@ namespace script4db
             this.scriptProcessor.FillRichTextBox(richTextBox);
         }
 
-        public bool hasError()
+        public bool HasError()
         {
             foreach (LogMessage logMsg in this.LogMessages)
             {

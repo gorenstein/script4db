@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data;
 using System.Data.Odbc;
 
@@ -290,10 +287,10 @@ namespace script4db.Connections
                 oldValue = ":" + dataReader.GetName(i) + ":";
                 newValue = ValueToString(dataReader, i, targetDbType);
                 fieldValues = fieldValues.Replace(oldValue, newValue);
-                //Console.WriteLine("-----------");
-                //Console.WriteLine(dataReader.GetName(i) + " = " + dataReader.GetValue(i).ToString());
-                //Console.WriteLine(dataReader.GetFieldType(i).ToString());
-                //Console.WriteLine("===========");
+                //Debug.WriteLine("-----------");
+                //Debug.WriteLine(dataReader.GetName(i) + " = " + dataReader.GetValue(i).ToString());
+                //Debug.WriteLine(dataReader.GetFieldType(i).ToString());
+                //Debug.WriteLine("===========");
             }
 
             return string.Format("({0})", fieldValues);
@@ -317,10 +314,10 @@ namespace script4db.Connections
                 oldValue = ":" + dataReader.GetName(i) + ":";
                 newValue = ValueToString(dataReader, i, targetDbType);
                 fieldValues = fieldValues.Replace(oldValue, newValue);
-                //Console.WriteLine("-----------");
-                //Console.WriteLine(dataReader.GetName(i) + " = " + dataReader.GetValue(i).ToString());
-                //Console.WriteLine(dataReader.GetFieldType(i).ToString());
-                //Console.WriteLine("===========");
+                //Debug.WriteLine("-----------");
+                //Debug.WriteLine(dataReader.GetName(i) + " = " + dataReader.GetValue(i).ToString());
+                //Debug.WriteLine(dataReader.GetFieldType(i).ToString());
+                //Debug.WriteLine("===========");
             }
 
             return string.Format("INSERT INTO {0} ({1}) VALUES ({2});", tableTarget, fieldNames, fieldValues);

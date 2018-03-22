@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace script4db
@@ -20,8 +16,15 @@ namespace script4db
 
         public void AppendMessage(LogMessage logMsg)
         {
-            this.RichTextBox.AppendText(String.Format("{0:s}", DateTime.Now));
+            DateTime now = DateTime.Now;
+
+            String msg = String.Format("{0:yyyy-MM-dd H:mm:ss}", now);
+            msg += "  " + logMsg.TypeNameNormalized + " " + logMsg.Text + " (" + logMsg.Source + ")";
+            Console.WriteLine(msg);
+
+            this.RichTextBox.AppendText(String.Format("{0:yyyy-MM-dd H:mm:ss}", now));
             this.RichTextBox.AppendText(" | ");
+
             this.RichTextBox.AppendText(logMsg.TypeNameNormalized, logMsg.Color);
             this.RichTextBox.AppendText(" | ");
             this.RichTextBox.AppendText(logMsg.Text);

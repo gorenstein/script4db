@@ -5,8 +5,6 @@ using System.Drawing;
 using System.IO;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using script4db.Connections;
 using script4db.ScriptProcessors;
@@ -15,7 +13,19 @@ namespace script4db
 {
     public partial class FormMain : Form
     {
-        enum appStatuses
+        String[] arguments = Environment.GetCommandLineArgs();
+        String scriptPathFromArg = null;
+        AutoCloseModes AutoClose = AutoCloseModes.disable;
+
+        enum AutoCloseModes
+        {
+            onSuccess,
+            onError,
+            always,
+            disable
+        }
+
+        enum AppStatuses
         {
             Init,
             Parse,
@@ -28,7 +38,7 @@ namespace script4db
             Error
         }
 
-        appStatuses currentStatus;
+        AppStatuses currentStatus;
         string initialDirectory = Environment.SpecialFolder.Desktop.ToString();
         //string initialDirectory = System.AppDomain.CurrentDomain.BaseDirectory;
         Parser parser;
@@ -50,7 +60,9 @@ namespace script4db
             this.worker.WorkerSupportsCancellation = true;
             this.worker.WorkerReportsProgress = true;
 
-            RefreshControls(appStatuses.Init);
+            ParseCommandLineArguments();
+
+            RefreshControls(AppStatuses.Init);
         }
 
         private void buttonExit_Click(object sender, EventArgs e)
@@ -99,37 +111,56 @@ namespace script4db
             // a script file was selected, open it.
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                textBoxScriptFile.Text = openFileDialog.FileName;
-                initialDirectory = Path.GetDirectoryName(openFileDialog.FileName);
-                RefreshControls(appStatuses.Parse);
-
-                // Parcing Script
-                this.parser = new Parser(openFileDialog.FileName);
-
-                // Show Result
-                parser.FillBlocksTree(this.treeViewScriptBlocks);
-                parser.FillRichTextBox(this.richTextBoxRaw);
-
-                foreach (LogMessage logMsg in parser.LogMessages) this.Logs.AppendMessage(logMsg);
-
-                if (parser.CurrentStatus == ParserStatuses.ParseSuccesse)
-                {
-                    RefreshControls(appStatuses.ReadyToRun);
-                }
-                else
-                {
-                    RefreshControls(appStatuses.Error);
-                }
+                this.ParseScript(openFileDialog.FileName);
             }
             else
             {
                 textBoxScriptFile.Text = "";
-                RefreshControls(appStatuses.Init);
+                RefreshControls(AppStatuses.Init);
                 statusLabel2.Text = "File was not selected.";
             }
         }
 
-        private void RefreshControls(appStatuses newStatus)
+        private bool ParseScript(String FileName)
+        {
+            textBoxScriptFile.Text = FileName;
+            initialDirectory = Path.GetDirectoryName(FileName);
+            RefreshControls(AppStatuses.Parse);
+
+            // Parcing Script
+            this.parser = new Parser(FileName);
+
+            // Show Result
+            parser.FillBlocksTree(this.treeViewScriptBlocks);
+            parser.FillRichTextBox(this.richTextBoxRaw);
+
+            foreach (LogMessage logMsg in parser.LogMessages) this.Logs.AppendMessage(logMsg);
+
+            if (parser.CurrentStatus == ParserStatuses.ParseSuccesse)
+            {
+                RefreshControls(AppStatuses.ReadyToRun);
+            }
+            else
+            {
+                RefreshControls(AppStatuses.Error);
+            }
+
+            return parser.CurrentStatus == ParserStatuses.ParseSuccesse;
+        }
+
+        private void RefreshAutoCloseLabel()
+        {
+            if (this.AutoClose == AutoCloseModes.disable)
+            {
+                this.labelAutoCloseMode.Hide();
+            }
+            else
+            {
+                this.labelAutoCloseMode.Text = "auto close " + this.AutoClose.ToString();
+            }
+        }
+
+        private void RefreshControls(AppStatuses newStatus)
         {
             this.Logs.AppendMessage(new LogMessage(LogMessageTypes.Info, "main", "Change app status to " + newStatus.ToString()));
             this.currentStatus = newStatus;
@@ -145,24 +176,23 @@ namespace script4db
 
             switch (this.currentStatus)
             {
-                case appStatuses.Init:
+                case AppStatuses.Init:
                     buttonOpen.Enabled = true;
                     buttonExit.Enabled = true;
                     statusLabel2.Text = "Please open a script file.";
                     break;
-                case appStatuses.Parse:
-                    //this.
+                case AppStatuses.Parse:
                     buttonExit.Enabled = true;
                     statusLabel2.Text = "Parsing in process...";
                     break;
-                case appStatuses.Cancel:
+                case AppStatuses.Cancel:
                     buttonOpen.Enabled = true;
                     buttonExit.Enabled = true;
                     statusLabel2.Text = "Canceled";
                     statusLabel3.Visible = false;
                     progressBar1.Visible = false;
                     break;
-                case appStatuses.Error:
+                case AppStatuses.Error:
                     buttonOpen.Enabled = true;
                     buttonExit.Enabled = true;
                     this.tabControl1.SelectTab(this.tabPageLogs);
@@ -170,14 +200,15 @@ namespace script4db
                     statusLabel2.Text = "Look please a Logs for details";
                     statusLabel3.Visible = false;
                     progressBar1.Visible = false;
+                    RefreshAutoCloseLabel();
                     break;
-                case appStatuses.ReadyToRun:
+                case AppStatuses.ReadyToRun:
                     buttonOpen.Enabled = true;
                     buttonRun.Enabled = true;
                     buttonExit.Enabled = true;
                     statusLabel2.Text = "Click 'Run' to start srcript.";
                     break;
-                case appStatuses.Run:
+                case AppStatuses.Run:
                     buttonPauseContinue.Enabled = true;
                     buttonCancel.Enabled = true;
                     statusLabel2.Text = "Running...";
@@ -185,21 +216,21 @@ namespace script4db
                     progressBar1.Visible = true;
                     this.tabControl1.SelectTab(this.tabPageTree);
                     break;
-                case appStatuses.Finish:
+                case AppStatuses.Finish:
                     buttonOpen.Enabled = true;
                     buttonExit.Enabled = true;
                     statusLabel2.Text = "Ended. You can open a next script file.";
                     statusLabel3.Visible = false;
                     progressBar1.Visible = false;
                     break;
-                case appStatuses.Pause:
-                    buttonPauseContinue.Text = appStatuses.Continue.ToString();
+                case AppStatuses.Pause:
+                    buttonPauseContinue.Text = AppStatuses.Continue.ToString();
                     buttonPauseContinue.Enabled = true;
                     buttonCancel.Enabled = true;
                     statusLabel2.Text = "Pause...";
                     break;
-                case appStatuses.Continue:
-                    buttonPauseContinue.Text = appStatuses.Pause.ToString();
+                case AppStatuses.Continue:
+                    buttonPauseContinue.Text = AppStatuses.Pause.ToString();
                     buttonPauseContinue.Enabled = true;
                     buttonCancel.Enabled = true;
                     statusLabel2.Text = "Continue running...";
@@ -211,14 +242,14 @@ namespace script4db
             EnableCloseItem(buttonExit.Enabled);
         }
 
-        private void buttonPauseContinue_Click(object sender, EventArgs e)
+        private void ButtonPauseContinue_Click(object sender, EventArgs e)
         {
-            appStatuses NewStatus;
+            AppStatuses NewStatus;
             //switch button
-            if (currentStatus == appStatuses.Run || currentStatus == appStatuses.Continue)
-                NewStatus = appStatuses.Pause;
-            else if (currentStatus == appStatuses.Pause)
-                NewStatus = appStatuses.Continue;
+            if (currentStatus == AppStatuses.Run || currentStatus == AppStatuses.Continue)
+                NewStatus = AppStatuses.Pause;
+            else if (currentStatus == AppStatuses.Pause)
+                NewStatus = AppStatuses.Continue;
             else
                 throw new System.ArgumentException("Error application status: " + currentStatus.ToString() + " - Must be Pause or Continue.", "appStatusError");
 
@@ -240,7 +271,7 @@ namespace script4db
 
         private void buttonRun_Click(object sender, EventArgs e)
         {
-            RefreshControls(appStatuses.Run);
+            RefreshControls(AppStatuses.Run);
             statusLabel2.Text = String.Format("Checking DB connection ({0})", parser.ConnectionsStrings().Count);
 
             worker.DoWork += Bw_DoWorkCheckConnection;
@@ -314,7 +345,7 @@ namespace script4db
             {
                 if (e.Cancelled)
                 {
-                    RefreshControls(appStatuses.Cancel);
+                    RefreshControls(AppStatuses.Cancel);
                 }
                 else
                 {
@@ -323,14 +354,14 @@ namespace script4db
                     switch (result.Status)
                     {
                         case WorkerResultStatuses.Cancel:
-                            RefreshControls(appStatuses.Cancel);
+                            RefreshControls(AppStatuses.Cancel);
                             break;
                         case WorkerResultStatuses.Success:
                             RunScriptCommand();
                             break;
                         case WorkerResultStatuses.Error:
                         default:
-                            RefreshControls(appStatuses.Error);
+                            RefreshControls(AppStatuses.Error);
                             break;
                     }
                 }
@@ -407,7 +438,7 @@ namespace script4db
             {
                 if (e.Cancelled)
                 {
-                    RefreshControls(appStatuses.Cancel);
+                    RefreshControls(AppStatuses.Cancel);
                 }
                 else
                 {
@@ -416,15 +447,23 @@ namespace script4db
                     switch (result.Status)
                     {
                         case WorkerResultStatuses.Cancel:
-                            RefreshControls(appStatuses.Cancel);
+                            RefreshControls(AppStatuses.Cancel);
                             break;
                         case WorkerResultStatuses.Success:
                             worker.DoWork -= Bw_DoWorkScriptCommand;
-                            RefreshControls(appStatuses.Finish);
+                            RefreshControls(AppStatuses.Finish);
+                            if (this.AutoClose == AutoCloseModes.onSuccess || this.AutoClose == AutoCloseModes.always)
+                            {
+                                Application.Exit();
+                            }
                             break;
                         case WorkerResultStatuses.Error:
                         default:
-                            RefreshControls(appStatuses.Error);
+                            RefreshControls(AppStatuses.Error);
+                            if (this.AutoClose == AutoCloseModes.onError || this.AutoClose == AutoCloseModes.always)
+                            {
+                                Application.Exit();
+                            }
                             break;
                     }
                 }
@@ -436,6 +475,99 @@ namespace script4db
             }
             worker.DoWork -= Bw_DoWorkScriptCommand;
             worker.RunWorkerCompleted -= Bw_RunWorkerScriptCompleted;
+        }
+
+        private void ParseCommandLineArguments()
+        {
+            int argCount = 0;
+            // Check command line parameters
+            foreach (String arg in arguments)
+            {
+                argCount++;
+
+                if (arg.Substring(0, Math.Min(11, arg.Length)).ToLower() == "/autoclose=")
+                {
+                    this.Logs.AppendMessage(new LogMessage(LogMessageTypes.Info, "main", "Auto close as cmd line arg: " + arg.Substring(11)));
+
+                    String mode = arg.Substring(11).ToLower();
+
+                    if (mode == AutoCloseModes.always.ToString().ToLower())
+                    {
+                        this.AutoClose = AutoCloseModes.always;
+                    }
+                    else if (mode == AutoCloseModes.disable.ToString().ToLower())
+                    {
+                        this.AutoClose = AutoCloseModes.disable;
+                    }
+                    else if (mode == AutoCloseModes.onError.ToString().ToLower())
+                    {
+                        this.AutoClose = AutoCloseModes.onError;
+                    }
+                    else if (mode == AutoCloseModes.onSuccess.ToString().ToLower())
+                    {
+                        this.AutoClose = AutoCloseModes.onSuccess;
+                    }
+                    else
+                    {
+                        this.AutoClose = AutoCloseModes.disable;
+                        String allowedModes = string.Join(",", Enum.GetNames(typeof(AutoCloseModes)));
+                        this.Logs.AppendMessage(new LogMessage(LogMessageTypes.Warning, "main", "Not supported auto close mode: " + arg + " - Allowed: " + allowedModes + ". Auto close disabled."));
+                        MessageBox.Show("Not supported auto close mode: " + arg + "\n\nallowed: " + allowedModes + "\n\n P.S. Auto close DISABLED.", "Requested unknown parameter", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+                else if (arg.Substring(0, Math.Min(8, arg.Length)).ToLower() == "/script=")
+                {
+                    this.scriptPathFromArg = arg.Substring(8);
+                    this.Logs.AppendMessage(new LogMessage(LogMessageTypes.Info, "main", "Script as cmd line arg: " + this.scriptPathFromArg));
+                }
+                else if (argCount > 1) // ignore runnig program path argument
+                {
+                    this.AutoClose = AutoCloseModes.disable;
+                    this.Logs.AppendMessage(new LogMessage(LogMessageTypes.Warning, "main", "Not supported cmd line argument: " + arg + " - Auto close disabled."));
+                    MessageBox.Show("Not supported cmd line argument: " + arg, "Requested unknown parameter", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+
+            RefreshAutoCloseLabel();
+        }
+
+        private void FormMain_Load(object sender, EventArgs e)
+        {
+            if (null != this.scriptPathFromArg) // script file as command line argument defined
+            {
+                if (!String.IsNullOrWhiteSpace(this.scriptPathFromArg) && File.Exists(this.scriptPathFromArg))
+                {
+                    bool parseResult = this.ParseScript(this.scriptPathFromArg);
+                    if (parseResult)
+                    {
+                        this.buttonRun.PerformClick();
+                    }
+                    else
+                    {
+                        if (this.AutoClose == AutoCloseModes.disable || this.AutoClose == AutoCloseModes.onSuccess)
+                        {
+                            MessageBox.Show("Check log for details.", "Script parse error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
+                    }
+                }
+                else
+                {
+                    String msg = "Script file not found.";
+                    if (this.AutoClose == AutoCloseModes.onSuccess)
+                    {
+                        this.AutoClose = AutoCloseModes.disable;
+                        msg += " Auto close disabled.";
+                    }
+
+                    this.Logs.AppendMessage(new LogMessage(LogMessageTypes.Warning, "main", msg));
+                    if (this.AutoClose == AutoCloseModes.disable || this.AutoClose == AutoCloseModes.onSuccess)
+                    {
+                        MessageBox.Show("Script file not found." + "\n path: " + this.scriptPathFromArg, "Script not found", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                }
+            }
+
+            RefreshAutoCloseLabel();
         }
     }
 }

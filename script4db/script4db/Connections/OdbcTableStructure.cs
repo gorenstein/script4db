@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Data;
 using System.Data.Odbc;
+using System.Diagnostics;
 
 namespace script4db.Connections
 {
@@ -94,7 +94,7 @@ namespace script4db.Connections
                             break;
                     }
                 }
-                Console.WriteLine("Table:{0} | {1}", _tableName, tableColumn.ToString());
+                Debug.WriteLine("Table:{0} | {1}", _tableName, tableColumn.ToString());
                 tableColumns.Add(tableColumn);
             }
 
@@ -110,9 +110,9 @@ namespace script4db.Connections
             // Generate Skeletons "PersonID int, LastName varchar(255)"
             foreach (TableColumn column in tableColumns)
             {
-                Console.WriteLine(column.ToString());
-                //Console.WriteLine(column.GetCreateFieldDefinition());
-                //Console.WriteLine(column.GetFieldSetValueDefinition());
+                Debug.WriteLine(column.ToString());
+                //Debug.WriteLine(column.GetCreateFieldDefinition());
+                //Debug.WriteLine(column.GetFieldSetValueDefinition());
                 buildCreateSeleton.Append(delimiter + column.GetCreateFieldDefinition(_targetDbType));
                 buildFieldNames.Append(delimiter + column.GetEscapedName(column.Name, _targetDbType));
                 buildFieldValues.Append(delimiter + column.GetFieldSetValuePlaceholder());
@@ -163,10 +163,10 @@ namespace script4db.Connections
         private void Test()
         {
 
-            //Console.WriteLine("Table:{0}", _tableName);
-            //Console.WriteLine(string.Format("ServerVersion:{0}", _connection.ServerVersion));
-            //Console.WriteLine(string.Format("Database:{0}", _connection.Database));
-            Console.WriteLine(string.Format("DataSource:{0}", _connection.DataSource));
+            //Debug.WriteLine("Table:{0}", _tableName);
+            //Debug.WriteLine(string.Format("ServerVersion:{0}", _connection.ServerVersion));
+            //Debug.WriteLine(string.Format("Database:{0}", _connection.Database));
+            Debug.WriteLine(string.Format("DataSource:{0}", _connection.DataSource));
             return;
 
             ////Retrieve column schema into a DataTable.
@@ -179,9 +179,9 @@ namespace script4db.Connections
             //    foreach (DataColumn property in schemaTable.Columns)
             //    {
             //        //Display the field name and value.
-            //        Console.WriteLine(property.ColumnName + " = " + field[property].ToString());
+            //        Debug.WriteLine(property.ColumnName + " = " + field[property].ToString());
             //    }
-            //    Console.WriteLine("------------------");
+            //    Debug.WriteLine("------------------");
             //}
         }
     }

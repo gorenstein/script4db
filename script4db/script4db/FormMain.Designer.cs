@@ -49,6 +49,7 @@
             this.tabPageTree = new System.Windows.Forms.TabPage();
             this.tabPageLogs = new System.Windows.Forms.TabPage();
             this.richTextBoxLogs = new System.Windows.Forms.RichTextBox();
+            this.labelAutoCloseMode = new System.Windows.Forms.Label();
             this.statusStrip.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPageRaw.SuspendLayout();
@@ -90,7 +91,7 @@
             this.buttonPauseContinue.Text = "Pause";
             this.buttonPauseContinue.UseVisualStyleBackColor = true;
             this.buttonPauseContinue.Visible = false;
-            this.buttonPauseContinue.Click += new System.EventHandler(this.buttonPauseContinue_Click);
+            this.buttonPauseContinue.Click += new System.EventHandler(this.ButtonPauseContinue_Click);
             // 
             // buttonCancel
             // 
@@ -265,11 +266,27 @@
             this.richTextBoxLogs.Text = "";
             this.richTextBoxLogs.WordWrap = false;
             // 
+            // labelAutoCloseMode
+            // 
+            this.labelAutoCloseMode.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelAutoCloseMode.AutoSize = true;
+            this.labelAutoCloseMode.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelAutoCloseMode.ForeColor = System.Drawing.Color.Red;
+            this.labelAutoCloseMode.Location = new System.Drawing.Point(778, 189);
+            this.labelAutoCloseMode.MaximumSize = new System.Drawing.Size(95, 0);
+            this.labelAutoCloseMode.MinimumSize = new System.Drawing.Size(95, 0);
+            this.labelAutoCloseMode.Name = "labelAutoCloseMode";
+            this.labelAutoCloseMode.Size = new System.Drawing.Size(95, 30);
+            this.labelAutoCloseMode.TabIndex = 10;
+            this.labelAutoCloseMode.Text = "auto close disabled";
+            this.labelAutoCloseMode.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(886, 372);
+            this.Controls.Add(this.labelAutoCloseMode);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.statusStrip);
             this.Controls.Add(this.buttonAbout);
@@ -285,6 +302,7 @@
             this.Name = "FormMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "script4db";
+            this.Load += new System.EventHandler(this.FormMain_Load);
             this.statusStrip.ResumeLayout(false);
             this.statusStrip.PerformLayout();
             this.tabControl1.ResumeLayout(false);
@@ -317,6 +335,7 @@
         private System.Windows.Forms.StatusStrip statusStrip;
         private System.Windows.Forms.ToolStripProgressBar progressBar1;
         private System.Windows.Forms.ToolStripStatusLabel statusLabel3;
+        private System.Windows.Forms.Label labelAutoCloseMode;
     }
 }
 

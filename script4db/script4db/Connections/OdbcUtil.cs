@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Data;
 using System.Data.Odbc;
-using System.Threading.Tasks;
 using System.Reflection;
 
 namespace script4db.Connections

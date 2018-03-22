@@ -2,9 +2,6 @@
 using System.IO;
 using System.Drawing;
 using System.Collections;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using script4db.ScriptProcessors;
 
@@ -179,7 +176,7 @@ namespace script4db
             this.textRaw = this.interpreter.ScriptProcessor.TextRaw;
             foreach (LogMessage logMsg in interpreter.LogMessages) this.LogMessages.Add(logMsg);
 
-            if (interpreter.hasError())
+            if (interpreter.HasError())
             {
                 LogMessages.Add(new LogMessage(LogMessageTypes.Warning, this.GetType().Name, "Break parsing - has error"));
                 return false;
